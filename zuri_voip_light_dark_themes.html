@@ -1,0 +1,404 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+.root{font-family:'DM Sans',sans-serif;padding:1.5rem 0 3rem;display:flex;flex-direction:column;align-items:center;gap:2.5rem;}
+.theme-row{display:flex;gap:20px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.theme-col{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.theme-badge{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-tertiary);}
+.section-sep{width:100%;display:flex;align-items:center;gap:12px;padding:0 0.5rem;}
+.sep-line{flex:1;height:0.5px;background:var(--color-border-tertiary);}
+.sep-label{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-tertiary);white-space:nowrap;}
+
+/* ---- PHONE FRAME ---- */
+.pf{width:280px;border-radius:38px;border:1.5px solid;overflow:hidden;position:relative;}
+.pf.dark{background:#0B0B14;border-color:#222234;}
+.pf.light{background:#F7F6FF;border-color:#DDD9F5;}
+.notch{width:88px;height:26px;border-radius:0 0 16px 16px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;justify-content:center;gap:5px;}
+.pf.dark .notch{background:#0B0B14;}
+.pf.light .notch{background:#F7F6FF;}
+.n-mic{width:26px;height:5px;border-radius:3px;}
+.pf.dark .n-mic{background:#1a1a2e;border:1px solid #2a2a3e;}
+.pf.light .n-mic{background:#E0DCF8;border:1px solid #C8C3EE;}
+.n-cam{width:9px;height:9px;border-radius:50%;}
+.pf.dark .n-cam{background:#1a1a2e;border:1.5px solid #2a2a3e;}
+.pf.light .n-cam{background:#E0DCF8;border:1.5px solid #C8C3EE;}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:38px 20px 6px;font-size:11px;font-weight:500;}
+.pf.dark .sb{color:#fff;}
+.pf.light .sb{color:#3C2E9A;}
+.sb-icons{display:flex;gap:4px;align-items:center;font-size:12px;}
+
+/* ---- WELCOME SCREEN ---- */
+.scr-welcome{min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:0 0 32px;}
+.wlc-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:0 24px;text-align:center;}
+.rings{width:180px;height:180px;position:relative;margin:0 auto;}
+.ring{position:absolute;border-radius:50%;border:1px solid;top:50%;left:50%;transform:translate(-50%,-50%);animation:pr 3s ease-in-out infinite;}
+.ring-c{width:68px;height:68px;display:flex;align-items:center;justify-content:center;}
+.ring-c .ti{font-size:26px;}
+.ring2{width:112px;height:112px;animation-delay:.4s;}
+.ring3{width:162px;height:162px;animation-delay:.8s;}
+.pf.dark .ring{border-color:rgba(124,58,237,0.5);}
+.pf.dark .ring-c{background:rgba(79,70,229,0.25);border-color:rgba(124,58,237,0.8);}
+.pf.dark .ring-c .ti{color:#fff;}
+.pf.light .ring{border-color:rgba(99,82,207,0.25);}
+.pf.light .ring-c{background:rgba(99,82,207,0.1);border-color:rgba(99,82,207,0.5);}
+.pf.light .ring-c .ti{color:#4F46E5;}
+@keyframes pr{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:1;}50%{transform:translate(-50%,-50%) scale(1.05);opacity:.75;}}
+.wmark{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.02em;}
+.pf.dark .wmark{color:#fff;}
+.pf.light .wmark{color:#2D1F8A;}
+.tagline{font-size:13px;font-weight:300;line-height:1.5;max-width:180px;}
+.pf.dark .tagline{color:rgba(255,255,255,0.45);}
+.pf.light .tagline{color:#7B72B8;}
+.ctas{display:flex;flex-direction:column;gap:8px;width:100%;padding:0 20px;}
+.btn-p{border:none;border-radius:14px;height:46px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;color:#fff;}
+.pf.dark .btn-p{background:linear-gradient(135deg,#4F46E5,#7C3AED);}
+.pf.light .btn-p{background:linear-gradient(135deg,#4F46E5,#6D28D9);}
+.btn-s{border-radius:14px;height:46px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
+.pf.dark .btn-s{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.1);}
+.pf.light .btn-s{background:#fff;color:#4F46E5;border:1px solid #DDD9F5;}
+
+/* ---- HOME SCREEN ---- */
+.scr-home{min-height:560px;display:flex;flex-direction:column;}
+.hdr{padding:6px 20px 12px;display:flex;justify-content:space-between;align-items:flex-start;}
+.greet-sub{font-size:11px;font-weight:300;}
+.greet-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.02em;}
+.pf.dark .greet-sub{color:rgba(255,255,255,0.4);}
+.pf.dark .greet-name{color:#fff;}
+.pf.light .greet-sub{color:#9590C4;}
+.pf.light .greet-name{color:#1E1461;}
+.hdr-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;}
+.pf.dark .hdr-av{background:linear-gradient(135deg,#4F46E5,#A855F7);border:2px solid rgba(168,85,247,0.35);}
+.pf.light .hdr-av{background:linear-gradient(135deg,#4F46E5,#7C3AED);border:2px solid rgba(99,82,207,0.2);}
+.sbar{margin:0 20px 14px;border-radius:12px;height:38px;display:flex;align-items:center;padding:0 12px;gap:8px;}
+.pf.dark .sbar{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);}
+.pf.light .sbar{background:#fff;border:1px solid #E2DEFA;}
+.sbar-ph{font-size:12px;}
+.pf.dark .sbar-ph{color:rgba(255,255,255,0.25);}
+.pf.light .sbar-ph{color:#B5B0D8;}
+.pf.dark .sbar .ti{color:rgba(255,255,255,0.25);font-size:14px;}
+.pf.light .sbar .ti{color:#B5B0D8;font-size:14px;}
+.sec-ttl{padding:0 20px 8px;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;}
+.pf.dark .sec-ttl{color:rgba(255,255,255,0.3);}
+.pf.light .sec-ttl{color:#B5B0D8;}
+.recents{display:flex;gap:12px;padding:0 20px 16px;overflow-x:auto;}
+.recents::-webkit-scrollbar{display:none;}
+.rec-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer;}
+.rec-av{width:46px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#fff;position:relative;}
+.online{position:absolute;bottom:3px;right:3px;width:9px;height:9px;border-radius:50%;background:#22C55E;}
+.pf.dark .online{border:2px solid #0B0B14;}
+.pf.light .online{border:2px solid #F7F6FF;}
+.rec-name{font-size:10px;}
+.pf.dark .rec-name{color:rgba(255,255,255,0.55);}
+.pf.light .rec-name{color:#7B72B8;}
+.clist{flex:1;overflow-y:auto;padding:0 20px;}
+.clist::-webkit-scrollbar{display:none;}
+.crow{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:0.5px solid;}
+.pf.dark .crow{border-color:rgba(255,255,255,0.06);}
+.pf.light .crow{border-color:#EDE9FD;}
+.cav{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0;}
+.cinfo{flex:1;display:flex;flex-direction:column;gap:1px;}
+.cname{font-size:13px;font-weight:500;}
+.pf.dark .cname{color:#fff;}
+.pf.light .cname{color:#1E1461;}
+.cnum{font-size:11px;}
+.pf.dark .cnum{color:rgba(255,255,255,0.35);}
+.pf.light .cnum{color:#B5B0D8;}
+.ccall{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;}
+.pf.dark .ccall{background:rgba(79,70,229,0.15);border:1px solid rgba(79,70,229,0.3);color:#818CF8;}
+.pf.light .ccall{background:#EEEDFE;border:1px solid #C8C3EE;color:#4F46E5;}
+.bnav{display:flex;justify-content:space-around;align-items:center;padding:12px 0 22px;border-top:0.5px solid;margin-top:auto;}
+.pf.dark .bnav{border-color:rgba(255,255,255,0.06);background:rgba(11,11,20,0.95);}
+.pf.light .bnav{border-color:#EDE9FD;background:rgba(247,246,255,0.97);}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.ni-icon{font-size:18px;}
+.pf.dark .ni-icon{color:rgba(255,255,255,0.3);}
+.pf.dark .ni-icon.on{color:#818CF8;}
+.pf.light .ni-icon{color:#C8C3EE;}
+.pf.light .ni-icon.on{color:#4F46E5;}
+.ni-lbl{font-size:9px;}
+.pf.dark .ni-lbl{color:rgba(255,255,255,0.3);}
+.pf.dark .ni-lbl.on{color:#818CF8;}
+.pf.light .ni-lbl{color:#C8C3EE;}
+.pf.light .ni-lbl.on{color:#4F46E5;}
+.fab{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;}
+.pf.dark .fab{background:linear-gradient(135deg,#4F46E5,#7C3AED);}
+.pf.light .fab{background:linear-gradient(135deg,#4F46E5,#6D28D9);}
+
+/* ---- CALL SCREEN ---- */
+.scr-call{min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:0 0 28px;position:relative;overflow:hidden;}
+.pf.light.call-light{background:#F0EEFF;}
+.cb1,.cb2{position:absolute;border-radius:50%;pointer-events:none;}
+.pf.dark .cb1{width:240px;height:240px;background:rgba(79,70,229,0.2);top:-50px;left:-50px;filter:blur(50px);}
+.pf.dark .cb2{width:200px;height:200px;background:rgba(168,85,247,0.12);bottom:80px;right:-60px;filter:blur(50px);}
+.pf.light .cb1{width:240px;height:240px;background:rgba(99,82,207,0.12);top:-50px;left:-50px;filter:blur(50px);}
+.pf.light .cb2{width:200px;height:200px;background:rgba(168,85,247,0.08);bottom:80px;right:-60px;filter:blur(50px);}
+.call-top{z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;padding:6px 20px 0;}
+.call-banner{border-radius:20px;padding:3px 12px;font-size:11px;font-weight:500;margin-bottom:22px;display:flex;align-items:center;gap:5px;}
+.pf.dark .call-banner{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#4ADE80;}
+.pf.light .call-banner{background:rgba(21,128,61,0.08);border:1px solid rgba(21,128,61,0.2);color:#15803D;}
+.cdot{width:5px;height:5px;border-radius:50%;animation:blink 1.5s ease-in-out infinite;}
+.pf.dark .cdot{background:#4ADE80;}
+.pf.light .cdot{background:#16A34A;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.call-av-wrap{position:relative;margin-bottom:16px;}
+.call-av{width:90px;height:90px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:34px;font-weight:700;color:#fff;position:relative;z-index:2;}
+.pf.dark .call-av{background:linear-gradient(135deg,#4F46E5,#A855F7);}
+.pf.light .call-av{background:linear-gradient(135deg,#4F46E5,#7C3AED);}
+.cpr{position:absolute;border-radius:32px;animation:cp 2.5s ease-out infinite;}
+.cpr1{inset:-8px;animation-delay:0s;}
+.cpr2{inset:-18px;border-radius:38px;animation-delay:.5s;}
+.pf.dark .cpr{border:1.5px solid rgba(124,58,237,0.4);}
+.pf.light .cpr{border:1.5px solid rgba(99,82,207,0.25);}
+@keyframes cp{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.1);opacity:0}}
+.call-name{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.02em;}
+.pf.dark .call-name{color:#fff;}
+.pf.light .call-name{color:#1E1461;}
+.call-num{font-size:12px;margin-bottom:2px;}
+.pf.dark .call-num{color:rgba(255,255,255,0.4);}
+.pf.light .call-num{color:#9590C4;}
+.call-timer{font-size:18px;font-weight:300;letter-spacing:.05em;font-variant-numeric:tabular-nums;margin-top:4px;}
+.pf.dark .call-timer{color:rgba(255,255,255,0.55);}
+.pf.light .call-timer{color:#7B72B8;}
+.wv{display:flex;align-items:center;gap:3px;height:28px;margin-top:12px;}
+.wb{width:3px;border-radius:2px;animation:wa 1.4s ease-in-out infinite;}
+.pf.dark .wb{background:rgba(129,140,248,0.5);}
+.pf.light .wb{background:rgba(99,82,207,0.35);}
+.wb:nth-child(1){height:6px;animation-delay:0s}
+.wb:nth-child(2){height:16px;animation-delay:.1s}
+.wb:nth-child(3){height:22px;animation-delay:.2s}
+.wb:nth-child(4){height:12px;animation-delay:.3s}
+.wb:nth-child(5){height:26px;animation-delay:.4s}
+.wb:nth-child(6){height:18px;animation-delay:.5s}
+.wb:nth-child(7){height:10px;animation-delay:.6s}
+.wb:nth-child(8){height:20px;animation-delay:.7s}
+.wb:nth-child(9){height:8px;animation-delay:.8s}
+.wb:nth-child(10){height:24px;animation-delay:.9s}
+@keyframes wa{0%,100%{transform:scaleY(1);opacity:.6}50%{transform:scaleY(1.5);opacity:1}}
+.ctrl-area{z-index:1;width:100%;padding:0 16px;display:flex;flex-direction:column;gap:12px;}
+.ctrl-row{display:flex;justify-content:space-between;}
+.cb{width:52px;height:52px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;}
+.pf.dark .cb{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);}
+.pf.dark .cb.on{background:rgba(79,70,229,0.2);border-color:rgba(124,58,237,0.4);}
+.pf.light .cb{background:#fff;border:1px solid #DDD9F5;}
+.pf.light .cb.on{background:#EEEDFE;border-color:#C8C3EE;}
+.cb-icon{font-size:20px;}
+.pf.dark .cb-icon{color:rgba(255,255,255,0.65);}
+.pf.dark .cb-icon.on{color:#818CF8;}
+.pf.light .cb-icon{color:#7B72B8;}
+.pf.light .cb-icon.on{color:#4F46E5;}
+.cb-lbl{font-size:9px;}
+.pf.dark .cb-lbl{color:rgba(255,255,255,0.3);}
+.pf.light .cb-lbl{color:#B5B0D8;}
+.end-row{display:flex;justify-content:center;align-items:center;gap:16px;}
+.end-btn{width:62px;height:62px;border-radius:50%;background:#DC2626;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;cursor:pointer;}
+.sec-btn{width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.pf.dark .sec-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);}
+.pf.light .sec-btn{background:#fff;border:1px solid #DDD9F5;color:#9590C4;}
+</style>
+
+<div class="root">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Zuri VOIP app — side-by-side light and dark theme across three screens: welcome, home contacts, and active call</h2>
+
+<!-- WELCOME -->
+<div class="section-sep"><div class="sep-line"></div><span class="sep-label">Welcome screen</span><div class="sep-line"></div></div>
+<div class="theme-row">
+  <div class="theme-col">
+    <span class="theme-badge">Dark</span>
+    <div class="pf dark">
+      <div class="notch"><div class="n-mic"></div><div class="n-cam"></div></div>
+      <div class="scr-welcome">
+        <div class="sb"><span>9:41</span><div class="sb-icons"><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></div></div>
+        <div class="wlc-top">
+          <div class="rings">
+            <div class="ring ring-c"><i class="ti ti-phone" aria-hidden="true"></i></div>
+            <div class="ring ring2"></div>
+            <div class="ring ring3"></div>
+          </div>
+          <div class="wmark">Zuri</div>
+          <p class="tagline">Crystal-clear calls, wherever you are</p>
+        </div>
+        <div class="ctas">
+          <button class="btn-p">Create account</button>
+          <button class="btn-s">Sign in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="theme-col">
+    <span class="theme-badge">Light</span>
+    <div class="pf light">
+      <div class="notch"><div class="n-mic"></div><div class="n-cam"></div></div>
+      <div class="scr-welcome">
+        <div class="sb"><span>9:41</span><div class="sb-icons"><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></div></div>
+        <div class="wlc-top">
+          <div class="rings">
+            <div class="ring ring-c"><i class="ti ti-phone" aria-hidden="true"></i></div>
+            <div class="ring ring2"></div>
+            <div class="ring ring3"></div>
+          </div>
+          <div class="wmark">Zuri</div>
+          <p class="tagline">Crystal-clear calls, wherever you are</p>
+        </div>
+        <div class="ctas">
+          <button class="btn-p">Create account</button>
+          <button class="btn-s">Sign in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="section-sep"><div class="sep-line"></div><span class="sep-label">Home — contacts</span><div class="sep-line"></div></div>
+<div class="theme-row">
+  <div class="theme-col">
+    <span class="theme-badge">Dark</span>
+    <div class="pf dark">
+      <div class="notch"><div class="n-mic"></div><div class="n-cam"></div></div>
+      <div class="scr-home">
+        <div class="sb"><span>9:41</span><div class="sb-icons"><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></div></div>
+        <div class="hdr">
+          <div><p class="greet-sub">Good morning</p><p class="greet-name">Alex ✦</p></div>
+          <div class="hdr-av">AJ</div>
+        </div>
+        <div class="sbar"><i class="ti ti-search" aria-hidden="true"></i><span class="sbar-ph">Search contacts…</span></div>
+        <p class="sec-ttl">Recent</p>
+        <div class="recents">
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">MK<div class="online"></div></div><span class="rec-name">Maya</span></div>
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#0D9488,#0891B2)">JR</div><span class="rec-name">Jordan</span></div>
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#D97706,#B45309)">SL<div class="online"></div></div><span class="rec-name">Sara</span></div>
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#DC2626,#9F1239)">TC</div><span class="rec-name">Tom</span></div>
+        </div>
+        <p class="sec-ttl">All Contacts</p>
+        <div class="clist">
+          <div class="crow"><div class="cav" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">MK</div><div class="cinfo"><span class="cname">Maya Kim</span><span class="cnum">+1 (206) 555-0142</span></div><div class="ccall"><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+          <div class="crow"><div class="cav" style="background:linear-gradient(135deg,#0D9488,#0891B2)">JR</div><div class="cinfo"><span class="cname">Jordan Rivera</span><span class="cnum">+1 (503) 555-0278</span></div><div class="ccall"><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+          <div class="crow"><div class="cav" style="background:linear-gradient(135deg,#D97706,#B45309)">SL</div><div class="cinfo"><span class="cname">Sara Lindqvist</span><span class="cnum">+46 70 123 4567</span></div><div class="ccall"><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+        </div>
+        <div class="bnav">
+          <div class="ni"><i class="ti ti-clock ni-icon" aria-hidden="true"></i><span class="ni-lbl">Recents</span></div>
+          <div class="ni"><i class="ti ti-users ni-icon on" aria-hidden="true"></i><span class="ni-lbl on">Contacts</span></div>
+          <div class="fab"><i class="ti ti-phone-plus" style="font-size:19px;color:#fff" aria-hidden="true"></i></div>
+          <div class="ni"><i class="ti ti-message ni-icon" aria-hidden="true"></i><span class="ni-lbl">Messages</span></div>
+          <div class="ni"><i class="ti ti-settings ni-icon" aria-hidden="true"></i><span class="ni-lbl">Settings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="theme-col">
+    <span class="theme-badge">Light</span>
+    <div class="pf light">
+      <div class="notch"><div class="n-mic"></div><div class="n-cam"></div></div>
+      <div class="scr-home">
+        <div class="sb"><span>9:41</span><div class="sb-icons"><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></div></div>
+        <div class="hdr">
+          <div><p class="greet-sub">Good morning</p><p class="greet-name">Alex ✦</p></div>
+          <div class="hdr-av">AJ</div>
+        </div>
+        <div class="sbar"><i class="ti ti-search" aria-hidden="true"></i><span class="sbar-ph">Search contacts…</span></div>
+        <p class="sec-ttl">Recent</p>
+        <div class="recents">
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">MK<div class="online"></div></div><span class="rec-name">Maya</span></div>
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#0D9488,#0891B2)">JR</div><span class="rec-name">Jordan</span></div>
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#D97706,#B45309)">SL<div class="online"></div></div><span class="rec-name">Sara</span></div>
+          <div class="rec-item"><div class="rec-av" style="background:linear-gradient(135deg,#DC2626,#9F1239)">TC</div><span class="rec-name">Tom</span></div>
+        </div>
+        <p class="sec-ttl">All Contacts</p>
+        <div class="clist">
+          <div class="crow"><div class="cav" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">MK</div><div class="cinfo"><span class="cname">Maya Kim</span><span class="cnum">+1 (206) 555-0142</span></div><div class="ccall"><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+          <div class="crow"><div class="cav" style="background:linear-gradient(135deg,#0D9488,#0891B2)">JR</div><div class="cinfo"><span class="cname">Jordan Rivera</span><span class="cnum">+1 (503) 555-0278</span></div><div class="ccall"><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+          <div class="crow"><div class="cav" style="background:linear-gradient(135deg,#D97706,#B45309)">SL</div><div class="cinfo"><span class="cname">Sara Lindqvist</span><span class="cnum">+46 70 123 4567</span></div><div class="ccall"><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+        </div>
+        <div class="bnav">
+          <div class="ni"><i class="ti ti-clock ni-icon" aria-hidden="true"></i><span class="ni-lbl">Recents</span></div>
+          <div class="ni"><i class="ti ti-users ni-icon on" aria-hidden="true"></i><span class="ni-lbl on">Contacts</span></div>
+          <div class="fab"><i class="ti ti-phone-plus" style="font-size:19px;color:#fff" aria-hidden="true"></i></div>
+          <div class="ni"><i class="ti ti-message ni-icon" aria-hidden="true"></i><span class="ni-lbl">Messages</span></div>
+          <div class="ni"><i class="ti ti-settings ni-icon" aria-hidden="true"></i><span class="ni-lbl">Settings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CALL -->
+<div class="section-sep"><div class="sep-line"></div><span class="sep-label">Active call</span><div class="sep-line"></div></div>
+<div class="theme-row">
+  <div class="theme-col">
+    <span class="theme-badge">Dark</span>
+    <div class="pf dark">
+      <div class="notch"><div class="n-mic"></div><div class="n-cam"></div></div>
+      <div class="scr-call">
+        <div class="cb1"></div><div class="cb2"></div>
+        <div class="call-top">
+          <div class="sb" style="width:100%;padding-top:0"><span>9:41</span><div class="sb-icons"><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></div></div>
+          <div class="call-banner"><div class="cdot"></div>Active Call</div>
+          <div class="call-av-wrap">
+            <div class="cpr cpr1"></div><div class="cpr cpr2"></div>
+            <div class="call-av">MK</div>
+          </div>
+          <p class="call-name">Maya Kim</p>
+          <p class="call-num">+1 (206) 555-0142</p>
+          <p class="call-timer" id="t1">04:23</p>
+          <div class="wv" aria-hidden="true"><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div></div>
+        </div>
+        <div class="ctrl-area">
+          <div class="ctrl-row">
+            <div class="cb on"><i class="ti ti-microphone-off cb-icon on" aria-hidden="true"></i><span class="cb-lbl">Mute</span></div>
+            <div class="cb"><i class="ti ti-speakerphone cb-icon" aria-hidden="true"></i><span class="cb-lbl">Speaker</span></div>
+            <div class="cb"><i class="ti ti-dialpad cb-icon" aria-hidden="true"></i><span class="cb-lbl">Keypad</span></div>
+            <div class="cb"><i class="ti ti-user-plus cb-icon" aria-hidden="true"></i><span class="cb-lbl">Add</span></div>
+          </div>
+          <div class="end-row">
+            <div class="sec-btn"><i class="ti ti-video" aria-hidden="true"></i></div>
+            <div class="end-btn"><i class="ti ti-phone-off" style="font-size:24px" aria-hidden="true"></i></div>
+            <div class="sec-btn"><i class="ti ti-dots" aria-hidden="true"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="theme-col">
+    <span class="theme-badge">Light</span>
+    <div class="pf light call-light">
+      <div class="notch"><div class="n-mic"></div><div class="n-cam"></div></div>
+      <div class="scr-call">
+        <div class="cb1"></div><div class="cb2"></div>
+        <div class="call-top">
+          <div class="sb" style="width:100%;padding-top:0"><span>9:41</span><div class="sb-icons"><i class="ti ti-wifi" aria-hidden="true"></i><i class="ti ti-battery-3" aria-hidden="true"></i></div></div>
+          <div class="call-banner"><div class="cdot"></div>Active Call</div>
+          <div class="call-av-wrap">
+            <div class="cpr cpr1"></div><div class="cpr cpr2"></div>
+            <div class="call-av">MK</div>
+          </div>
+          <p class="call-name">Maya Kim</p>
+          <p class="call-num">+1 (206) 555-0142</p>
+          <p class="call-timer" id="t2">04:23</p>
+          <div class="wv" aria-hidden="true"><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div></div>
+        </div>
+        <div class="ctrl-area">
+          <div class="ctrl-row">
+            <div class="cb on"><i class="ti ti-microphone-off cb-icon on" aria-hidden="true"></i><span class="cb-lbl">Mute</span></div>
+            <div class="cb"><i class="ti ti-speakerphone cb-icon" aria-hidden="true"></i><span class="cb-lbl">Speaker</span></div>
+            <div class="cb"><i class="ti ti-dialpad cb-icon" aria-hidden="true"></i><span class="cb-lbl">Keypad</span></div>
+            <div class="cb"><i class="ti ti-user-plus cb-icon" aria-hidden="true"></i><span class="cb-lbl">Add</span></div>
+          </div>
+          <div class="end-row">
+            <div class="sec-btn"><i class="ti ti-video" aria-hidden="true"></i></div>
+            <div class="end-btn"><i class="ti ti-phone-off" style="font-size:24px" aria-hidden="true"></i></div>
+            <div class="sec-btn"><i class="ti ti-dots" aria-hidden="true"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+let s=263;
+function fmt(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
+const t1=document.getElementById('t1'),t2=document.getElementById('t2');
+setInterval(()=>{s++;if(t1)t1.textContent=fmt(s);if(t2)t2.textContent=fmt(s);},1000);
+</script>
