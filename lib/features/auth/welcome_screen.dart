@@ -11,50 +11,57 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: ZuriSpacing.welcome,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
-              const Center(child: _SignalMark()),
-              const SizedBox(height: 24),
-              const Text(
-                'Zuri',
-                style: ZuriTextStyles.display,
-              ),
-              const SizedBox(height: 14),
-              Text(
-                'Crystal-clear calls, wherever you are',
-                style: ZuriTextStyles.control.copyWith(
-                  color: ZuriColors.muted,
-                  height: 1.2,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: ZuriSpacing.welcome,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: constraints.maxHeight < 520 ? 16 : 40),
+                    const Center(child: _SignalMark()),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Zuri',
+                      style: ZuriTextStyles.display,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Crystal-clear calls, wherever you are',
+                      style: ZuriTextStyles.control.copyWith(
+                        color: ZuriColors.muted,
+                        height: 1.2,
+                      ),
+                    ),
+                    SizedBox(height: constraints.maxHeight < 520 ? 32 : 80),
+                    ZuriPillButton(
+                      label: 'Continue with phone',
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PhoneEntryScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PhoneEntryScreen(),
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: ZuriColors.muted,
+                        textStyle: ZuriTextStyles.label,
+                      ),
+                      child: const Text('I already have an account'),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              ZuriPillButton(
-                label: 'Continue with phone',
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const PhoneEntryScreen(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const PhoneEntryScreen(),
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  foregroundColor: ZuriColors.muted,
-                  textStyle: ZuriTextStyles.label,
-                ),
-                child: const Text('I already have an account'),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

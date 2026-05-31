@@ -30,8 +30,8 @@ class ZuriScaffold extends StatelessWidget {
             ),
       bottomNavigationBar: bottomNavigationBar,
       body: SafeArea(
-        child: DecoratedBox(
-          decoration: const BoxDecoration(color: ZuriColors.surface),
+        child: Material(
+          color: ZuriColors.surface,
           child: child,
         ),
       ),

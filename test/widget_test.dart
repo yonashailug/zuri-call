@@ -10,6 +10,28 @@ void main() {
     expect(find.text('Continue with phone'), findsOneWidget);
   });
 
+  testWidgets('handles Firebase auth callback routes', (tester) async {
+    await tester.pumpWidget(const ZuriApp());
+
+    Navigator.of(tester.element(find.text('Zuri'))).pushNamed(
+      '/link?deep_link_id=https://zuri-call.firebaseapp.com/__/auth/callback',
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Zuri'), findsOneWidget);
+  });
+
+  testWidgets('falls back safely for unknown external routes', (tester) async {
+    await tester.pumpWidget(const ZuriApp());
+
+    Navigator.of(tester.element(find.text('Zuri'))).pushNamed('/unexpected');
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Zuri'), findsOneWidget);
+  });
+
   testWidgets('walks through auth onboarding screens', (tester) async {
     tester.view.physicalSize = const Size(430, 1100);
     tester.view.devicePixelRatio = 1.0;
