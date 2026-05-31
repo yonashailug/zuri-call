@@ -44,5 +44,11 @@ void main() {
       find.text('Please enter your name to create an account.'),
       findsOneWidget,
     );
+
+    await tester.enterText(find.byType(EditableText), 'Alex Johnson');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Create an account'));
+    await tester.pumpAndSettle();
+    expect(find.text('Search contacts'), findsOneWidget);
   });
 }

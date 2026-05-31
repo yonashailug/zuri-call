@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
+import 'application/auth_scope.dart';
 import 'auth_design.dart';
 import 'code_verification_screen.dart';
+import 'data/phone_country_data.dart';
+import 'domain/phone_mask_input_formatter.dart';
+import 'domain/phone_number.dart';
 
 class PhoneEntryScreen extends StatefulWidget {
   const PhoneEntryScreen({super.key});
@@ -17,8 +20,14 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
   final phoneController = TextEditingController();
   CountryOption selectedCountry = countries.first;
 
-  bool get canContinue =>
-      phoneController.text.replaceAll(RegExp(r'\D'), '').length >= 7;
+  PhoneNumber get phoneNumber {
+    return PhoneNumber(
+      country: selectedCountry,
+      rawNationalNumber: phoneController.text,
+    );
+  }
+
+  bool get canContinue => phoneNumber.isValid;
 
   @override
   void dispose() {
@@ -28,6 +37,10 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = AuthScope.of(context);
+    final authState = authController.state;
+    final isBusy = authState.isBusy;
+
     return AuthScaffold(
       child: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -63,17 +76,27 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
             ),
           ),
           const SizedBox(height: 34),
+          if (authState.errorMessage != null) ...[
+            _ErrorText(authState.errorMessage!),
+            const SizedBox(height: 18),
+          ],
           ZuriPillButton(
-            label: 'Continue',
-            onPressed: canContinue
-                ? () => Navigator.of(context).push(
+            label: isBusy ? 'Sending...' : 'Continue',
+            onPressed: canContinue && !isBusy
+                ? () async {
+                    final navigator = Navigator.of(context);
+                    final didSend = await authController.startPhoneAuth(
+                      phoneNumber,
+                    );
+                    if (!mounted || !didSend) return;
+                    await navigator.push(
                       MaterialPageRoute<void>(
                         builder: (_) => CodeVerificationScreen(
-                          phoneNumber:
-                              '${selectedCountry.prefix} ${phoneController.text}',
+                          phoneNumber: phoneNumber,
                         ),
                       ),
-                    )
+                    );
+                  }
                 : null,
           ),
         ],
@@ -98,6 +121,20 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
         picked.placeholder,
       ).formatEditUpdate(TextEditingValue.empty, phoneController.value);
     });
+  }
+}
+
+class _ErrorText extends StatelessWidget {
+  const _ErrorText(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      message,
+      style: ZuriTextStyles.bodyLarge.copyWith(color: ZuriColors.danger),
+    );
   }
 }
 
@@ -198,80 +235,3 @@ class _CountrySheet extends StatelessWidget {
     );
   }
 }
-
-class CountryOption {
-  const CountryOption({
-    required this.name,
-    required this.prefix,
-    required this.placeholder,
-  });
-
-  final String name;
-  final String prefix;
-  final String placeholder;
-}
-
-class PhoneMaskInputFormatter extends TextInputFormatter {
-  PhoneMaskInputFormatter(this.placeholder);
-
-  final String placeholder;
-
-  int get maxDigits => RegExp('0').allMatches(placeholder).length;
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text
-        .replaceAll(RegExp(r'\D'), '')
-        .characters
-        .take(maxDigits)
-        .join();
-    final formatted = _applyMask(digits);
-
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
-
-  String _applyMask(String digits) {
-    if (digits.isEmpty) return '';
-
-    final buffer = StringBuffer();
-    var digitIndex = 0;
-
-    for (final character in placeholder.characters) {
-      if (character == '0') {
-        if (digitIndex >= digits.length) break;
-        buffer.write(digits[digitIndex]);
-        digitIndex += 1;
-        continue;
-      }
-
-      if (digitIndex < digits.length) {
-        buffer.write(character);
-      }
-    }
-
-    return buffer.toString();
-  }
-}
-
-const countries = [
-  CountryOption(
-      name: 'United States', prefix: '+1', placeholder: '(000) 000-0000'),
-  CountryOption(name: 'Canada', prefix: '+1', placeholder: '(000) 000-0000'),
-  CountryOption(name: 'Singapore', prefix: '+65', placeholder: '0000 0000'),
-  CountryOption(name: 'Argentina', prefix: '+54', placeholder: '00 0000 0000'),
-  CountryOption(name: 'Australia', prefix: '+61', placeholder: '000 000 000'),
-  CountryOption(name: 'Austria', prefix: '+43', placeholder: '000 000000'),
-  CountryOption(name: 'Belgium', prefix: '+32', placeholder: '000 00 00 00'),
-  CountryOption(name: 'Brazil', prefix: '+55', placeholder: '(00) 00000-0000'),
-  CountryOption(name: 'Chile', prefix: '+56', placeholder: '0 0000 0000'),
-  CountryOption(name: 'Colombia', prefix: '+57', placeholder: '000 0000000'),
-  CountryOption(name: 'Costa Rica', prefix: '+506', placeholder: '0000 0000'),
-  CountryOption(
-      name: 'Czech Republic', prefix: '+420', placeholder: '000 000 000'),
-];

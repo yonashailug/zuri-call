@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
+import 'application/auth_scope.dart';
 import 'auth_design.dart';
+import 'domain/phone_number.dart';
 import 'profile_name_screen.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
@@ -12,7 +14,7 @@ class CodeVerificationScreen extends StatefulWidget {
     super.key,
   });
 
-  final String phoneNumber;
+  final PhoneNumber phoneNumber;
 
   @override
   State<CodeVerificationScreen> createState() => _CodeVerificationScreenState();
@@ -41,6 +43,10 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = AuthScope.of(context);
+    final authState = authController.state;
+    final isBusy = authState.isBusy;
+
     return AuthScaffold(
       child: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -74,7 +80,11 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
           ),
           const SizedBox(height: 46),
           TextButton(
-            onPressed: () {},
+            onPressed: isBusy
+                ? null
+                : () async {
+                    await authController.startPhoneAuth(widget.phoneNumber);
+                  },
             style: TextButton.styleFrom(
               foregroundColor: ZuriColors.accent,
               textStyle: ZuriTextStyles.sectionTitle,
@@ -82,14 +92,30 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
             child: const Text("I didn't get a text message"),
           ),
           const SizedBox(height: 46),
+          if (authState.errorMessage != null) ...[
+            Text(
+              authState.errorMessage!,
+              style: ZuriTextStyles.bodyLarge.copyWith(
+                color: ZuriColors.danger,
+              ),
+            ),
+            const SizedBox(height: 18),
+          ],
           ZuriPillButton(
-            label: 'Continue',
-            onPressed: canContinue
-                ? () => Navigator.of(context).push(
+            label: isBusy ? 'Verifying...' : 'Continue',
+            onPressed: canContinue && !isBusy
+                ? () async {
+                    final navigator = Navigator.of(context);
+                    final didVerify = await authController.verifyCode(
+                      codeController.text,
+                    );
+                    if (!mounted || !didVerify) return;
+                    await navigator.push(
                       MaterialPageRoute<void>(
                         builder: (_) => const ProfileNameScreen(),
                       ),
-                    )
+                    );
+                  }
                 : null,
           ),
         ],

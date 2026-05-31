@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/ui/zuri_ui.dart';
-import '../home/app_shell.dart';
+import 'application/auth_scope.dart';
 import 'auth_design.dart';
 
 class ProfileNameScreen extends StatefulWidget {
@@ -24,6 +24,10 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = AuthScope.of(context);
+    final authState = authController.state;
+    final isBusy = authState.isBusy;
+
     return AuthScaffold(
       child: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -43,15 +47,26 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 34),
+          if (authState.errorMessage != null) ...[
+            Text(
+              authState.errorMessage!,
+              style: ZuriTextStyles.bodyLarge.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 18),
+          ],
           ZuriPillButton(
-            label: 'Create an account',
-            onPressed: canContinue
-                ? () => Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const AppShell(),
-                      ),
-                      (_) => false,
-                    )
+            label: isBusy ? 'Creating...' : 'Create an account',
+            onPressed: canContinue && !isBusy
+                ? () async {
+                    final navigator = Navigator.of(context);
+                    final didCreate = await authController.createProfile(
+                      nameController.text,
+                    );
+                    if (!mounted || !didCreate) return;
+                    navigator.popUntil((route) => route.isFirst);
+                  }
                 : null,
           ),
         ],
