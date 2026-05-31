@@ -1,0 +1,138 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'auth_design.dart';
+import 'profile_name_screen.dart';
+
+class CodeVerificationScreen extends StatefulWidget {
+  const CodeVerificationScreen({
+    required this.phoneNumber,
+    super.key,
+  });
+
+  final String phoneNumber;
+
+  @override
+  State<CodeVerificationScreen> createState() => _CodeVerificationScreenState();
+}
+
+class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
+  final codeController = TextEditingController();
+  final focusNode = FocusNode();
+
+  bool get canContinue => codeController.text.length == 6;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    codeController.dispose();
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthScaffold(
+      child: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(28, 46, 28, 32),
+        children: [
+          const AuthHeadline(
+              "We've sent you a security code. Please type it here:"),
+          const SizedBox(height: 44),
+          GestureDetector(
+            onTap: focusNode.requestFocus,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                _CodeBoxes(value: codeController.text),
+                Opacity(
+                  opacity: 0,
+                  child: TextField(
+                    controller: codeController,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(6),
+                    ],
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 46),
+          TextButton(
+            onPressed: () {},
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF0E9F6E),
+              textStyle: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            child: const Text("I didn't get a text message"),
+          ),
+          const SizedBox(height: 46),
+          AuthPillButton(
+            label: 'Continue',
+            onPressed: canContinue
+                ? () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ProfileNameScreen(),
+                      ),
+                    )
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CodeBoxes extends StatelessWidget {
+  const _CodeBoxes({required this.value});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(6, (index) {
+        final hasValue = index < value.length;
+        final focused = index == value.length.clamp(0, 5);
+        return Container(
+          height: 96,
+          width: 54,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AuthColors.field,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: focused ? AuthColors.ink : AuthColors.border,
+              width: 1.4,
+            ),
+          ),
+          child: Text(
+            hasValue ? value[index] : '',
+            style: const TextStyle(
+              color: AuthColors.ink,
+              fontSize: 25,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
