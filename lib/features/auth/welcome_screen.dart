@@ -73,12 +73,14 @@ class _SignalMark extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _Ring(size: 172, opacity: 0.16),
-          _Ring(size: 122, opacity: 0.22),
+          const _Ring(size: 172, opacity: 0.16),
+          const _Ring(size: 122, opacity: 0.22),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: ZuriColors.primary.withOpacity(0.08),
-              border: Border.all(color: ZuriColors.primary.withOpacity(0.28)),
+              color: ZuriColors.primary.withValues(alpha: 0.08),
+              border: Border.all(
+                color: ZuriColors.primary.withValues(alpha: 0.28),
+              ),
               shape: BoxShape.circle,
             ),
             child: const SizedBox(
@@ -110,7 +112,9 @@ class _Ring extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: ZuriColors.primary.withOpacity(opacity)),
+        border: Border.all(
+          color: ZuriColors.primary.withValues(alpha: opacity),
+        ),
       ),
     );
   }

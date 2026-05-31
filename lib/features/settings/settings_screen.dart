@@ -16,12 +16,16 @@ class SettingsScreen extends StatelessWidget {
           _ProfileHeader(),
           SizedBox(height: 18),
           _SettingsRow(icon: Icons.account_circle_rounded, label: 'Account'),
-          _SettingsRow(icon: Icons.account_balance_wallet_rounded, label: 'Wallet'),
+          _SettingsRow(
+              icon: Icons.account_balance_wallet_rounded, label: 'Wallet'),
           _SettingsRow(icon: Icons.price_check_rounded, label: 'Rates'),
           _SettingsRow(icon: Icons.support_agent_rounded, label: 'Support'),
-          _SettingsRow(icon: Icons.privacy_tip_rounded, label: 'Privacy policy'),
-          _SettingsRow(icon: Icons.description_rounded, label: 'Terms of service'),
-          _SettingsRow(icon: Icons.emergency_rounded, label: 'Emergency calling notice'),
+          _SettingsRow(
+              icon: Icons.privacy_tip_rounded, label: 'Privacy policy'),
+          _SettingsRow(
+              icon: Icons.description_rounded, label: 'Terms of service'),
+          _SettingsRow(
+              icon: Icons.emergency_rounded, label: 'Emergency calling notice'),
           SizedBox(height: 12),
           _SettingsRow(
             icon: Icons.logout_rounded,

@@ -30,7 +30,7 @@ class WalletScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  '$12.40',
+                  '\$12.40',
                   style: TextStyle(fontSize: 38, fontWeight: FontWeight.w900),
                 ),
                 SizedBox(height: 6),
@@ -56,19 +56,19 @@ class WalletScreen extends StatelessWidget {
           const _TransactionRow(
             title: 'Credit purchase',
             subtitle: 'Today - Visa ending 4242',
-            amount: '+$10.00',
+            amount: '+\$10.00',
             positive: true,
           ),
           const _TransactionRow(
             title: 'Call to Maya Kim',
             subtitle: 'Yesterday - 4m 23s',
-            amount: '-$0.09',
+            amount: '-\$0.09',
             positive: false,
           ),
           const _TransactionRow(
             title: 'Call to Sweden',
             subtitle: 'May 28 - 12m 04s',
-            amount: '-$0.72',
+            amount: '-\$0.72',
             positive: false,
           ),
         ],
@@ -101,8 +101,8 @@ class _TransactionRow extends StatelessWidget {
             width: 42,
             decoration: BoxDecoration(
               color: positive
-                  ? ZuriColors.success.withOpacity(0.08)
-                  : ZuriColors.primary.withOpacity(0.08),
+                  ? ZuriColors.success.withValues(alpha: 0.08)
+                  : ZuriColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(

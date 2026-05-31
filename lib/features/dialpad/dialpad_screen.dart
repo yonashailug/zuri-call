@@ -42,7 +42,7 @@ class _DialpadScreenState extends State<DialpadScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'United States - estimated $0.02/min',
+              'United States - estimated \$0.02/min',
               style: TextStyle(color: ZuriColors.muted),
             ),
             const Spacer(),
