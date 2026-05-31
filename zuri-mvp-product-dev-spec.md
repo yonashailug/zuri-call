@@ -1,6 +1,6 @@
 # Zuri MVP Product and Developer Design
 
-This document turns the Zuri VoIP concept into an implementation-ready MVP plan. It should be used together with `zuri_voip_light_dark_themes.html` for visual direction and `zuri-missing-mvp-screens-spec.md` for screen coverage.
+This document turns the Zuri VoIP concept into an implementation-ready MVP plan. It should be used together with `zuri_voip_light_dark_themes.html` for visual direction and `zuri-missing-mvp-screens-spec.md` for screen coverage. The first implementation target is a Flutter mobile app, starting with the light theme.
 
 ## Product Definition
 
@@ -52,6 +52,17 @@ The MVP is not a messaging app, video-call product, social network, or full tele
 
 ## Recommended Product Decisions
 
+### Platform and Theme
+
+Build the MVP as a Flutter mobile app first.
+
+Implementation priority:
+
+- Target iOS and Android from one Flutter codebase.
+- Implement the light theme first.
+- Keep theme tokens structured so dark theme can be added later without rewriting screens.
+- Treat the current HTML prototype as visual reference, not production UI code.
+
 ### Auth
 
 Use phone-first OTP authentication.
@@ -76,7 +87,7 @@ Do not ship password auth in MVP unless a web-only requirement appears. It adds 
 Use the following provider split for MVP:
 
 - Supabase: auth, Postgres, row-level security, storage of product data, edge/server functions.
-- Twilio: SMS OTP provider and programmable voice provider.
+- Twilio: SMS OTP provider and programmable voice provider. Flutter support may require a native plugin, platform-channel wrapper, or a provider-specific Flutter SDK decision during implementation.
 - Stripe or RevenueCat: payment provider, depending on distribution policy.
 
 Payment decision:
@@ -467,24 +478,24 @@ Exit criteria:
 
 ## Initial Engineering Backlog
 
-1. Choose app runtime: React Native, native iOS/Android, or web-first prototype.
-2. Create Supabase project and local migration structure.
-3. Add schema for profiles, wallets, wallet transactions, rates, calls, contacts, and support tickets.
-4. Configure Supabase Auth with Twilio phone OTP.
-5. Build OTP onboarding screens.
-6. Build profile completion.
-7. Build wallet ledger server functions.
-8. Decide Stripe vs RevenueCat after payment policy review.
-9. Build payment sandbox flow.
-10. Build dial pad and rate preflight.
-11. Configure Twilio Voice sandbox/test app.
-12. Build call token function and active call integration.
-13. Build Twilio status webhook and call charge finalization.
-14. Build settings/support/failure states.
+1. Create Flutter mobile app project.
+2. Define light theme tokens, navigation shell, and reusable screen primitives.
+3. Create Supabase project and local migration structure.
+4. Add schema for profiles, wallets, wallet transactions, rates, calls, contacts, and support tickets.
+5. Configure Supabase Auth with Twilio phone OTP.
+6. Build OTP onboarding screens.
+7. Build profile completion.
+8. Build wallet ledger server functions.
+9. Decide Stripe vs RevenueCat after payment policy review.
+10. Build payment sandbox flow.
+11. Build dial pad and rate preflight.
+12. Configure Twilio Voice sandbox/test app.
+13. Build call token function and active call integration.
+14. Build Twilio status webhook and call charge finalization.
+15. Build settings/support/failure states.
 
 ## Open Decisions Before Implementation
 
-- Target platform for first implementation: React Native, native mobile, or web.
 - Payment path: Stripe, RevenueCat/App Store IAP, or both with platform-specific behavior.
 - Launch country/countries for users.
 - Allowed destination countries for MVP.

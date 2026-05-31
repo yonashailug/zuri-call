@@ -1,20 +1,20 @@
 # Zuri Missing MVP Screens Spec
 
-This spec defines the missing MVP screens for the Zuri VoIP app design in `zuri_voip_light_dark_themes.html`. The current HTML covers welcome, contacts home, and active call screens in light and dark themes. The screens below complete the onboarding, calling, billing, account, and error flows needed for a production MVP. Product scope, backend design, provider choices, and implementation phases are defined in `zuri-mvp-product-dev-spec.md`.
+This spec defines the missing MVP screens for the Zuri VoIP app design in `zuri_voip_light_dark_themes.html`. The current HTML covers welcome, contacts home, and active call screens in light and dark themes. The first production implementation is a Flutter mobile app focused on the light theme first. The screens below complete the onboarding, calling, billing, account, and error flows needed for a production MVP. Product scope, backend design, provider choices, and implementation phases are defined in `zuri-mvp-product-dev-spec.md`.
 
 ## Design Baseline
 
 Use the existing visual system:
 
 - Phone frame width: `280px`
-- Rounded app frame with dark and light variants
+- Rounded app frame with light theme as the MVP production target
 - Font pairing: `DM Sans` for UI text, `Syne` for brand and major names
 - Primary action gradient: indigo to purple
 - Dark background: `#0B0B14`
 - Light background: `#F7F6FF` or `#F0EEFF` for call-adjacent screens
 - Bottom navigation style from the home screen
 - Icon style: Tabler icons via `ti` classes
-- Every new screen should have both dark and light theme examples unless it is a modal/state shown over an existing screen
+- Every new screen should be implemented in light theme first. Keep color and typography tokens compatible with a later dark theme.
 
 ## Screen 1: Create Account
 
@@ -178,7 +178,7 @@ States:
 
 UX notes:
 - Credit packages should be simple cards or segmented buttons.
-- Make the selected amount obvious in both light and dark themes.
+- Make the selected amount obvious in the light theme.
 
 ## Screen 7: Transaction History
 
@@ -435,7 +435,6 @@ UX notes:
 
 ## Open Product Decisions
 
-- Confirm target platform for the first implementation: React Native, native mobile, or web.
 - Confirm payment path after policy review: Stripe, RevenueCat/App Store IAP, or platform-specific behavior.
 - Confirm launch countries for users and allowed destination countries for calls.
 - Confirm initial credit packages.
