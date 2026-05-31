@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
+import '../../core/ui/zuri_ui.dart';
 import '../../core/widgets/zuri_scaffold.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -11,10 +12,10 @@ class SettingsScreen extends StatelessWidget {
     return ZuriScaffold(
       title: 'Settings',
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        padding: ZuriSpacing.screenCompact,
         children: const [
           _ProfileHeader(),
-          SizedBox(height: 18),
+          SizedBox(height: 22),
           _SettingsRow(icon: Icons.account_circle_rounded, label: 'Account'),
           _SettingsRow(
               icon: Icons.account_balance_wallet_rounded, label: 'Wallet'),
@@ -43,38 +44,29 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ZuriPanel(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: ZuriColors.border),
-      ),
-      child: const Row(
+      child: Row(
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: ZuriColors.primary,
-            child: Text(
-              'AJ',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+          const ZuriAvatar(
+            label: 'AJ',
+            color: ZuriColors.primary,
+            size: 52,
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Alex Johnson',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                  style: ZuriTextStyles.rowTitle,
                 ),
                 Text(
                   '+1 (206) 555-0100',
-                  style: TextStyle(color: ZuriColors.muted),
+                  style: ZuriTextStyles.bodyLarge.copyWith(
+                    color: ZuriColors.muted,
+                  ),
                 ),
               ],
             ),
@@ -100,15 +92,15 @@ class _SettingsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = destructive ? ZuriColors.danger : ZuriColors.ink;
     return ListTile(
-      contentPadding: EdgeInsets.zero,
+      contentPadding: const EdgeInsets.symmetric(vertical: 2),
       leading: Icon(icon, color: color),
       title: Text(
         label,
-        style: TextStyle(color: color, fontWeight: FontWeight.w700),
+        style: ZuriTextStyles.rowTitle.copyWith(color: color),
       ),
       trailing: destructive
           ? null
-          : const Icon(Icons.chevron_right_rounded, color: ZuriColors.tertiary),
+          : const Icon(Icons.chevron_right_rounded, color: ZuriColors.muted),
       onTap: () {},
     );
   }

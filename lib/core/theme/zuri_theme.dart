@@ -1,29 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../ui/zuri_ui.dart';
+
 class ZuriColors {
   const ZuriColors._();
 
-  static const ink = Color(0xFF1E1461);
-  static const muted = Color(0xFF7B72B8);
-  static const tertiary = Color(0xFFB5B0D8);
-  static const surface = Color(0xFFF7F6FF);
-  static const callSurface = Color(0xFFF0EEFF);
-  static const card = Colors.white;
-  static const border = Color(0xFFE2DEFA);
-  static const primary = Color(0xFF4F46E5);
-  static const primaryDeep = Color(0xFF6D28D9);
+  static const ink = Color(0xFF0B4A2F);
+  static const muted = Color(0xFF706961);
+  static const surface = Color(0xFFFFF6EF);
+  static const callSurface = Color(0xFFF0EADD);
+  static const card = Color(0xFFFFFCFA);
+  static const border = Color(0xFFAAA298);
+  static const primary = Color(0xFF0B4A2F);
+  static const accent = Color(0xFF0E9F6E);
+  static const disabled = Color(0xFFB8C8C0);
   static const success = Color(0xFF15803D);
   static const danger = Color(0xFFDC2626);
-}
-
-class ZuriGradients {
-  const ZuriGradients._();
-
-  static const primary = LinearGradient(
-    colors: [ZuriColors.primary, ZuriColors.primaryDeep],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
 }
 
 class ZuriTheme {
@@ -36,9 +28,15 @@ class ZuriTheme {
         seedColor: ZuriColors.primary,
         brightness: Brightness.light,
         surface: ZuriColors.surface,
+        primary: ZuriColors.primary,
+        primaryContainer: ZuriColors.callSurface,
+        onSurface: ZuriColors.ink,
+        onSurfaceVariant: ZuriColors.muted,
+        outline: ZuriColors.border,
+        outlineVariant: ZuriColors.disabled,
+        surfaceContainerLowest: ZuriColors.card,
       ),
       scaffoldBackgroundColor: ZuriColors.surface,
-      fontFamily: 'DM Sans',
     );
 
     return base.copyWith(
@@ -46,26 +44,52 @@ class ZuriTheme {
         bodyColor: ZuriColors.ink,
         displayColor: ZuriColors.ink,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: ZuriColors.surface,
         foregroundColor: ZuriColors.ink,
         elevation: 0,
         centerTitle: false,
+        titleTextStyle: ZuriTextStyles.screenTitle.copyWith(
+          color: ZuriColors.ink,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: ZuriColors.card,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(ZuriRadius.field),
           borderSide: const BorderSide(color: ZuriColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(ZuriRadius.field),
           borderSide: const BorderSide(color: ZuriColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(ZuriRadius.field),
           borderSide: const BorderSide(color: ZuriColors.primary),
+        ),
+        hintStyle: ZuriTextStyles.control.copyWith(
+          color: ZuriColors.muted,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: ZuriColors.surface,
+        indicatorColor: ZuriColors.callSurface,
+        labelTextStyle: WidgetStateProperty.all(
+          const TextStyle(
+            color: ZuriColors.ink,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0,
+          ),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? ZuriColors.ink
+                : ZuriColors.muted,
+          ),
         ),
       ),
     );

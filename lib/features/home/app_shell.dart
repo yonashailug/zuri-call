@@ -40,7 +40,7 @@ class _AppShellState extends State<AppShell> {
         selectedIndex: selectedIndex,
         onDestinationSelected: (index) => setState(() => selectedIndex = index),
         backgroundColor: ZuriColors.surface,
-        indicatorColor: const Color(0xFFEEEDFE),
+        indicatorColor: ZuriColors.callSurface,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.history_rounded),

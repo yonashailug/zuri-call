@@ -22,9 +22,9 @@ class ZuriScaffold extends StatelessWidget {
       appBar: title == null
           ? null
           : AppBar(
+              toolbarHeight: 84,
               title: Text(
                 title!,
-                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
               actions: actions,
             ),

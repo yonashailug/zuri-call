@@ -1,0 +1,211 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'zuri_tokens.dart';
+
+class ZuriPillButton extends StatelessWidget {
+  const ZuriPillButton({
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.height = 66,
+    super.key,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final enabled = onPressed != null;
+
+    final style = TextButton.styleFrom(
+      backgroundColor: enabled ? colors.primary : colors.outlineVariant,
+      foregroundColor: Colors.white,
+      shape: const StadiumBorder(),
+      textStyle: ZuriTextStyles.control,
+    );
+
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: icon == null
+          ? TextButton(
+              onPressed: onPressed,
+              style: style,
+              child: Text(label),
+            )
+          : TextButton.icon(
+              onPressed: onPressed,
+              style: style,
+              icon: Icon(icon),
+              label: Text(label),
+            ),
+    );
+  }
+}
+
+class ZuriCircleButton extends StatelessWidget {
+  const ZuriCircleButton({
+    required this.icon,
+    required this.onPressed,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.size = 50,
+    super.key,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color? foregroundColor;
+  final Color? backgroundColor;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return SizedBox.square(
+      dimension: size,
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        color: foregroundColor ?? colors.primary,
+        style: IconButton.styleFrom(
+          backgroundColor: backgroundColor ?? colors.primaryContainer,
+          shape: const CircleBorder(),
+        ),
+      ),
+    );
+  }
+}
+
+class ZuriTextField extends StatelessWidget {
+  const ZuriTextField({
+    required this.controller,
+    required this.hintText,
+    this.keyboardType,
+    this.textInputAction,
+    this.inputFormatters,
+    this.autofocus = false,
+    this.onChanged,
+    super.key,
+  });
+
+  final TextEditingController controller;
+  final String hintText;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool autofocus;
+  final ValueChanged<String>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return TextField(
+      controller: controller,
+      autofocus: autofocus,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      inputFormatters: inputFormatters,
+      onChanged: onChanged,
+      cursorColor: colors.primary,
+      style: ZuriTextStyles.control.copyWith(color: colors.primary),
+      decoration: InputDecoration(
+        hintText: hintText,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 17,
+        ),
+      ),
+    );
+  }
+}
+
+class ZuriPanel extends StatelessWidget {
+  const ZuriPanel({
+    required this.child,
+    this.padding = const EdgeInsets.all(22),
+    super.key,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(ZuriRadius.panel),
+        border: Border.all(color: colors.outline, width: 1.4),
+      ),
+      child: child,
+    );
+  }
+}
+
+class ZuriFieldLabel extends StatelessWidget {
+  const ZuriFieldLabel(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Text(
+      text,
+      style: ZuriTextStyles.label.copyWith(color: colors.onSurfaceVariant),
+    );
+  }
+}
+
+class ZuriScreenHeadline extends StatelessWidget {
+  const ZuriScreenHeadline(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Text(
+      text,
+      style: ZuriTextStyles.screenTitle.copyWith(color: colors.primary),
+    );
+  }
+}
+
+class ZuriAvatar extends StatelessWidget {
+  const ZuriAvatar({
+    required this.label,
+    required this.color,
+    this.size = 52,
+    super.key,
+  });
+
+  final String label;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: size,
+      width: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        label,
+        style: ZuriTextStyles.rowTitle.copyWith(color: Colors.white),
+      ),
+    );
+  }
+}

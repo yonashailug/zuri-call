@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/theme/zuri_theme.dart';
+import '../../core/ui/zuri_ui.dart';
 import 'auth_design.dart';
 import 'code_verification_screen.dart';
 
@@ -29,20 +31,20 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
     return AuthScaffold(
       child: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(28, 46, 28, 32),
+        padding: ZuriSpacing.authBody,
         children: [
-          const AuthHeadline('Please enter your phone number below:'),
+          const ZuriScreenHeadline('Please enter your phone number below:'),
           const SizedBox(height: 48),
-          const AuthFieldLabel('Country/Region'),
+          const ZuriFieldLabel('Country/Region'),
           const SizedBox(height: 8),
           _CountrySelector(
             country: selectedCountry,
             onTap: showCountryPicker,
           ),
           const SizedBox(height: 16),
-          const AuthFieldLabel('Phone number'),
+          const ZuriFieldLabel('Phone number'),
           const SizedBox(height: 8),
-          AuthTextField(
+          ZuriTextField(
             controller: phoneController,
             hintText: selectedCountry.placeholder,
             keyboardType: TextInputType.phone,
@@ -54,17 +56,14 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 34),
-          const Text(
+          Text(
             'You agree to receive automated text messages from us. Message frequency varies. Message and data rates may apply. Text STOP to cancel.',
-            style: TextStyle(
-              color: AuthColors.muted,
-              fontSize: 17,
-              height: 1.25,
-              fontWeight: FontWeight.w600,
+            style: ZuriTextStyles.bodyLarge.copyWith(
+              color: ZuriColors.muted,
             ),
           ),
           const SizedBox(height: 34),
-          AuthPillButton(
+          ZuriPillButton(
             label: 'Continue',
             onPressed: canContinue
                 ? () => Navigator.of(context).push(
@@ -114,31 +113,29 @@ class _CountrySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(ZuriRadius.field),
       onTap: onTap,
       child: Ink(
         height: 66,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         decoration: BoxDecoration(
-          color: AuthColors.field,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AuthColors.border, width: 1.4),
+          color: ZuriColors.card,
+          borderRadius: BorderRadius.circular(ZuriRadius.field),
+          border: Border.all(color: ZuriColors.border, width: 1.4),
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 '${country.name} (${country.prefix})',
-                style: const TextStyle(
-                  color: AuthColors.ink,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
+                style: ZuriTextStyles.controlStrong.copyWith(
+                  color: ZuriColors.ink,
                 ),
               ),
             ),
             const Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: AuthColors.border,
+              color: ZuriColors.border,
               size: 32,
             ),
           ],
@@ -162,8 +159,8 @@ class _CountrySheet extends StatelessWidget {
           constraints: const BoxConstraints(maxHeight: 560),
           padding: const EdgeInsets.symmetric(vertical: 22),
           decoration: BoxDecoration(
-            color: AuthColors.field.withValues(alpha: 0.96),
-            borderRadius: BorderRadius.circular(30),
+            color: ZuriColors.card.withValues(alpha: 0.96),
+            borderRadius: BorderRadius.circular(ZuriRadius.modal),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.12),
@@ -184,10 +181,11 @@ class _CountrySheet extends StatelessWidget {
                   title: Text(
                     '${country.name} (${country.prefix})',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: selected ? AuthColors.ink : Colors.black,
-                      fontSize: 22,
-                      fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                    style: ZuriTextStyles.control.copyWith(
+                      color: selected ? ZuriColors.ink : Colors.black,
+                      fontWeight: selected
+                          ? FontWeight.w800
+                          : ZuriTextStyles.control.fontWeight,
                     ),
                   ),
                   onTap: () => Navigator.of(context).pop(country),

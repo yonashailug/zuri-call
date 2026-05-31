@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
-import '../../core/widgets/gradient_button.dart';
+import '../../core/ui/zuri_ui.dart';
 import '../../core/widgets/zuri_scaffold.dart';
 
 class DialpadScreen extends StatefulWidget {
@@ -28,31 +28,32 @@ class _DialpadScreenState extends State<DialpadScreen> {
     return ZuriScaffold(
       title: 'Dial pad',
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
+        padding: ZuriSpacing.screenCompact,
         child: Column(
           children: [
-            const SizedBox(height: 12),
             Text(
               number.trim().isEmpty ? 'Enter number' : number,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 28,
+              style: ZuriTextStyles.compactTitle.copyWith(
+                color: ZuriColors.ink,
                 fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'United States - estimated \$0.02/min',
-              style: TextStyle(color: ZuriColors.muted),
+              style: ZuriTextStyles.bodyLarge.copyWith(
+                color: ZuriColors.muted,
+              ),
             ),
             const Spacer(),
             GridView.count(
               crossAxisCount: 3,
-              childAspectRatio: 1.25,
+              childAspectRatio: 1.2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 14,
               children: [
                 _DialKey(label: '1', onTap: append),
                 _DialKey(label: '2', sublabel: 'ABC', onTap: append),
@@ -71,24 +72,26 @@ class _DialpadScreenState extends State<DialpadScreen> {
             const SizedBox(height: 18),
             Row(
               children: [
-                IconButton(
+                ZuriCircleButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.person_add_alt_1_rounded),
-                  color: ZuriColors.muted,
+                  icon: Icons.person_add_alt_1_rounded,
+                  foregroundColor: ZuriColors.muted,
+                  size: 48,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: GradientButton(
+                  child: ZuriPillButton(
                     label: 'Call now',
                     icon: Icons.call_rounded,
                     onPressed: () {},
                   ),
                 ),
                 const SizedBox(width: 12),
-                IconButton(
+                ZuriCircleButton(
                   onPressed: backspace,
-                  icon: const Icon(Icons.backspace_rounded),
-                  color: ZuriColors.muted,
+                  icon: Icons.backspace_rounded,
+                  foregroundColor: ZuriColors.muted,
+                  size: 48,
                 ),
               ],
             ),
@@ -113,12 +116,12 @@ class _DialKey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(ZuriRadius.panel),
       onTap: () => onTap(label),
       child: Ink(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          color: ZuriColors.card,
+          borderRadius: BorderRadius.circular(ZuriRadius.panel),
           border: Border.all(color: ZuriColors.border),
         ),
         child: Column(
@@ -126,19 +129,17 @@ class _DialKey extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 28,
+              style: ZuriTextStyles.compactTitle.copyWith(
+                color: ZuriColors.ink,
                 fontWeight: FontWeight.w800,
               ),
             ),
             if (sublabel != null)
               Text(
                 sublabel!,
-                style: const TextStyle(
-                  color: ZuriColors.tertiary,
+                style: ZuriTextStyles.eyebrow.copyWith(
+                  color: ZuriColors.muted,
                   fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0,
                 ),
               ),
           ],

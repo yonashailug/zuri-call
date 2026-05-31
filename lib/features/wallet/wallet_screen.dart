@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
-import '../../core/widgets/gradient_button.dart';
+import '../../core/ui/zuri_ui.dart';
 import '../../core/widgets/zuri_scaffold.dart';
 
 class WalletScreen extends StatelessWidget {
@@ -12,47 +12,45 @@ class WalletScreen extends StatelessWidget {
     return ZuriScaffold(
       title: 'Wallet',
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        padding: ZuriSpacing.screenCompact,
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: ZuriColors.border),
-            ),
-            child: const Column(
+          ZuriPanel(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Available credit',
-                  style: TextStyle(color: ZuriColors.muted),
+                  style: ZuriTextStyles.label.copyWith(
+                    color: ZuriColors.muted,
+                  ),
                 ),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 8),
+                const Text(
                   '\$12.40',
-                  style: TextStyle(fontSize: 38, fontWeight: FontWeight.w900),
+                  style: ZuriTextStyles.display,
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 10),
                 Text(
                   'About 620 minutes to United States numbers',
-                  style: TextStyle(color: ZuriColors.muted),
+                  style: ZuriTextStyles.bodyLarge.copyWith(
+                    color: ZuriColors.muted,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 18),
-          GradientButton(
+          const SizedBox(height: 20),
+          ZuriPillButton(
             label: 'Add credits',
             icon: Icons.add_card_rounded,
             onPressed: () {},
           ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 30),
           const Text(
             'Transactions',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+            style: ZuriTextStyles.sectionTitle,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           const _TransactionRow(
             title: 'Credit purchase',
             subtitle: 'Today - Visa ending 4242',
@@ -103,11 +101,11 @@ class _TransactionRow extends StatelessWidget {
               color: positive
                   ? ZuriColors.success.withValues(alpha: 0.08)
                   : ZuriColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(ZuriRadius.panel),
             ),
             child: Icon(
               positive ? Icons.add_rounded : Icons.call_made_rounded,
-              color: positive ? ZuriColors.success : ZuriColors.primary,
+              color: positive ? ZuriColors.success : ZuriColors.ink,
             ),
           ),
           const SizedBox(width: 12),
@@ -117,20 +115,21 @@ class _TransactionRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  style: ZuriTextStyles.rowTitle.copyWith(fontSize: 16),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: ZuriColors.tertiary),
+                  style: ZuriTextStyles.rowMeta.copyWith(
+                    color: ZuriColors.muted,
+                  ),
                 ),
               ],
             ),
           ),
           Text(
             amount,
-            style: TextStyle(
+            style: ZuriTextStyles.rowTitle.copyWith(
               color: positive ? ZuriColors.success : ZuriColors.ink,
-              fontWeight: FontWeight.w800,
             ),
           ),
         ],

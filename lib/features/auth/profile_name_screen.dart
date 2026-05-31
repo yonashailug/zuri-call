@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/ui/zuri_ui.dart';
 import '../home/app_shell.dart';
 import 'auth_design.dart';
 
@@ -26,13 +27,15 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
     return AuthScaffold(
       child: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(28, 46, 28, 32),
+        padding: ZuriSpacing.authBody,
         children: [
-          const AuthHeadline('Please enter your name to create an account.'),
+          const ZuriScreenHeadline(
+            'Please enter your name to create an account.',
+          ),
           const SizedBox(height: 50),
-          const AuthFieldLabel('Name'),
+          const ZuriFieldLabel('Name'),
           const SizedBox(height: 8),
-          AuthTextField(
+          ZuriTextField(
             controller: nameController,
             hintText: 'Enter your full name',
             textInputAction: TextInputAction.done,
@@ -40,7 +43,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 34),
-          AuthPillButton(
+          ZuriPillButton(
             label: 'Create an account',
             onPressed: canContinue
                 ? () => Navigator.of(context).pushAndRemoveUntil(

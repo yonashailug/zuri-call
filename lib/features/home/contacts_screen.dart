@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
+import '../../core/ui/zuri_ui.dart';
 import '../../core/widgets/zuri_scaffold.dart';
 
 enum ContactsMode { recents, contacts }
@@ -14,50 +15,41 @@ class ContactsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ZuriScaffold(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+        padding: ZuriSpacing.screen,
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Good morning',
-                      style: TextStyle(color: ZuriColors.muted, fontSize: 13),
+                      style: ZuriTextStyles.bodyLarge.copyWith(
+                        color: ZuriColors.muted,
+                      ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       'Alex',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
+                      style: ZuriTextStyles.screenTitle.copyWith(
+                        fontSize: 38,
+                        height: 1,
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                height: 42,
-                width: 42,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  gradient: ZuriGradients.primary,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Text(
-                  'AJ',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+              const ZuriAvatar(
+                label: 'AJ',
+                color: ZuriColors.primary,
+                size: 42,
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 26),
           const _SearchField(),
-          const SizedBox(height: 22),
+          const SizedBox(height: 28),
           if (mode == ContactsMode.recents) ...[
             const _SectionTitle('Recent calls'),
             const SizedBox(height: 10),
@@ -101,10 +93,11 @@ class _SearchField extends StatelessWidget {
     return TextField(
       decoration: InputDecoration(
         hintText: 'Search contacts',
-        prefixIcon: const Icon(Icons.search_rounded),
+        prefixIcon: const Icon(Icons.search_rounded, color: ZuriColors.muted),
         suffixIcon: IconButton(
           onPressed: () {},
           icon: const Icon(Icons.tune_rounded),
+          color: ZuriColors.ink,
         ),
       ),
     );
@@ -117,7 +110,7 @@ class _RecentStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 86,
+      height: 96,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: sampleContacts.length,
@@ -125,16 +118,16 @@ class _RecentStrip extends StatelessWidget {
         itemBuilder: (context, index) {
           final contact = sampleContacts[index];
           return SizedBox(
-            width: 62,
+            width: 70,
             child: Column(
               children: [
-                _Avatar(contact: contact, size: 54),
+                _Avatar(contact: contact, size: 60),
                 const SizedBox(height: 6),
                 Text(
                   contact.shortName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: ZuriTextStyles.rowMeta.copyWith(
                     color: ZuriColors.muted,
                     fontSize: 12,
                   ),
@@ -157,26 +150,25 @@ class _ContactRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          _Avatar(contact: contact, size: 46),
-          const SizedBox(width: 12),
+          _Avatar(contact: contact, size: 52),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   contact.name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: ZuriTextStyles.rowTitle,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   contact.phone,
-                  style: const TextStyle(color: ZuriColors.tertiary),
+                  style: ZuriTextStyles.rowMeta.copyWith(
+                    color: ZuriColors.muted,
+                  ),
                 ),
               ],
             ),
@@ -196,21 +188,10 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: size,
-      width: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: contact.gradient,
-        borderRadius: BorderRadius.circular(size * 0.32),
-      ),
-      child: Text(
-        contact.initials,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
+    return ZuriAvatar(
+      label: contact.initials,
+      color: contact.color,
+      size: size,
     );
   }
 }
@@ -224,11 +205,8 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label.toUpperCase(),
-      style: const TextStyle(
-        color: ZuriColors.tertiary,
-        fontSize: 11,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 0,
+      style: ZuriTextStyles.eyebrow.copyWith(
+        color: ZuriColors.muted,
       ),
     );
   }
@@ -239,14 +217,14 @@ class ContactPreview {
     required this.name,
     required this.phone,
     required this.initials,
-    required this.gradient,
+    required this.color,
     this.wasMissed = false,
   });
 
   final String name;
   final String phone;
   final String initials;
-  final Gradient gradient;
+  final Color color;
   final bool wasMissed;
 
   String get shortName => name.split(' ').first;
@@ -257,25 +235,25 @@ const sampleContacts = [
     name: 'Maya Kim',
     phone: '+1 (206) 555-0142',
     initials: 'MK',
-    gradient: ZuriGradients.primary,
+    color: ZuriColors.primary,
   ),
   ContactPreview(
     name: 'Jordan Rivera',
     phone: '+1 (503) 555-0278',
     initials: 'JR',
-    gradient: LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0891B2)]),
+    color: Color(0xFF0E9F6E),
   ),
   ContactPreview(
     name: 'Sara Lindqvist',
     phone: '+46 70 123 4567',
     initials: 'SL',
-    gradient: LinearGradient(colors: [Color(0xFFD97706), Color(0xFFB45309)]),
+    color: Color(0xFFD97706),
   ),
   ContactPreview(
     name: 'Tom Chen',
     phone: '+1 (415) 555-0198',
     initials: 'TC',
-    gradient: LinearGradient(colors: [Color(0xFFDC2626), Color(0xFF9F1239)]),
+    color: ZuriColors.danger,
     wasMissed: true,
   ),
 ];
