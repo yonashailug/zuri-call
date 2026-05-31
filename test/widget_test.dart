@@ -5,6 +5,7 @@ import 'package:zuri_call/app.dart';
 void main() {
   testWidgets('renders Zuri welcome screen', (tester) async {
     await tester.pumpWidget(const ZuriApp());
+    await tester.pumpAndSettle();
 
     expect(find.text('Zuri'), findsOneWidget);
     expect(find.text('Continue with phone'), findsOneWidget);
@@ -12,6 +13,7 @@ void main() {
 
   testWidgets('handles Firebase auth callback routes', (tester) async {
     await tester.pumpWidget(const ZuriApp());
+    await tester.pumpAndSettle();
 
     Navigator.of(tester.element(find.text('Zuri'))).pushNamed(
       '/link?deep_link_id=https://zuri-call.firebaseapp.com/__/auth/callback',
@@ -24,6 +26,7 @@ void main() {
 
   testWidgets('falls back safely for unknown external routes', (tester) async {
     await tester.pumpWidget(const ZuriApp());
+    await tester.pumpAndSettle();
 
     Navigator.of(tester.element(find.text('Zuri'))).pushNamed('/unexpected');
     await tester.pumpAndSettle();
@@ -39,6 +42,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(const ZuriApp());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Continue with phone'));
     await tester.pumpAndSettle();

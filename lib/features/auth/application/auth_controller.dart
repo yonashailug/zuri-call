@@ -4,6 +4,7 @@ import '../data/auth_repository.dart';
 import '../domain/phone_number.dart';
 
 enum AuthStep {
+  restoring,
   signedOut,
   enteringPhone,
   sendingCode,
@@ -63,6 +64,33 @@ class AuthController extends ChangeNotifier {
   AuthState _state = const AuthState();
 
   AuthState get state => _state;
+
+  Future<void> restoreSession() async {
+    _setState(_state.copyWith(step: AuthStep.restoring, clearError: true));
+
+    try {
+      final session = await _repository.restoreSession();
+      if (session == null) {
+        _setState(const AuthState(step: AuthStep.signedOut));
+        return;
+      }
+
+      _setState(
+        AuthState(
+          step: AuthStep.authenticated,
+          phoneNumber: session.phoneNumber,
+          session: session,
+        ),
+      );
+    } on AuthException catch (error) {
+      _setState(
+        AuthState(
+          step: AuthStep.signedOut,
+          errorMessage: error.message,
+        ),
+      );
+    }
+  }
 
   Future<bool> startPhoneAuth(PhoneNumber phoneNumber) async {
     _setState(

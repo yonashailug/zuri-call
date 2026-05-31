@@ -21,6 +21,8 @@ class AuthSession {
 }
 
 abstract class AuthRepository {
+  Future<AuthSession?> restoreSession();
+
   Future<void> startPhoneAuth(PhoneNumber phoneNumber);
 
   Future<AuthSession> verifyCode({

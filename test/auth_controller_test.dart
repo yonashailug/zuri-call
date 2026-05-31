@@ -1,10 +1,33 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuri_call/features/auth/application/auth_controller.dart';
+import 'package:zuri_call/features/auth/data/auth_repository.dart';
 import 'package:zuri_call/features/auth/data/fake_auth_repository.dart';
 import 'package:zuri_call/features/auth/data/phone_country_data.dart';
 import 'package:zuri_call/features/auth/domain/phone_number.dart';
 
 void main() {
+  test('restores an existing auth session', () async {
+    final phoneNumber = PhoneNumber(
+      country: countries.first,
+      rawNationalNumber: '6502137552',
+    );
+    final session = AuthSession(
+      userId: 'existing-user',
+      phoneNumber: phoneNumber,
+      displayName: 'Alex Johnson',
+    );
+    final controller = AuthController(
+      repository: _RestoringAuthRepository(session),
+    );
+
+    addTearDown(controller.dispose);
+
+    await controller.restoreSession();
+
+    expect(controller.state.step, AuthStep.authenticated);
+    expect(controller.state.session, session);
+  });
+
   test('walks fake auth state from phone to authenticated session', () async {
     final controller = AuthController(repository: FakeAuthRepository());
     final phoneNumber = PhoneNumber(
@@ -44,4 +67,15 @@ void main() {
     expect(controller.state.step, AuthStep.codeSent);
     expect(controller.state.errorMessage, contains('338750'));
   });
+}
+
+class _RestoringAuthRepository extends FakeAuthRepository {
+  _RestoringAuthRepository(this.session);
+
+  final AuthSession? session;
+
+  @override
+  Future<AuthSession?> restoreSession() async {
+    return session;
+  }
 }

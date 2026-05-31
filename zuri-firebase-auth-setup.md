@@ -47,8 +47,9 @@ ios/Runner/GoogleService-Info.plist
 ```
 
 5. Enable Phone provider in Firebase Authentication.
-6. Configure iOS APNs settings for reliable phone auth on real devices.
-7. Add test phone numbers in Firebase for development.
+6. Enable Cloud Firestore for user profile documents.
+7. Configure iOS APNs settings for reliable phone auth on real devices.
+8. Add test phone numbers in Firebase for development.
 
 ## Runtime Switch
 
@@ -58,6 +59,30 @@ The app chooses auth implementation in `lib/main.dart`:
 - with `ZURI_USE_FIREBASE_AUTH=true`: `FirebaseAuthRepository`
 
 This keeps CI and local UI work stable while allowing real-device Firebase testing when config exists.
+
+## User Profile Persistence
+
+Firebase Auth owns phone-number identity. Cloud Firestore stores the product
+profile document at:
+
+```text
+users/{firebaseUser.uid}
+```
+
+The app writes:
+
+- `displayName`
+- `phoneNumber`
+- `phoneCountryCode`
+- `phoneNationalNumber`
+- `createdAt`
+- `updatedAt`
+
+On cold launch, `FirebaseAuth.currentUser` is restored first. If a signed-in
+user exists, the app reads `users/{uid}` through Firestore's REST API and routes
+directly into the app shell with the stored profile data. The REST path keeps
+the iOS build independent from the native Firestore Flutter plugin while still
+using Firestore as the backend system of record.
 
 ## Production Readiness: iOS Phone Auth Verification
 

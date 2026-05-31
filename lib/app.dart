@@ -29,6 +29,9 @@ class _ZuriAppState extends State<ZuriApp> {
     authController = AuthController(
       repository: widget.authRepository ?? FakeAuthRepository(),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      authController.restoreSession();
+    });
   }
 
   @override
@@ -86,10 +89,29 @@ class _AuthRoot extends StatelessWidget {
     return AnimatedBuilder(
       animation: authController,
       builder: (context, _) {
+        if (authController.state.step == AuthStep.restoring) {
+          return const _RestoreSessionScreen();
+        }
         final session = authController.state.session;
         if (session != null) return const AppShell();
         return const WelcomeScreen();
       },
+    );
+  }
+}
+
+class _RestoreSessionScreen extends StatelessWidget {
+  const _RestoreSessionScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: ColoredBox(
+        color: ZuriColors.surface,
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
   }
 }

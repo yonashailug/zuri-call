@@ -5,6 +5,11 @@ class FakeAuthRepository implements AuthRepository {
   static const validCode = '338750';
 
   @override
+  Future<AuthSession?> restoreSession() async {
+    return null;
+  }
+
+  @override
   Future<void> startPhoneAuth(PhoneNumber phoneNumber) async {
     await Future<void>.delayed(const Duration(milliseconds: 250));
     if (!phoneNumber.isValid) {
