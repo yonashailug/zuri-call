@@ -4,6 +4,7 @@ import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import '../../core/widgets/zuri_scaffold.dart';
 import '../auth/application/auth_scope.dart';
+import '../auth/application/auth_session_summary.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -11,13 +12,16 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authController = AuthScope.of(context);
+    final sessionSummary = AuthSessionSummary.fromSession(
+      authController.state.session,
+    );
 
     return ZuriScaffold(
       title: 'Settings',
       child: ListView(
         padding: ZuriSpacing.screenCompact,
         children: [
-          const _ProfileHeader(),
+          _ProfileHeader(sessionSummary: sessionSummary),
           const SizedBox(height: 22),
           const _SettingsRow(
               icon: Icons.account_circle_rounded, label: 'Account'),
@@ -46,7 +50,9 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
+  const _ProfileHeader({required this.sessionSummary});
+
+  final AuthSessionSummary sessionSummary;
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +60,8 @@ class _ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const ZuriAvatar(
-            label: 'AJ',
+          ZuriAvatar(
+            label: sessionSummary.initials,
             color: ZuriColors.primary,
             size: 52,
           ),
@@ -64,12 +70,12 @@ class _ProfileHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Alex Johnson',
+                Text(
+                  sessionSummary.displayName,
                   style: ZuriTextStyles.rowTitle,
                 ),
                 Text(
-                  '+1 (206) 555-0100',
+                  sessionSummary.phoneDisplay,
                   style: ZuriTextStyles.bodyLarge.copyWith(
                     color: ZuriColors.muted,
                   ),

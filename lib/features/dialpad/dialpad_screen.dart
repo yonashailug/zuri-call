@@ -5,22 +5,66 @@ import '../../core/ui/zuri_ui.dart';
 import '../../core/widgets/zuri_scaffold.dart';
 
 class DialpadScreen extends StatefulWidget {
-  const DialpadScreen({super.key});
+  const DialpadScreen({
+    required this.onCallStarted,
+    this.initialNumber,
+    this.contactName,
+    super.key,
+  });
+
+  final ValueChanged<String> onCallStarted;
+  final String? initialNumber;
+  final String? contactName;
 
   @override
   State<DialpadScreen> createState() => _DialpadScreenState();
 }
 
 class _DialpadScreenState extends State<DialpadScreen> {
-  String number = '+1 ';
+  late String number = _initialNumber;
+
+  String get _initialNumber {
+    final value = widget.initialNumber?.trim();
+    if (value != null && value.isNotEmpty) return value;
+    return '+1 ';
+  }
+
+  bool get canCall => number.replaceAll(RegExp(r'\D'), '').isNotEmpty;
+
+  @override
+  void didUpdateWidget(DialpadScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialNumber != oldWidget.initialNumber) {
+      number = _initialNumber;
+    }
+  }
 
   void append(String digit) {
-    setState(() => number += digit);
+    setState(() {
+      if (number == '+1 ' && digit == '0') {
+        number = '+';
+        return;
+      }
+      number += digit;
+    });
   }
 
   void backspace() {
     if (number.isEmpty) return;
     setState(() => number = number.substring(0, number.length - 1));
+  }
+
+  void startCall() {
+    final trimmedNumber = number.trim();
+    if (trimmedNumber.isEmpty) return;
+
+    widget.onCallStarted(trimmedNumber);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Starting call to $trimmedNumber'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -41,7 +85,9 @@ class _DialpadScreenState extends State<DialpadScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'United States - estimated \$0.02/min',
+              widget.contactName == null
+                  ? 'United States - estimated \$0.02/min'
+                  : widget.contactName!,
               style: ZuriTextStyles.bodyLarge.copyWith(
                 color: ZuriColors.muted,
               ),
@@ -83,7 +129,7 @@ class _DialpadScreenState extends State<DialpadScreen> {
                   child: ZuriPillButton(
                     label: 'Call now',
                     icon: Icons.call_rounded,
-                    onPressed: () {},
+                    onPressed: canCall ? startCall : null,
                   ),
                 ),
                 const SizedBox(width: 12),

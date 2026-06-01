@@ -6,15 +6,21 @@ import 'features/auth/application/auth_scope.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/fake_auth_repository.dart';
 import 'features/auth/welcome_screen.dart';
+import 'features/home/call_history_repository.dart';
 import 'features/home/app_shell.dart';
+import 'features/home/device_contacts_repository.dart';
 
 class ZuriApp extends StatefulWidget {
   const ZuriApp({
     this.authRepository,
+    this.contactsRepository,
+    this.callHistoryRepository,
     super.key,
   });
 
   final AuthRepository? authRepository;
+  final ContactsRepository? contactsRepository;
+  final CallHistoryRepository? callHistoryRepository;
 
   @override
   State<ZuriApp> createState() => _ZuriAppState();
@@ -48,7 +54,11 @@ class _ZuriAppState extends State<ZuriApp> {
         title: 'Zuri',
         debugShowCheckedModeBanner: false,
         theme: ZuriTheme.light(),
-        home: _AuthRoot(authController: authController),
+        home: _AuthRoot(
+          authController: authController,
+          contactsRepository: widget.contactsRepository,
+          callHistoryRepository: widget.callHistoryRepository,
+        ),
         onGenerateRoute: (settings) {
           if (_isFirebaseAuthCallback(settings.name)) {
             return _rootRoute(settings);
@@ -64,7 +74,11 @@ class _ZuriAppState extends State<ZuriApp> {
   MaterialPageRoute<void> _rootRoute(RouteSettings settings) {
     return MaterialPageRoute<void>(
       settings: settings,
-      builder: (_) => _AuthRoot(authController: authController),
+      builder: (_) => _AuthRoot(
+        authController: authController,
+        contactsRepository: widget.contactsRepository,
+        callHistoryRepository: widget.callHistoryRepository,
+      ),
     );
   }
 }
@@ -80,9 +94,15 @@ bool _isFirebaseAuthCallback(String? routeName) {
 }
 
 class _AuthRoot extends StatelessWidget {
-  const _AuthRoot({required this.authController});
+  const _AuthRoot({
+    required this.authController,
+    required this.contactsRepository,
+    required this.callHistoryRepository,
+  });
 
   final AuthController authController;
+  final ContactsRepository? contactsRepository;
+  final CallHistoryRepository? callHistoryRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +113,12 @@ class _AuthRoot extends StatelessWidget {
           return const _RestoreSessionScreen();
         }
         final session = authController.state.session;
-        if (session != null) return const AppShell();
+        if (session != null) {
+          return AppShell(
+            contactsRepository: contactsRepository,
+            callHistoryRepository: callHistoryRepository,
+          );
+        }
         return const WelcomeScreen();
       },
     );

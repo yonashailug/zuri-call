@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuri_call/app.dart';
+import 'package:zuri_call/features/home/call_history_repository.dart';
+import 'package:zuri_call/features/home/call_record.dart';
+import 'package:zuri_call/features/home/contact_preview.dart';
+import 'package:zuri_call/features/home/device_contacts_repository.dart';
 
 void main() {
   testWidgets('renders Zuri welcome screen', (tester) async {
-    await tester.pumpWidget(const ZuriApp());
+    await tester.pumpWidget(
+      _testApp(),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Zuri'), findsOneWidget);
@@ -12,7 +18,9 @@ void main() {
   });
 
   testWidgets('handles Firebase auth callback routes', (tester) async {
-    await tester.pumpWidget(const ZuriApp());
+    await tester.pumpWidget(
+      _testApp(),
+    );
     await tester.pumpAndSettle();
 
     Navigator.of(tester.element(find.text('Zuri'))).pushNamed(
@@ -25,7 +33,9 @@ void main() {
   });
 
   testWidgets('falls back safely for unknown external routes', (tester) async {
-    await tester.pumpWidget(const ZuriApp());
+    await tester.pumpWidget(
+      _testApp(),
+    );
     await tester.pumpAndSettle();
 
     Navigator.of(tester.element(find.text('Zuri'))).pushNamed('/unexpected');
@@ -41,7 +51,9 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const ZuriApp());
+    await tester.pumpWidget(
+      _testApp(),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Continue with phone'));
@@ -76,5 +88,110 @@ void main() {
     await tester.tap(find.text('Create an account'));
     await tester.pumpAndSettle();
     expect(find.text('Search contacts'), findsOneWidget);
+    expect(find.text('Maya Kim'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.call_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Dial pad'), findsOneWidget);
+    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
+
+    await tester.tap(find.text('Call now'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('Just now • Outgoing • Completed'), findsOneWidget);
   });
+
+  testWidgets('restores persisted recent calls after sign in', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final callHistoryRepository = _FakeCallHistoryRepository(
+      initialCalls: [
+        CallRecord.fromDialpad(
+          number: '+1 (503) 555-0278',
+          name: 'Jordan Rivera',
+          startedAt: DateTime.now(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_testApp(callHistoryRepository));
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jordan Rivera'), findsOneWidget);
+    expect(find.text('Just now • Outgoing • Completed'), findsOneWidget);
+  });
+}
+
+Widget _testApp([CallHistoryRepository? callHistoryRepository]) {
+  return ZuriApp(
+    contactsRepository: _FakeContactsRepository(),
+    callHistoryRepository:
+        callHistoryRepository ?? _FakeCallHistoryRepository(),
+  );
+}
+
+Future<void> _signIn(
+  WidgetTester tester, {
+  required String displayName,
+}) async {
+  await tester.tap(find.text('Continue with phone'));
+  await tester.pumpAndSettle();
+
+  await tester.enterText(find.byType(EditableText), '6502137552');
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(find.text('Continue'));
+  await tester.tap(find.text('Continue'));
+  await tester.pumpAndSettle();
+
+  await tester.enterText(find.byType(EditableText), '338750');
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(find.text('Continue'));
+  await tester.tap(find.text('Continue'));
+  await tester.pumpAndSettle();
+
+  await tester.enterText(find.byType(EditableText), displayName);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Create an account'));
+  await tester.pumpAndSettle();
+}
+
+class _FakeContactsRepository implements ContactsRepository {
+  @override
+  Future<ContactsLoadResult> loadContacts() async {
+    return ContactsLoadResult.loaded([
+      ContactPreview.fromNameAndPhone(
+        name: 'Maya Kim',
+        phone: '+1 (206) 555-0142',
+      ),
+    ]);
+  }
+}
+
+class _FakeCallHistoryRepository implements CallHistoryRepository {
+  _FakeCallHistoryRepository({
+    List<CallRecord> initialCalls = const [],
+  }) : savedCalls = [...initialCalls];
+
+  List<CallRecord> savedCalls;
+
+  @override
+  Future<List<CallRecord>> loadRecentCalls() async {
+    return [...savedCalls];
+  }
+
+  @override
+  Future<void> saveRecentCalls(List<CallRecord> calls) async {
+    savedCalls = [...calls];
+  }
 }
