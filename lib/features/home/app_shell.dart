@@ -6,6 +6,7 @@ import '../calling/in_call_screen.dart';
 import '../dialpad/dialpad_screen.dart';
 import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
+import 'call_details_screen.dart';
 import 'call_history_repository.dart';
 import 'call_record.dart';
 import 'contact_preview.dart';
@@ -35,6 +36,7 @@ class _AppShellState extends State<AppShell> {
   String? dialNumber;
   String? dialContactName;
   OutgoingCallRequest? activeCall;
+  CallRecord? selectedCall;
   final recentCalls = <CallRecord>[];
 
   @override
@@ -53,18 +55,21 @@ class _AppShellState extends State<AppShell> {
         onCallEnded: _recordCompletedCall,
       );
     }
-
     final screens = [
       ContactsScreen(
         mode: ContactsMode.recents,
         contactsRepository: widget.contactsRepository,
         recentCalls: recentCalls,
         onContactCall: _selectContactForCall,
+        onRecentCallOpen: _openCallDetails,
+        onOpenDialpad: () => _selectTab(2),
+        onOpenContacts: () => _selectTab(1),
       ),
       ContactsScreen(
         mode: ContactsMode.contacts,
         contactsRepository: widget.contactsRepository,
         onContactCall: _selectContactForCall,
+        onRecentCallOpen: _openCallDetails,
       ),
       DialpadScreen(
         initialNumber: dialNumber,
@@ -75,13 +80,23 @@ class _AppShellState extends State<AppShell> {
       const SettingsScreen(),
     ];
 
+    final selectedCall = this.selectedCall;
+    final body = selectedCall == null
+        ? IndexedStack(
+            index: selectedIndex,
+            children: screens,
+          )
+        : CallDetailsScreen(
+            call: selectedCall,
+            onBack: _closeCallDetails,
+            onCallBack: _selectContactForCall,
+            onDelete: _deleteRecentCall,
+          );
+
     return Scaffold(
-      body: IndexedStack(
-        index: selectedIndex,
-        children: screens,
-      ),
+      body: body,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => setState(() => selectedIndex = 2),
+        onPressed: () => _selectTab(2),
         backgroundColor: ZuriColors.primary,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
@@ -90,7 +105,7 @@ class _AppShellState extends State<AppShell> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
-        onDestinationSelected: (index) => setState(() => selectedIndex = index),
+        onDestinationSelected: _selectTab,
         backgroundColor: ZuriColors.surface,
         indicatorColor: ZuriColors.callSurface,
         destinations: const [
@@ -125,6 +140,7 @@ class _AppShellState extends State<AppShell> {
 
   void _selectContactForCall(ContactPreview contact) {
     setState(() {
+      selectedCall = null;
       dialNumber = contact.phone;
       dialContactName = contact.name;
       selectedIndex = 2;
@@ -133,6 +149,7 @@ class _AppShellState extends State<AppShell> {
 
   void _startDialpadCall(String number) {
     setState(() {
+      selectedCall = null;
       activeCall = OutgoingCallRequest(
         phone: number,
         name: dialContactName,
@@ -149,6 +166,37 @@ class _AppShellState extends State<AppShell> {
     });
 
     _saveRecentCalls();
+  }
+
+  void _openCallDetails(CallRecord call) {
+    setState(() {
+      selectedCall = call;
+      selectedIndex = 0;
+    });
+  }
+
+  void _closeCallDetails() {
+    setState(() {
+      selectedCall = null;
+      selectedIndex = 0;
+    });
+  }
+
+  void _deleteRecentCall(CallRecord call) {
+    setState(() {
+      selectedCall = null;
+      recentCalls.remove(call);
+      selectedIndex = 0;
+    });
+
+    _saveRecentCalls();
+  }
+
+  void _selectTab(int index) {
+    setState(() {
+      selectedCall = null;
+      selectedIndex = index;
+    });
   }
 
   Future<void> _restoreRecentCalls() async {

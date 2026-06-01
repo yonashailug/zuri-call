@@ -78,6 +78,23 @@ class CallRecord {
     return parts.join(' • ');
   }
 
+  String get durationLabel {
+    if (durationSeconds <= 0) return '0s';
+    return _durationLabel;
+  }
+
+  String get startedAtLabel {
+    final local = startedAt.toLocal();
+    final hour = local.hour == 0
+        ? 12
+        : local.hour > 12
+            ? local.hour - 12
+            : local.hour;
+    final minute = local.minute.toString().padLeft(2, '0');
+    final period = local.hour >= 12 ? 'PM' : 'AM';
+    return '${local.month}/${local.day}/${local.year} $hour:$minute $period';
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'name': name,

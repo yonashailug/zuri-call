@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
-import '../../core/widgets/zuri_scaffold.dart';
 
 class DialpadScreen extends StatefulWidget {
   const DialpadScreen({
@@ -26,7 +25,7 @@ class _DialpadScreenState extends State<DialpadScreen> {
   String get _initialNumber {
     final value = widget.initialNumber?.trim();
     if (value != null && value.isNotEmpty) return value;
-    return '+1 ';
+    return '';
   }
 
   bool get canCall => number.replaceAll(RegExp(r'\D'), '').isNotEmpty;
@@ -41,11 +40,17 @@ class _DialpadScreenState extends State<DialpadScreen> {
 
   void append(String digit) {
     setState(() {
-      if (number == '+1 ' && digit == '0') {
-        number = '+';
-        return;
-      }
       number += digit;
+    });
+  }
+
+  void appendPlus() {
+    setState(() {
+      if (number.isEmpty) {
+        number = '+';
+      } else {
+        number += '+';
+      }
     });
   }
 
@@ -58,84 +63,333 @@ class _DialpadScreenState extends State<DialpadScreen> {
     final trimmedNumber = number.trim();
     if (trimmedNumber.isEmpty) return;
 
-    widget.onStartCall(trimmedNumber);
+    final dialableNumber =
+        trimmedNumber.startsWith('+') ? trimmedNumber : '+1 $trimmedNumber';
+    widget.onStartCall(dialableNumber);
   }
 
   @override
   Widget build(BuildContext context) {
-    return ZuriScaffold(
-      title: 'Dial pad',
-      child: Padding(
-        padding: ZuriSpacing.screenCompact,
-        child: Column(
-          children: [
-            Text(
-              number.trim().isEmpty ? 'Enter number' : number,
-              textAlign: TextAlign.center,
-              style: ZuriTextStyles.compactTitle.copyWith(
-                color: ZuriColors.ink,
-                fontWeight: FontWeight.w800,
+    return Material(
+      color: ZuriColors.surface,
+      child: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compactHeight = constraints.maxHeight < 720;
+            final horizontalPadding = constraints.maxWidth < 380 ? 24.0 : 28.0;
+            final padWidth = constraints.maxWidth * 0.76;
+            final keyGap = constraints.maxWidth * 0.055;
+            final keyWidth =
+                ((padWidth - keyGap * 2) / 3).clamp(78.0, 94.0).toDouble();
+            final keyHeight = (keyWidth * 0.91).clamp(70.0, 84.0).toDouble();
+            final rowGap = compactHeight ? 10.0 : 12.0;
+            final topGap = compactHeight ? 14.0 : 18.0;
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                18,
+                horizontalPadding,
+                16,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.contactName == null
-                  ? 'United States - estimated \$0.02/min'
-                  : widget.contactName!,
-              style: ZuriTextStyles.bodyLarge.copyWith(
-                color: ZuriColors.muted,
-              ),
-            ),
-            const Spacer(),
-            GridView.count(
-              crossAxisCount: 3,
-              childAspectRatio: 1.2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 14,
-              children: [
-                _DialKey(label: '1', onTap: append),
-                _DialKey(label: '2', sublabel: 'ABC', onTap: append),
-                _DialKey(label: '3', sublabel: 'DEF', onTap: append),
-                _DialKey(label: '4', sublabel: 'GHI', onTap: append),
-                _DialKey(label: '5', sublabel: 'JKL', onTap: append),
-                _DialKey(label: '6', sublabel: 'MNO', onTap: append),
-                _DialKey(label: '7', sublabel: 'PQRS', onTap: append),
-                _DialKey(label: '8', sublabel: 'TUV', onTap: append),
-                _DialKey(label: '9', sublabel: 'WXYZ', onTap: append),
-                _DialKey(label: '*', onTap: append),
-                _DialKey(label: '0', sublabel: '+', onTap: append),
-                _DialKey(label: '#', onTap: append),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                ZuriCircleButton(
-                  onPressed: () {},
-                  icon: Icons.person_add_alt_1_rounded,
-                  foregroundColor: ZuriColors.muted,
-                  size: 48,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ZuriPillButton(
-                    label: 'Call now',
-                    icon: Icons.call_rounded,
-                    onPressed: canCall ? startCall : null,
+              child: Column(
+                children: [
+                  const _DialHeader(),
+                  SizedBox(height: topGap),
+                  _NumberDisplay(number: number),
+                  const SizedBox(height: 12),
+                  _RateRow(
+                    contactName:
+                        number.trim().isEmpty ? null : widget.contactName,
                   ),
-                ),
-                const SizedBox(width: 12),
-                ZuriCircleButton(
-                  onPressed: backspace,
-                  icon: Icons.backspace_rounded,
-                  foregroundColor: ZuriColors.muted,
-                  size: 48,
-                ),
-              ],
+                  SizedBox(height: compactHeight ? 16 : 22),
+                  _DialPad(
+                    keyWidth: keyWidth,
+                    keyHeight: keyHeight,
+                    rowGap: rowGap,
+                    keyGap: keyGap,
+                    onTap: append,
+                    onPlus: appendPlus,
+                  ),
+                  const Spacer(),
+                  _CallActions(
+                    canCall: canCall,
+                    onStartCall: startCall,
+                    onBackspace: backspace,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _DialHeader extends StatelessWidget {
+  const _DialHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          'Dial',
+          style: ZuriTextStyles.screenTitle.copyWith(
+            color: ZuriColors.ink,
+            fontSize: 30,
+          ),
+        ),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: const ShapeDecoration(
+            color: ZuriColors.primary,
+            shape: StadiumBorder(),
+          ),
+          child: Text(
+            'US +1',
+            style: ZuriTextStyles.eyebrow.copyWith(
+              color: ZuriColors.surface,
+              fontSize: 12,
             ),
-          ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NumberDisplay extends StatelessWidget {
+  const _NumberDisplay({required this.number});
+
+  final String number;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasNumber = number.trim().isNotEmpty;
+    return SizedBox(
+      height: 38,
+      child: Center(
+        child: Text(
+          hasNumber ? number : 'Enter number',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: (hasNumber
+                  ? ZuriTextStyles.control.copyWith(
+                      color: ZuriColors.ink,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 24,
+                    )
+                  : ZuriTextStyles.bodyLarge.copyWith(
+                      color: ZuriColors.disabled,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 22,
+                    ))
+              .copyWith(letterSpacing: 0),
+        ),
+      ),
+    );
+  }
+}
+
+class _RateRow extends StatelessWidget {
+  const _RateRow({required this.contactName});
+
+  final String? contactName;
+
+  @override
+  Widget build(BuildContext context) {
+    if (contactName != null) {
+      return Text(
+        contactName!,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: ZuriTextStyles.bodyLarge.copyWith(
+          color: ZuriColors.muted,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('🇺🇸', style: TextStyle(fontSize: 15)),
+        const SizedBox(width: 8),
+        Text(
+          'United States',
+          style: ZuriTextStyles.bodyLarge.copyWith(
+            color: ZuriColors.muted.withValues(alpha: 0.72),
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          '\$0.02 / min',
+          style: ZuriTextStyles.bodyLarge.copyWith(
+            color: ZuriColors.ink,
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DialPad extends StatelessWidget {
+  const _DialPad({
+    required this.keyWidth,
+    required this.keyHeight,
+    required this.rowGap,
+    required this.keyGap,
+    required this.onTap,
+    required this.onPlus,
+  });
+
+  final double keyWidth;
+  final double keyHeight;
+  final double rowGap;
+  final double keyGap;
+  final ValueChanged<String> onTap;
+  final VoidCallback onPlus;
+
+  @override
+  Widget build(BuildContext context) {
+    const rows = [
+      [
+        ('1', null),
+        ('2', 'ABC'),
+        ('3', 'DEF'),
+      ],
+      [
+        ('4', 'GHI'),
+        ('5', 'JKL'),
+        ('6', 'MNO'),
+      ],
+      [
+        ('7', 'PQRS'),
+        ('8', 'TUV'),
+        ('9', 'WXYZ'),
+      ],
+      [
+        ('*', null),
+        ('0', '+'),
+        ('#', null),
+      ],
+    ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final row in rows) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (final item in row) ...[
+                _DialKey(
+                  label: item.$1,
+                  sublabel: item.$2,
+                  width: keyWidth,
+                  height: keyHeight,
+                  onTap: onTap,
+                  onLongPress: item.$1 == '0' ? onPlus : null,
+                ),
+                if (item != row.last) SizedBox(width: keyGap),
+              ],
+            ],
+          ),
+          if (row != rows.last) SizedBox(height: rowGap),
+        ],
+      ],
+    );
+  }
+}
+
+class _CallActions extends StatelessWidget {
+  const _CallActions({
+    required this.canCall,
+    required this.onStartCall,
+    required this.onBackspace,
+  });
+
+  final bool canCall;
+  final VoidCallback onStartCall;
+  final VoidCallback onBackspace;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        children: [
+          ZuriCircleButton(
+            onPressed: () {},
+            icon: Icons.person_add_alt_1_rounded,
+            foregroundColor: ZuriColors.ink,
+            backgroundColor: ZuriColors.callSurface,
+            size: 52,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: _DialCallButton(
+              enabled: canCall,
+              onPressed: onStartCall,
+            ),
+          ),
+          const SizedBox(width: 14),
+          ZuriCircleButton(
+            onPressed: onBackspace,
+            icon: Icons.backspace_outlined,
+            foregroundColor: ZuriColors.ink,
+            backgroundColor: ZuriColors.callSurface,
+            size: 52,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DialCallButton extends StatelessWidget {
+  const _DialCallButton({
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final foregroundColor =
+        enabled ? ZuriColors.surface : ZuriColors.ink.withValues(alpha: 0.38);
+    return SizedBox(
+      height: 52,
+      child: TextButton.icon(
+        onPressed: enabled ? onPressed : null,
+        icon: const Icon(Icons.call_outlined, size: 20),
+        label: const Text('Call now'),
+        style: TextButton.styleFrom(
+          backgroundColor: enabled
+              ? ZuriColors.primary
+              : ZuriColors.callSurface.withValues(alpha: 0.55),
+          disabledBackgroundColor: ZuriColors.callSurface.withValues(
+            alpha: 0.55,
+          ),
+          foregroundColor: foregroundColor,
+          disabledForegroundColor: foregroundColor,
+          shape: const StadiumBorder(),
+          textStyle: ZuriTextStyles.control.copyWith(
+            fontSize: 21,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -146,43 +400,70 @@ class _DialKey extends StatelessWidget {
   const _DialKey({
     required this.label,
     required this.onTap,
+    required this.width,
+    required this.height,
     this.sublabel,
+    this.onLongPress,
   });
 
   final String label;
   final ValueChanged<String> onTap;
+  final double width;
+  final double height;
   final String? sublabel;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(ZuriRadius.panel),
-      onTap: () => onTap(label),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: ZuriColors.card,
-          borderRadius: BorderRadius.circular(ZuriRadius.panel),
-          border: Border.all(color: ZuriColors.border),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              style: ZuriTextStyles.compactTitle.copyWith(
-                color: ZuriColors.ink,
-                fontWeight: FontWeight.w800,
+    final isSymbol = label == '*' || label == '#';
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Material(
+        color: ZuriColors.card,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => onTap(label),
+          onLongPress: onLongPress,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: ZuriColors.ink.withValues(alpha: 0.08),
               ),
             ),
-            if (sublabel != null)
-              Text(
-                sublabel!,
-                style: ZuriTextStyles.eyebrow.copyWith(
-                  color: ZuriColors.muted,
-                  fontSize: 10,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: (isSymbol
+                          ? ZuriTextStyles.control.copyWith(
+                              fontWeight: FontWeight.w400,
+                            )
+                          : ZuriTextStyles.compactTitle.copyWith(
+                              fontSize: 29,
+                              fontWeight: FontWeight.w800,
+                            ))
+                      .copyWith(color: ZuriColors.ink),
                 ),
-              ),
-          ],
+                SizedBox(
+                  height: 16,
+                  child: Center(
+                    child: Text(
+                      sublabel ?? '',
+                      style: ZuriTextStyles.eyebrow.copyWith(
+                        color: ZuriColors.muted.withValues(alpha: 0.62),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

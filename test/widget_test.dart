@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuri_call/app.dart';
 import 'package:zuri_call/features/calling/call_service.dart';
+import 'package:zuri_call/features/dialpad/dialpad_screen.dart';
 import 'package:zuri_call/features/home/call_history_repository.dart';
 import 'package:zuri_call/features/home/call_record.dart';
 import 'package:zuri_call/features/home/contact_preview.dart';
@@ -94,7 +95,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.call_rounded).first);
     await tester.pumpAndSettle();
-    expect(find.text('Dial pad'), findsOneWidget);
+    expect(find.text('Dial'), findsOneWidget);
     expect(find.text('+1 (206) 555-0142'), findsOneWidget);
 
     await tester.tap(find.text('Call now'));
@@ -117,7 +118,31 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Maya Kim'), findsOneWidget);
-    expect(find.text('Just now • Outgoing • Completed • 1s'), findsOneWidget);
+    expect(find.text('Just now'), findsOneWidget);
+    expect(find.text('Outgoing • 1s'), findsOneWidget);
+
+    await tester.tap(find.text('Maya Kim').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Call details'), findsNothing);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+    expect(find.text('Recents'), findsOneWidget);
+    expect(find.text('Status'), findsOneWidget);
+    expect(find.text('Completed'), findsOneWidget);
+    expect(find.text('Duration'), findsOneWidget);
+    expect(find.text('1s'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Recents'), findsOneWidget);
+    expect(find.text('Just now'), findsOneWidget);
+    expect(find.text('Outgoing • 1s'), findsOneWidget);
+
+    await tester.tap(find.text('Maya Kim').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Call back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dial'), findsOneWidget);
+    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
   });
 
   testWidgets('records failed calls from call service', (tester) async {
@@ -146,7 +171,44 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Maya Kim'), findsOneWidget);
-    expect(find.text('Just now • Outgoing • Failed'), findsOneWidget);
+    expect(find.text('Just now'), findsOneWidget);
+    expect(find.text('Outgoing • Failed'), findsOneWidget);
+  });
+
+  testWidgets('deletes recent call from details', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final callHistoryRepository = _FakeCallHistoryRepository(
+      initialCalls: [
+        CallRecord.fromDialpad(
+          number: '+1 (503) 555-0278',
+          name: 'Jordan Rivera',
+          startedAt: DateTime.now(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_testApp(callHistoryRepository));
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Jordan Rivera'));
+    await tester.pumpAndSettle();
+    expect(find.text('Call details'), findsNothing);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+    expect(find.text('Recents'), findsOneWidget);
+
+    await tester.tap(find.text('Delete from recents'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No calls yet'), findsOneWidget);
+    expect(callHistoryRepository.savedCalls, isEmpty);
   });
 
   testWidgets('restores persisted recent calls after sign in', (tester) async {
@@ -174,7 +236,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Jordan Rivera'), findsOneWidget);
-    expect(find.text('Just now • Outgoing • Completed'), findsOneWidget);
+    expect(find.text('Just now'), findsOneWidget);
+    expect(find.text('Outgoing'), findsOneWidget);
   });
 
   testWidgets('keeps contacts loaded when switching from recents', (
@@ -194,12 +257,38 @@ void main() {
 
     await tester.tap(find.text('Recents'));
     await tester.pumpAndSettle();
-    expect(find.text('No recent calls yet'), findsOneWidget);
+    expect(find.text('No calls yet'), findsOneWidget);
 
     await tester.tap(find.text('Contacts'));
     await tester.pumpAndSettle();
     expect(find.text('Maya Kim'), findsOneWidget);
     expect(find.text('No contacts found'), findsNothing);
+  });
+
+  testWidgets('dialpad keeps selected US prefix for manual numbers', (
+    tester,
+  ) async {
+    String? startedNumber;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DialpadScreen(
+          onStartCall: (number) => startedNumber = number,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('2'));
+    await tester.tap(find.text('0'));
+    await tester.tap(find.text('6'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('206'), findsOneWidget);
+
+    await tester.tap(find.text('Call now'));
+    await tester.pump();
+
+    expect(startedNumber, '+1 206');
   });
 }
 
