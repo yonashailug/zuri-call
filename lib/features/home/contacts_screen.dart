@@ -236,7 +236,7 @@ class _ContactsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    if (isLoading || status == null) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 28),
         child: Center(child: CircularProgressIndicator()),

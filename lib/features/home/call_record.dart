@@ -24,6 +24,8 @@ class CallRecord {
     required String number,
     required DateTime startedAt,
     String? name,
+    CallStatus status = CallStatus.completed,
+    int durationSeconds = 0,
   }) {
     final trimmedName = name?.trim();
     return CallRecord(
@@ -31,7 +33,8 @@ class CallRecord {
       phone: number,
       startedAt: startedAt,
       direction: CallDirection.outgoing,
-      status: CallStatus.completed,
+      status: status,
+      durationSeconds: durationSeconds,
     );
   }
 
@@ -114,6 +117,7 @@ enum CallDirection {
 
 enum CallStatus {
   completed('completed', 'Completed'),
+  cancelled('cancelled', 'Cancelled'),
   missed('missed', 'Missed'),
   failed('failed', 'Failed');
 

@@ -6,13 +6,13 @@ import '../../core/widgets/zuri_scaffold.dart';
 
 class DialpadScreen extends StatefulWidget {
   const DialpadScreen({
-    required this.onCallStarted,
+    required this.onStartCall,
     this.initialNumber,
     this.contactName,
     super.key,
   });
 
-  final ValueChanged<String> onCallStarted;
+  final ValueChanged<String> onStartCall;
   final String? initialNumber;
   final String? contactName;
 
@@ -58,13 +58,7 @@ class _DialpadScreenState extends State<DialpadScreen> {
     final trimmedNumber = number.trim();
     if (trimmedNumber.isEmpty) return;
 
-    widget.onCallStarted(trimmedNumber);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Starting call to $trimmedNumber'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    widget.onStartCall(trimmedNumber);
   }
 
   @override

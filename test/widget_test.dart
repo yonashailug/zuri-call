@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuri_call/app.dart';
+import 'package:zuri_call/features/calling/call_service.dart';
 import 'package:zuri_call/features/home/call_history_repository.dart';
 import 'package:zuri_call/features/home/call_record.dart';
 import 'package:zuri_call/features/home/contact_preview.dart';
@@ -11,6 +12,7 @@ void main() {
     await tester.pumpWidget(
       _testApp(),
     );
+    await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 
     expect(find.text('Zuri'), findsOneWidget);
@@ -96,12 +98,55 @@ void main() {
     expect(find.text('+1 (206) 555-0142'), findsOneWidget);
 
     await tester.tap(find.text('Call now'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Connected'), findsOneWidget);
+    expect(find.text('0:00'), findsOneWidget);
+    expect(find.text('Mute'), findsOneWidget);
+    expect(find.text('Speaker'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1100));
+    expect(find.text('0:01'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.call_end_rounded));
+    await tester.pump();
+    expect(find.text('Ended'), findsOneWidget);
+    expect(find.text('Call ended'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Recents'));
-    await tester.pumpAndSettle();
     expect(find.text('Maya Kim'), findsOneWidget);
-    expect(find.text('Just now • Outgoing • Completed'), findsOneWidget);
+    expect(find.text('Just now • Outgoing • Completed • 1s'), findsOneWidget);
+  });
+
+  testWidgets('records failed calls from call service', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _testApp(_FakeCallHistoryRepository(), const _FailingCallService()),
+    );
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.byIcon(Icons.call_rounded).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Call now'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Failed'), findsOneWidget);
+    expect(find.text('Unable to connect'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('Just now • Outgoing • Failed'), findsOneWidget);
   });
 
   testWidgets('restores persisted recent calls after sign in', (tester) async {
@@ -131,13 +176,42 @@ void main() {
     expect(find.text('Jordan Rivera'), findsOneWidget);
     expect(find.text('Just now • Outgoing • Completed'), findsOneWidget);
   });
+
+  testWidgets('keeps contacts loaded when switching from recents', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    expect(find.text('Maya Kim'), findsOneWidget);
+
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+    expect(find.text('No recent calls yet'), findsOneWidget);
+
+    await tester.tap(find.text('Contacts'));
+    await tester.pumpAndSettle();
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('No contacts found'), findsNothing);
+  });
 }
 
-Widget _testApp([CallHistoryRepository? callHistoryRepository]) {
+Widget _testApp([
+  CallHistoryRepository? callHistoryRepository,
+  CallService callService = const _FakeCallService(),
+]) {
   return ZuriApp(
     contactsRepository: _FakeContactsRepository(),
     callHistoryRepository:
         callHistoryRepository ?? _FakeCallHistoryRepository(),
+    callService: callService,
   );
 }
 
@@ -193,5 +267,29 @@ class _FakeCallHistoryRepository implements CallHistoryRepository {
   @override
   Future<void> saveRecentCalls(List<CallRecord> calls) async {
     savedCalls = [...calls];
+  }
+}
+
+class _FakeCallService implements CallService {
+  const _FakeCallService();
+
+  @override
+  Stream<ActiveCallStatus> startOutgoingCall(OutgoingCallRequest request) {
+    return Stream.fromIterable([
+      ActiveCallStatus.connecting,
+      ActiveCallStatus.connected,
+    ]);
+  }
+}
+
+class _FailingCallService implements CallService {
+  const _FailingCallService();
+
+  @override
+  Stream<ActiveCallStatus> startOutgoingCall(OutgoingCallRequest request) {
+    return Stream.fromIterable([
+      ActiveCallStatus.connecting,
+      ActiveCallStatus.failed,
+    ]);
   }
 }

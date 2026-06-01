@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
+import '../calling/call_service.dart';
+import '../calling/in_call_screen.dart';
 import '../dialpad/dialpad_screen.dart';
 import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
@@ -14,11 +16,13 @@ class AppShell extends StatefulWidget {
   const AppShell({
     this.contactsRepository,
     this.callHistoryRepository,
+    this.callService = const MockCallService(),
     super.key,
   });
 
   final ContactsRepository? contactsRepository;
   final CallHistoryRepository? callHistoryRepository;
+  final CallService callService;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -30,6 +34,7 @@ class _AppShellState extends State<AppShell> {
       widget.callHistoryRepository ?? LocalCallHistoryRepository();
   String? dialNumber;
   String? dialContactName;
+  OutgoingCallRequest? activeCall;
   final recentCalls = <CallRecord>[];
 
   @override
@@ -40,6 +45,15 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final activeCall = this.activeCall;
+    if (activeCall != null) {
+      return InCallScreen(
+        request: activeCall,
+        callService: widget.callService,
+        onCallEnded: _recordCompletedCall,
+      );
+    }
+
     final screens = [
       ContactsScreen(
         mode: ContactsMode.recents,
@@ -55,14 +69,17 @@ class _AppShellState extends State<AppShell> {
       DialpadScreen(
         initialNumber: dialNumber,
         contactName: dialContactName,
-        onCallStarted: _recordDialpadCall,
+        onStartCall: _startDialpadCall,
       ),
       const WalletScreen(),
       const SettingsScreen(),
     ];
 
     return Scaffold(
-      body: screens[selectedIndex],
+      body: IndexedStack(
+        index: selectedIndex,
+        children: screens,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(() => selectedIndex = 2),
         backgroundColor: ZuriColors.primary,
@@ -114,14 +131,20 @@ class _AppShellState extends State<AppShell> {
     });
   }
 
-  void _recordDialpadCall(String number) {
-    final call = CallRecord.fromDialpad(
-      number: number,
-      name: dialContactName,
-      startedAt: DateTime.now(),
-    );
-
+  void _startDialpadCall(String number) {
     setState(() {
+      activeCall = OutgoingCallRequest(
+        phone: number,
+        name: dialContactName,
+        startedAt: DateTime.now(),
+      );
+    });
+  }
+
+  void _recordCompletedCall(CallRecord call) {
+    setState(() {
+      activeCall = null;
+      selectedIndex = 0;
       recentCalls.insert(0, call);
     });
 

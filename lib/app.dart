@@ -6,6 +6,7 @@ import 'features/auth/application/auth_scope.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/fake_auth_repository.dart';
 import 'features/auth/welcome_screen.dart';
+import 'features/calling/call_service.dart';
 import 'features/home/call_history_repository.dart';
 import 'features/home/app_shell.dart';
 import 'features/home/device_contacts_repository.dart';
@@ -15,12 +16,14 @@ class ZuriApp extends StatefulWidget {
     this.authRepository,
     this.contactsRepository,
     this.callHistoryRepository,
+    this.callService = const MockCallService(),
     super.key,
   });
 
   final AuthRepository? authRepository;
   final ContactsRepository? contactsRepository;
   final CallHistoryRepository? callHistoryRepository;
+  final CallService callService;
 
   @override
   State<ZuriApp> createState() => _ZuriAppState();
@@ -58,6 +61,7 @@ class _ZuriAppState extends State<ZuriApp> {
           authController: authController,
           contactsRepository: widget.contactsRepository,
           callHistoryRepository: widget.callHistoryRepository,
+          callService: widget.callService,
         ),
         onGenerateRoute: (settings) {
           if (_isFirebaseAuthCallback(settings.name)) {
@@ -78,6 +82,7 @@ class _ZuriAppState extends State<ZuriApp> {
         authController: authController,
         contactsRepository: widget.contactsRepository,
         callHistoryRepository: widget.callHistoryRepository,
+        callService: widget.callService,
       ),
     );
   }
@@ -98,11 +103,13 @@ class _AuthRoot extends StatelessWidget {
     required this.authController,
     required this.contactsRepository,
     required this.callHistoryRepository,
+    required this.callService,
   });
 
   final AuthController authController;
   final ContactsRepository? contactsRepository;
   final CallHistoryRepository? callHistoryRepository;
+  final CallService callService;
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +124,7 @@ class _AuthRoot extends StatelessWidget {
           return AppShell(
             contactsRepository: contactsRepository,
             callHistoryRepository: callHistoryRepository,
+            callService: callService,
           );
         }
         return const WelcomeScreen();
