@@ -216,29 +216,41 @@ class _RateRow extends StatelessWidget {
       );
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('🇺🇸', style: TextStyle(fontSize: 15)),
-        const SizedBox(width: 8),
-        Text(
-          'United States',
-          style: ZuriTextStyles.bodyLarge.copyWith(
-            color: ZuriColors.muted.withValues(alpha: 0.72),
-            fontWeight: FontWeight.w500,
-            fontSize: 15,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🇺🇸', style: TextStyle(fontSize: 15)),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              'United States',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: ZuriTextStyles.bodyLarge.copyWith(
+                color: ZuriColors.muted.withValues(alpha: 0.72),
+                fontWeight: FontWeight.w500,
+                fontSize: 15,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          '\$0.02 / min',
-          style: ZuriTextStyles.bodyLarge.copyWith(
-            color: ZuriColors.ink,
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              '\$0.02 / min',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: ZuriTextStyles.bodyLarge.copyWith(
+                color: ZuriColors.ink,
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

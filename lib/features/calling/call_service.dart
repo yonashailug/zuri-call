@@ -2,6 +2,7 @@ enum ActiveCallStatus {
   connecting('Connecting'),
   ringing('Ringing'),
   connected('Connected'),
+  poorNetwork('Poor network'),
   ended('Ended'),
   failed('Failed');
 

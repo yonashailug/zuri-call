@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuri_call/app.dart';
 import 'package:zuri_call/features/calling/call_service.dart';
+import 'package:zuri_call/features/calling/in_call_screen.dart';
 import 'package:zuri_call/features/dialpad/dialpad_screen.dart';
 import 'package:zuri_call/features/home/call_history_repository.dart';
 import 'package:zuri_call/features/home/call_record.dart';
@@ -90,7 +91,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Create an account'));
     await tester.pumpAndSettle();
-    expect(find.text('Search contacts'), findsOneWidget);
+    expect(find.text('Search contacts or numbers'), findsOneWidget);
     expect(find.text('Maya Kim'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.call_rounded).first);
@@ -101,7 +102,7 @@ void main() {
     await tester.tap(find.text('Call now'));
     await tester.pump();
     await tester.pump();
-    expect(find.text('Connected'), findsOneWidget);
+    expect(find.text('Active call'), findsOneWidget);
     expect(find.text('0:00'), findsOneWidget);
     expect(find.text('Mute'), findsOneWidget);
     expect(find.text('Speaker'), findsOneWidget);
@@ -111,10 +112,14 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.call_end_rounded));
     await tester.pump();
-    expect(find.text('Ended'), findsOneWidget);
     expect(find.text('Call ended'), findsOneWidget);
+    expect(find.text('DURATION'), findsOneWidget);
+    expect(find.text('COST'), findsOneWidget);
+    expect(find.text('Rate'), findsOneWidget);
+    expect(find.text('Wallet balance'), findsOneWidget);
+    expect(find.text('Report call quality'), findsOneWidget);
 
-    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Report call quality'));
     await tester.pumpAndSettle();
 
     expect(find.text('Maya Kim'), findsOneWidget);
@@ -265,6 +270,36 @@ void main() {
     expect(find.text('No contacts found'), findsNothing);
   });
 
+  testWidgets('shows network-building empty contacts state', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _testApp(
+        null,
+        const _FakeCallService(),
+        _EmptyContactsRepository(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    expect(find.text('Your network'), findsOneWidget);
+    expect(find.text('Contacts'), findsWidgets);
+    expect(find.text('Build your network'), findsOneWidget);
+    expect(find.text('Sync phone contacts'), findsOneWidget);
+    expect(find.text('Add manually'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Add manually'));
+    await tester.tap(find.text('Add manually'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dial'), findsOneWidget);
+  });
+
   testWidgets('dialpad keeps selected US prefix for manual numbers', (
     tester,
   ) async {
@@ -290,14 +325,195 @@ void main() {
 
     expect(startedNumber, '+1 206');
   });
+
+  testWidgets('in-call hold state disables irrelevant controls', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: InCallScreen(
+          request: OutgoingCallRequest(
+            phone: '+251 91 393 9493',
+            name: 'Yonas Hailu',
+            startedAt: DateTime.now(),
+          ),
+          callService: const _FakeCallService(),
+          onCallEnded: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Hold'));
+    await tester.pump();
+
+    expect(find.text('On hold'), findsOneWidget);
+    expect(find.text('Resume'), findsOneWidget);
+    expect(find.textContaining('can hear hold music'), findsOneWidget);
+
+    final muteButton = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Mute'),
+    );
+    final speakerButton = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Speaker'),
+    );
+    final keypadButton = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Keypad'),
+    );
+    final resumeButton = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Resume'),
+    );
+
+    expect(muteButton.onPressed, isNull);
+    expect(speakerButton.onPressed, isNull);
+    expect(keypadButton.onPressed, isNull);
+    expect(resumeButton.onPressed, isNotNull);
+  });
+
+  testWidgets('in-call poor network state offers cellular fallback', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: InCallScreen(
+          request: OutgoingCallRequest(
+            phone: '+251 91 393 9493',
+            name: 'Yonas Hailu',
+            startedAt: DateTime.now(),
+          ),
+          callService: const _PoorNetworkCallService(),
+          onCallEnded: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Poor network'), findsOneWidget);
+    expect(find.text('Weak signal'), findsOneWidget);
+    expect(find.text('Use 4G'), findsOneWidget);
+
+    await tester.tap(find.text('Use 4G'));
+    await tester.pump();
+
+    expect(find.text('Active call'), findsOneWidget);
+    expect(find.text('Poor network'), findsNothing);
+  });
+
+  testWidgets('in-call ended summary exposes call back action', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    CallRecord? callbackRecord;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: InCallScreen(
+          request: OutgoingCallRequest(
+            phone: '+251 91 393 9493',
+            name: 'Yonas Hailu',
+            startedAt: DateTime.now(),
+          ),
+          callService: const _FakeCallService(),
+          onCallEnded: (_) {},
+          onCallBackAfterEnded: (call) => callbackRecord = call,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.call_end_rounded));
+    await tester.pump();
+
+    expect(find.text('Call ended'), findsOneWidget);
+    expect(find.text('DURATION'), findsOneWidget);
+    expect(find.text('COST'), findsOneWidget);
+
+    await tester.tap(find.text('Call\nback'));
+    await tester.pump();
+
+    expect(callbackRecord, isNotNull);
+    expect(callbackRecord!.phone, '+251 91 393 9493');
+  });
+
+  testWidgets('app shell shows ended summary before returning to recents', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.byIcon(Icons.call_rounded).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Call now'));
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.call_end_rounded));
+    await tester.pump();
+
+    expect(find.text('Call ended'), findsOneWidget);
+    expect(find.text('DURATION'), findsOneWidget);
+    expect(find.text('COST'), findsOneWidget);
+    expect(find.text('Report call quality'), findsOneWidget);
+    expect(find.text('Maya Kim'), findsOneWidget);
+  });
+
+  testWidgets('service ended status opens call summary', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: InCallScreen(
+          request: OutgoingCallRequest(
+            phone: '+251 91 393 9493',
+            name: 'Yonas Hailu',
+            startedAt: DateTime.now(),
+          ),
+          callService: const _EndedCallService(),
+          onCallEnded: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Call ended'), findsOneWidget);
+    expect(find.text('DURATION'), findsOneWidget);
+    expect(find.text('COST'), findsOneWidget);
+    expect(find.text('Report call quality'), findsOneWidget);
+  });
 }
 
 Widget _testApp([
   CallHistoryRepository? callHistoryRepository,
   CallService callService = const _FakeCallService(),
+  ContactsRepository? contactsRepository,
 ]) {
   return ZuriApp(
-    contactsRepository: _FakeContactsRepository(),
+    contactsRepository: contactsRepository ?? _FakeContactsRepository(),
     callHistoryRepository:
         callHistoryRepository ?? _FakeCallHistoryRepository(),
     callService: callService,
@@ -341,6 +557,13 @@ class _FakeContactsRepository implements ContactsRepository {
   }
 }
 
+class _EmptyContactsRepository implements ContactsRepository {
+  @override
+  Future<ContactsLoadResult> loadContacts() async {
+    return const ContactsLoadResult.loaded([]);
+  }
+}
+
 class _FakeCallHistoryRepository implements CallHistoryRepository {
   _FakeCallHistoryRepository({
     List<CallRecord> initialCalls = const [],
@@ -379,6 +602,32 @@ class _FailingCallService implements CallService {
     return Stream.fromIterable([
       ActiveCallStatus.connecting,
       ActiveCallStatus.failed,
+    ]);
+  }
+}
+
+class _PoorNetworkCallService implements CallService {
+  const _PoorNetworkCallService();
+
+  @override
+  Stream<ActiveCallStatus> startOutgoingCall(OutgoingCallRequest request) {
+    return Stream.fromIterable([
+      ActiveCallStatus.connecting,
+      ActiveCallStatus.connected,
+      ActiveCallStatus.poorNetwork,
+    ]);
+  }
+}
+
+class _EndedCallService implements CallService {
+  const _EndedCallService();
+
+  @override
+  Stream<ActiveCallStatus> startOutgoingCall(OutgoingCallRequest request) {
+    return Stream.fromIterable([
+      ActiveCallStatus.connecting,
+      ActiveCallStatus.connected,
+      ActiveCallStatus.ended,
     ]);
   }
 }

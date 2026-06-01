@@ -81,14 +81,18 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Good morning',
+                      widget.mode == ContactsMode.recents
+                          ? 'Good morning'
+                          : 'Your network',
                       style: ZuriTextStyles.bodyLarge.copyWith(
                         color: ZuriColors.muted,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      sessionSummary.greetingName,
+                      widget.mode == ContactsMode.recents
+                          ? sessionSummary.greetingName
+                          : 'Contacts',
                       style: ZuriTextStyles.screenTitle.copyWith(
                         fontSize: 38,
                         height: 1,
@@ -105,9 +109,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           const SizedBox(height: 26),
           _SearchField(
             controller: searchController,
-            hintText: widget.mode == ContactsMode.recents
-                ? 'Search contacts or numbers'
-                : 'Search contacts',
+            hintText: 'Search contacts or numbers',
           ),
           const SizedBox(height: 18),
           if (widget.mode == ContactsMode.recents) ...[
@@ -119,15 +121,17 @@ class _ContactsScreenState extends State<ContactsScreen> {
               onOpenContacts: widget.onOpenContacts,
             ),
           ] else ...[
-            const _SectionTitle('All contacts'),
-            const SizedBox(height: 10),
+            const _ContactsFilterTabs(),
+            const SizedBox(height: 24),
             _ContactsContent(
               contacts: _filteredContacts,
+              hasLoadedContacts: contacts.isNotEmpty,
               status: status,
               isLoading: isLoading,
               errorMessage: errorMessage,
               onRetry: _loadContacts,
               onContactCall: widget.onContactCall,
+              onAddManually: widget.onOpenDialpad,
             ),
           ],
         ],
@@ -268,20 +272,62 @@ class _SearchField extends StatelessWidget {
             vertical: 11,
           ),
           prefixIcon: const Icon(Icons.search_rounded, color: ZuriColors.muted),
-          suffixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: IconButton.filledTonal(
-              onPressed: () {},
-              icon: const Icon(Icons.tune_rounded),
-              color: ZuriColors.muted,
-              style: IconButton.styleFrom(
-                backgroundColor: ZuriColors.callSurface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContactsFilterTabs extends StatelessWidget {
+  const _ContactsFilterTabs();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _ContactFilterChip(label: 'All', selected: true),
+          SizedBox(width: 8),
+          _ContactFilterChip(label: 'On Zuri'),
+          SizedBox(width: 8),
+          _ContactFilterChip(label: 'Favourites'),
+        ],
+      ),
+    );
+  }
+}
+
+class _ContactFilterChip extends StatelessWidget {
+  const _ContactFilterChip({
+    required this.label,
+    this.selected = false,
+  });
+
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        color: selected ? ZuriColors.primary : Colors.transparent,
+        shape: StadiumBorder(
+          side: BorderSide(
+            color: selected ? ZuriColors.primary : const Color(0xFFD8D0C7),
+            width: 1.5,
           ),
+        ),
+      ),
+      child: Text(
+        label,
+        style: ZuriTextStyles.label.copyWith(
+          color: selected ? Colors.white : ZuriColors.muted,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -716,19 +762,23 @@ class _RecentCallRow extends StatelessWidget {
 class _ContactsContent extends StatelessWidget {
   const _ContactsContent({
     required this.contacts,
+    required this.hasLoadedContacts,
     required this.status,
     required this.isLoading,
     required this.onRetry,
     required this.onContactCall,
+    this.onAddManually,
     this.errorMessage,
   });
 
   final List<ContactPreview> contacts;
+  final bool hasLoadedContacts;
   final ContactsLoadStatus? status;
   final bool isLoading;
   final String? errorMessage;
   final VoidCallback onRetry;
   final ValueChanged<ContactPreview> onContactCall;
+  final VoidCallback? onAddManually;
 
   @override
   Widget build(BuildContext context) {
@@ -760,10 +810,17 @@ class _ContactsContent extends StatelessWidget {
     }
 
     if (contacts.isEmpty) {
-      return const _EmptyState(
-        icon: Icons.person_search_rounded,
-        title: 'No contacts found',
-        body: 'Try a different search or add contacts on your phone.',
+      if (hasLoadedContacts) {
+        return const _EmptyState(
+          icon: Icons.person_search_rounded,
+          title: 'No contacts found',
+          body: 'Try a different search.',
+        );
+      }
+
+      return _EmptyContactsState(
+        onSyncContacts: onRetry,
+        onAddManually: onAddManually,
       );
     }
 
@@ -779,6 +836,178 @@ class _ContactsContent extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _EmptyContactsState extends StatelessWidget {
+  const _EmptyContactsState({
+    required this.onSyncContacts,
+    required this.onAddManually,
+  });
+
+  final VoidCallback onSyncContacts;
+  final VoidCallback? onAddManually;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 22, 12, 0),
+      child: Column(
+        children: [
+          const _GhostAvatarTrio(),
+          const SizedBox(height: 28),
+          Text(
+            'Build your network',
+            textAlign: TextAlign.center,
+            style: ZuriTextStyles.compactTitle.copyWith(
+              color: ZuriColors.ink,
+              fontSize: 27,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Sync your phone contacts or add\npeople manually to start calling for\nless.',
+            textAlign: TextAlign.center,
+            style: ZuriTextStyles.bodyLarge.copyWith(
+              color: ZuriColors.muted,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 34),
+          SizedBox(
+            width: double.infinity,
+            height: 62,
+            child: FilledButton.icon(
+              onPressed: onSyncContacts,
+              icon: const Icon(Icons.contacts_rounded, size: 22),
+              label: const Text('Sync phone contacts'),
+              style: FilledButton.styleFrom(
+                backgroundColor: ZuriColors.primary,
+                foregroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                textStyle: ZuriTextStyles.label.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: OutlinedButton.icon(
+              onPressed: onAddManually,
+              icon: const Icon(Icons.person_add_alt_1_rounded, size: 22),
+              label: const Text('Add manually'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: ZuriColors.muted,
+                disabledForegroundColor: ZuriColors.muted.withValues(
+                  alpha: 0.45,
+                ),
+                side: const BorderSide(color: Color(0xFFD8D0C7), width: 1.6),
+                shape: const StadiumBorder(),
+                textStyle: ZuriTextStyles.label.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Your contacts are hashed before matching -\nnever stored on our servers.',
+            textAlign: TextAlign.center,
+            style: ZuriTextStyles.rowMeta.copyWith(
+              color: ZuriColors.muted.withValues(alpha: 0.55),
+              fontSize: 15,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GhostAvatarTrio extends StatelessWidget {
+  const _GhostAvatarTrio();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 72,
+      width: 172,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: 18,
+            child: _GhostAvatar(),
+          ),
+          _GhostAvatar(),
+          Positioned(
+            right: 18,
+            child: _GhostAvatar(dashed: true, showAdd: true),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GhostAvatar extends StatelessWidget {
+  const _GhostAvatar({
+    this.dashed = false,
+    this.showAdd = false,
+  });
+
+  final bool dashed;
+  final bool showAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final avatar = SizedBox.square(
+      dimension: 66,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: dashed ? Colors.transparent : ZuriColors.callSurface,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                Icons.person_outline_rounded,
+                color: ZuriColors.muted.withValues(alpha: 0.38),
+                size: 30,
+              ),
+              if (showAdd)
+                Positioned(
+                  right: -10,
+                  bottom: -1,
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: ZuriColors.muted.withValues(alpha: 0.46),
+                    size: 18,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (!dashed) return avatar;
+
+    return CustomPaint(
+      painter: _DashedCirclePainter(),
+      child: avatar,
     );
   }
 }
@@ -978,22 +1207,6 @@ String? _countryLabelFor(String phone) {
 extension on String {
   String get shortTimeAgo {
     return replaceAll(' ago', '');
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label.toUpperCase(),
-      style: ZuriTextStyles.eyebrow.copyWith(
-        color: ZuriColors.muted,
-      ),
-    );
   }
 }
 

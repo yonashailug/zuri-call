@@ -53,6 +53,8 @@ class _AppShellState extends State<AppShell> {
         request: activeCall,
         callService: widget.callService,
         onCallEnded: _recordCompletedCall,
+        onCallBackAfterEnded: _recordCompletedCallAndCallBack,
+        onSaveContactAfterEnded: _recordCompletedCallAndOpenContacts,
       );
     }
     final screens = [
@@ -70,6 +72,7 @@ class _AppShellState extends State<AppShell> {
         contactsRepository: widget.contactsRepository,
         onContactCall: _selectContactForCall,
         onRecentCallOpen: _openCallDetails,
+        onOpenDialpad: () => _selectTab(2),
       ),
       DialpadScreen(
         initialNumber: dialNumber,
@@ -162,6 +165,30 @@ class _AppShellState extends State<AppShell> {
     setState(() {
       activeCall = null;
       selectedIndex = 0;
+      recentCalls.insert(0, call);
+    });
+
+    _saveRecentCalls();
+  }
+
+  void _recordCompletedCallAndCallBack(CallRecord call) {
+    setState(() {
+      activeCall = null;
+      selectedCall = null;
+      dialNumber = call.phone;
+      dialContactName = call.name;
+      selectedIndex = 2;
+      recentCalls.insert(0, call);
+    });
+
+    _saveRecentCalls();
+  }
+
+  void _recordCompletedCallAndOpenContacts(CallRecord call) {
+    setState(() {
+      activeCall = null;
+      selectedCall = null;
+      selectedIndex = 1;
       recentCalls.insert(0, call);
     });
 
