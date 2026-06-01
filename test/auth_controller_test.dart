@@ -28,6 +28,21 @@ void main() {
     expect(controller.state.session, session);
   });
 
+  test('returns to signed out when session restore fails unexpectedly',
+      () async {
+    final controller = AuthController(
+      repository: _FailingRestoreAuthRepository(),
+    );
+
+    addTearDown(controller.dispose);
+
+    await controller.restoreSession();
+
+    expect(controller.state.step, AuthStep.signedOut);
+    expect(controller.state.session, isNull);
+    expect(controller.state.errorMessage, contains('Could not restore'));
+  });
+
   test('walks fake auth state from phone to authenticated session', () async {
     final controller = AuthController(repository: FakeAuthRepository());
     final phoneNumber = PhoneNumber(
@@ -77,5 +92,12 @@ class _RestoringAuthRepository extends FakeAuthRepository {
   @override
   Future<AuthSession?> restoreSession() async {
     return session;
+  }
+}
+
+class _FailingRestoreAuthRepository extends FakeAuthRepository {
+  @override
+  Future<AuthSession?> restoreSession() async {
+    throw StateError('restore failed');
   }
 }

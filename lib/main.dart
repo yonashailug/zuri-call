@@ -21,9 +21,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (useFirebaseAuth) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    await _initializeFirebase();
     await firebase_auth.FirebaseAuth.instance.setSettings(
       appVerificationDisabledForTesting: disableFirebaseAppVerification,
       phoneNumber:
@@ -46,4 +44,18 @@ Future<void> main() async {
           : null,
     ),
   );
+}
+
+Future<void> _initializeFirebase() async {
+  if (Firebase.apps.isNotEmpty) return;
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } on FirebaseException catch (error) {
+    if (error.code == 'duplicate-app') return;
+
+    rethrow;
+  }
 }

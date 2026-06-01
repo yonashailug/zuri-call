@@ -89,6 +89,13 @@ class AuthController extends ChangeNotifier {
           errorMessage: error.message,
         ),
       );
+    } catch (_) {
+      _setState(
+        const AuthState(
+          step: AuthStep.signedOut,
+          errorMessage: 'Could not restore your session. Please sign in again.',
+        ),
+      );
     }
   }
 
