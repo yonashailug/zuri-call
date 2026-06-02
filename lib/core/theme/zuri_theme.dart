@@ -40,6 +40,46 @@ class ZuriColors {
   static const subtitleText = Color(0xFF9EA49A);
   static const navBorderTop = Color(0x141C3820);
   static const neutralBg = Color(0x0F1C3820);
+  static const overlayOnForest = Color(0xA6F2EAE3);
+  static const subtleForestText = Color(0x662C4A2E);
+  static const emptyIcon = Color(0xFFB7BBB0);
+  static const dashedStroke = Color(0xFFC9C9C0);
+  static const profileAvatar = Color(0xFFD4845A);
+
+  static const walletCardMuted = Color(0xFF91A08F);
+  static const walletCardDivider = Color(0xFF496748);
+  static const walletActiveSoft = Color(0xFF315C31);
+  static const walletActiveBorder = Color(0xFF4F8547);
+  static const walletActiveText = Color(0xFF9ED18D);
+  static const walletBorder = Color(0xFFD8D0C7);
+  static const walletRowDivider = Color(0xFFE7DED4);
+  static const walletDebit = Color(0xFFC0392D);
+  static const walletPopular = Color(0xFFB56B2C);
+  static const walletTipBackground = Color(0xFFFFEBDD);
+  static const walletTipBorder = Color(0xFFEBC6A7);
+  static const walletTipText = Color(0xFF965616);
+
+  static const inCallAvatarFill = Color(0xFF39533A);
+  static const inCallAvatarRing = Color(0xFFA6B29E);
+  static const inCallWaveform = Color(0xFF93A18D);
+  static const inCallControl = Color(0x14FFFFFF);
+  static const inCallControlActive = Color(0x24FFFFFF);
+  static const inCallControlIcon = Color(0xB3F2EAE3);
+  static const inCallLiveSoft = Color(0x264CAF50);
+  static const inCallLiveBorder = Color(0x4D4CAF50);
+  static const inCallLiveText = Color(0xFF1C5C30);
+  static const inCallDangerSoft = Color(0x33C0392B);
+  static const inCallDangerBorder = Color(0x59C0392B);
+  static const inCallDangerText = Color(0xFF8C2A1E);
+  static const inCallHoldSoft = Color(0x2EB7651D);
+  static const inCallHoldBorder = Color(0x59B7651D);
+  static const inCallHoldText = Color(0xFF8C4D0A);
+  static const endedCallPill = Color(0xFFEAE9E2);
+  static const endedCallBorder = Color(0xFFD8D0C7);
+  static const endedCallDivider = Color(0xFFE7DED4);
+  static const endedCallMuted = Color(0xFF8E9788);
+  static const endedCallQuality = Color(0xFF61AE58);
+  static const endedCallAvatar = Color(0xFF7767D9);
 }
 
 class ZuriTheme {

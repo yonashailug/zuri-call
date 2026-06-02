@@ -208,7 +208,7 @@ class ZuriAvatar extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: ZuriTextStyles.rowTitle.copyWith(color: Colors.white),
+        style: ZuriTextStyles.contactName.copyWith(color: Colors.white),
       ),
     );
   }

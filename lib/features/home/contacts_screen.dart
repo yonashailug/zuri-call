@@ -277,12 +277,12 @@ class _SearchField extends StatelessWidget {
             size: 20,
           ),
           suffixIcon: Container(
-            width: 44,
-            height: 44,
+            width: ZuriDimensions.searchBarHeight,
+            height: ZuriDimensions.searchBarHeight,
             margin: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: ZuriColors.iconButtonBg,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(ZuriRadius.field),
             ),
             child: const Icon(
               ZuriIcons.filter,
@@ -346,7 +346,7 @@ class _ContactFilterChip extends StatelessWidget {
         color: selected ? ZuriColors.primary : Colors.transparent,
         shape: StadiumBorder(
           side: BorderSide(
-            color: selected ? ZuriColors.primary : const Color(0xFFD8D0C7),
+            color: selected ? ZuriColors.primary : ZuriColors.border,
             width: 1.5,
           ),
         ),
@@ -401,7 +401,7 @@ class _EmptyRecentsState extends StatelessWidget {
           const SizedBox(height: 34),
           SizedBox(
             width: double.infinity,
-            height: 62,
+            height: ZuriDimensions.primaryButtonHeight,
             child: FilledButton.icon(
               onPressed: onOpenDialpad,
               icon: const Icon(ZuriIcons.dialpad, size: 24),
@@ -420,12 +420,12 @@ class _EmptyRecentsState extends StatelessWidget {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: ZuriDimensions.secondaryButtonHeight,
             child: OutlinedButton(
               onPressed: onOpenContacts,
               style: OutlinedButton.styleFrom(
                 foregroundColor: ZuriColors.muted,
-                side: const BorderSide(color: Color(0xFFD8D0C7), width: 1.6),
+                side: const BorderSide(color: ZuriColors.border, width: 1.6),
                 shape: const StadiumBorder(),
                 textStyle: ZuriTextStyles.label.copyWith(
                   fontSize: 17,
@@ -453,7 +453,7 @@ class _DashedCircleIcon extends StatelessWidget {
         child: Center(
           child: Icon(
             ZuriIcons.recents,
-            color: Color(0xFFB7BBB0),
+            color: ZuriColors.emptyIcon,
             size: 44,
           ),
         ),
@@ -466,7 +466,7 @@ class _DashedCirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFC9C9C0)
+      ..color = ZuriColors.dashedStroke
       ..strokeWidth = 2.2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -501,7 +501,7 @@ class _QuickDialStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 56,
+      height: ZuriDimensions.quickDialHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: contacts.length,
@@ -544,13 +544,13 @@ class _QuickDialPill extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(ZuriRadius.callAv),
       child: Container(
         width: selected ? 128 : 124,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(ZuriRadius.callAv),
           border: selected ? null : Border.all(color: ZuriColors.callSurface),
         ),
         child: Row(
@@ -567,9 +567,8 @@ class _QuickDialPill extends StatelessWidget {
                 contact.firstDisplayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: ZuriTextStyles.rowTitle.copyWith(
+                style: ZuriTextStyles.contactName.copyWith(
                   color: foreground,
-                  fontSize: 15,
                   height: 1.05,
                 ),
               ),
@@ -604,7 +603,7 @@ class MissedCallBanner extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: ZuriColors.dangerBg,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(ZuriRadius.field),
         border: Border.all(
           color: ZuriColors.danger.withValues(alpha: 0.22),
         ),
@@ -647,7 +646,7 @@ class MissedCallBanner extends StatelessWidget {
                 vertical: 10,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(13),
+                borderRadius: BorderRadius.circular(ZuriRadius.action),
               ),
               textStyle: ZuriTypography.caption.copyWith(
                 fontWeight: FontWeight.w600,
@@ -715,7 +714,7 @@ class _RecentCallRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 64,
+        height: ZuriDimensions.recentRowHeight,
         child: Row(
           children: [
             _Avatar(
@@ -728,7 +727,7 @@ class _RecentCallRow extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: Container(
-                height: 64,
+                height: ZuriDimensions.recentRowHeight,
                 decoration: const BoxDecoration(
                   border: Border(
                     bottom: BorderSide(color: ZuriColors.rowDivider),
@@ -747,10 +746,8 @@ class _RecentCallRow extends StatelessWidget {
                               call.contact.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: ZuriTextStyles.rowTitle.copyWith(
+                              style: ZuriTextStyles.contactName.copyWith(
                                 color: rowColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 5),
@@ -941,7 +938,7 @@ class _EmptyContactsState extends StatelessWidget {
           const SizedBox(height: 34),
           SizedBox(
             width: double.infinity,
-            height: 62,
+            height: ZuriDimensions.primaryButtonHeight,
             child: FilledButton.icon(
               onPressed: onSyncContacts,
               icon: const Icon(ZuriIcons.contactsBook, size: 22),
@@ -960,7 +957,7 @@ class _EmptyContactsState extends StatelessWidget {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: ZuriDimensions.secondaryButtonHeight,
             child: OutlinedButton.icon(
               onPressed: onAddManually,
               icon: const Icon(ZuriIcons.userPlus, size: 22),
@@ -970,7 +967,7 @@ class _EmptyContactsState extends StatelessWidget {
                 disabledForegroundColor: ZuriColors.muted.withValues(
                   alpha: 0.45,
                 ),
-                side: const BorderSide(color: Color(0xFFD8D0C7), width: 1.6),
+                side: const BorderSide(color: ZuriColors.border, width: 1.6),
                 shape: const StadiumBorder(),
                 textStyle: ZuriTextStyles.label.copyWith(
                   fontSize: 17,
@@ -1100,7 +1097,7 @@ class _ContactRow extends StatelessWidget {
               children: [
                 Text(
                   contact.name,
-                  style: ZuriTextStyles.rowTitle,
+                  style: ZuriTextStyles.contactName,
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1132,7 +1129,7 @@ class _ProfileAvatar extends StatelessWidget {
         children: [
           ZuriAvatar(
             label: label,
-            color: const Color(0xFFD4845A),
+            color: ZuriColors.profileAvatar,
             size: 42,
           ),
           Positioned(
@@ -1294,7 +1291,7 @@ class _EmptyState extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.rowTitle,
+            style: ZuriTextStyles.contactName,
           ),
           const SizedBox(height: 6),
           Text(

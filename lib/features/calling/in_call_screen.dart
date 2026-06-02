@@ -375,7 +375,7 @@ class _StatusPill extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(ZuriRadius.round),
         border: Border.all(color: borderColor, width: 1.4),
       ),
       child: Padding(
@@ -556,7 +556,7 @@ class _EndedStatusPill extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: _EndedCallColors.pill,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(ZuriRadius.round),
         border: Border.all(color: _EndedCallColors.border, width: 1.2),
       ),
       child: Padding(
@@ -586,8 +586,8 @@ class _EndedAvatar extends StatelessWidget {
       height: 112,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: const Color(0xFF7767D9),
-        borderRadius: BorderRadius.circular(32),
+        color: ZuriColors.endedCallAvatar,
+        borderRadius: BorderRadius.circular(ZuriRadius.avatar),
       ),
       child: Text(
         label,
@@ -616,7 +616,7 @@ class _CostSummaryCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
       decoration: BoxDecoration(
         color: ZuriColors.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(ZuriRadius.tile),
       ),
       child: Column(
         children: [
@@ -996,7 +996,7 @@ class _SignalBars extends StatelessWidget {
                 color: i == 0
                     ? _InCallColors.dangerText
                     : _InCallColors.waveform.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(ZuriRadius.waveform),
               ),
             ),
             if (i != heights.length - 1) const SizedBox(width: 5),
@@ -1039,7 +1039,7 @@ class _CallNoticeBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(ZuriRadius.surface),
         border: Border.all(color: border, width: 1.2),
       ),
       child: Row(
@@ -1195,7 +1195,7 @@ class _CallControlButton extends StatelessWidget {
                   foregroundColor: foregroundColor,
                   disabledForegroundColor: foregroundColor,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(ZuriRadius.badge),
                   ),
                   side: BorderSide(color: borderColor, width: 1.2),
                 ),
@@ -1367,34 +1367,34 @@ class _InCallColors {
 
   static const background = ZuriColors.forest900;
   static const text = ZuriColors.surface;
-  static const muted = Color(0xA6F2EAE3);
-  static const avatarFill = Color(0xFF39533A);
-  static const avatarRing = Color(0xFFA6B29E);
-  static const waveform = Color(0xFF93A18D);
-  static const control = Color(0x14FFFFFF);
-  static const controlActive = Color(0x24FFFFFF);
-  static const controlIcon = Color(0xB3F2EAE3);
+  static const muted = ZuriColors.overlayOnForest;
+  static const avatarFill = ZuriColors.inCallAvatarFill;
+  static const avatarRing = ZuriColors.inCallAvatarRing;
+  static const waveform = ZuriColors.inCallWaveform;
+  static const control = ZuriColors.inCallControl;
+  static const controlActive = ZuriColors.inCallControlActive;
+  static const controlIcon = ZuriColors.inCallControlIcon;
   static const endCall = ZuriColors.danger;
-  static const liveSoft = Color(0x264CAF50);
-  static const liveBorder = Color(0x4D4CAF50);
-  static const liveText = Color(0xFF1C5C30);
-  static const dangerSoft = Color(0x33C0392B);
-  static const dangerBorder = Color(0x59C0392B);
-  static const dangerText = Color(0xFF8C2A1E);
-  static const holdSoft = Color(0x2EB7651D);
-  static const holdBorder = Color(0x59B7651D);
-  static const holdText = Color(0xFF8C4D0A);
+  static const liveSoft = ZuriColors.inCallLiveSoft;
+  static const liveBorder = ZuriColors.inCallLiveBorder;
+  static const liveText = ZuriColors.inCallLiveText;
+  static const dangerSoft = ZuriColors.inCallDangerSoft;
+  static const dangerBorder = ZuriColors.inCallDangerBorder;
+  static const dangerText = ZuriColors.inCallDangerText;
+  static const holdSoft = ZuriColors.inCallHoldSoft;
+  static const holdBorder = ZuriColors.inCallHoldBorder;
+  static const holdText = ZuriColors.inCallHoldText;
 }
 
 class _EndedCallColors {
   const _EndedCallColors._();
 
   static const background = ZuriColors.surface;
-  static const pill = Color(0xFFEAE9E2);
-  static const border = Color(0xFFD8D0C7);
-  static const divider = Color(0xFFE7DED4);
-  static const muted = Color(0xFF8E9788);
-  static const quality = Color(0xFF61AE58);
+  static const pill = ZuriColors.endedCallPill;
+  static const border = ZuriColors.endedCallBorder;
+  static const divider = ZuriColors.endedCallDivider;
+  static const muted = ZuriColors.endedCallMuted;
+  static const quality = ZuriColors.endedCallQuality;
 }
 
 String _formatShortDuration(int totalSeconds) {

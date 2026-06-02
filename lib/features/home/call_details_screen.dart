@@ -168,7 +168,7 @@ class _DetailsAction extends StatelessWidget {
       leading: Icon(icon, color: color),
       title: Text(
         label,
-        style: ZuriTextStyles.rowTitle.copyWith(color: color),
+        style: ZuriTextStyles.contactName.copyWith(color: color),
       ),
       onTap: onTap,
     );

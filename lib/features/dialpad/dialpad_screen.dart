@@ -622,7 +622,7 @@ class _CallActions extends StatelessWidget {
             icon: ZuriIcons.userPlus,
             foregroundColor: ZuriColors.ink,
             backgroundColor: ZuriColors.callSurface,
-            size: 44,
+            size: ZuriDimensions.dialpadActionSize,
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -637,7 +637,7 @@ class _CallActions extends StatelessWidget {
             icon: ZuriIcons.backspace,
             foregroundColor: ZuriColors.ink,
             backgroundColor: ZuriColors.callSurface,
-            size: 44,
+            size: ZuriDimensions.dialpadActionSize,
           ),
         ],
       ),
@@ -659,7 +659,7 @@ class _DialCallButton extends StatelessWidget {
     final foregroundColor =
         enabled ? ZuriColors.surface : ZuriColors.ink.withValues(alpha: 0.38);
     return SizedBox(
-      height: 48,
+      height: ZuriDimensions.callButtonHeight,
       child: TextButton.icon(
         onPressed: enabled ? onPressed : null,
         icon: const Icon(ZuriIcons.phone, size: 18),
@@ -709,14 +709,14 @@ class _DialKey extends StatelessWidget {
       height: height,
       child: Material(
         color: ZuriColors.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(ZuriRadius.key),
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(ZuriRadius.key),
           onTap: () => onTap(label),
           onLongPress: onLongPress,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(ZuriRadius.key),
               border: Border.all(
                 color: ZuriColors.ink.withValues(alpha: 0.08),
               ),
@@ -742,11 +742,7 @@ class _DialKey extends StatelessWidget {
                     child: Text(
                       sublabel ?? '',
                       style: ZuriTextStyles.eyebrow.copyWith(
-                        // Spec: rgba(44,74,46,0.40) — forest-green tone at 40%
-                        color: const Color(0x662C4A2E),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.08,
+                        color: ZuriColors.subtleForestText,
                       ),
                     ),
                   ),

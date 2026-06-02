@@ -37,6 +37,14 @@ class ZuriRadius {
   static const badge = 20.0; // status badges / pills
   static const callAv = 28.0; // call screen avatar (rounded rect)
   static const iconButton = 18.0; // 36dp circular icon buttons
+  static const compact = 7.0; // small wallet/inset controls
+  static const small = 8.0; // tiny rounded surfaces
+  static const action = 13.0; // compact CTA buttons
+  static const surface = 16.0; // medium cards / selectable rows
+  static const tile = 18.0; // dial keys / content tiles
+  static const avatar = 32.0; // large avatar rounds
+  static const round = 999.0; // fully rounded pills
+  static const waveform = 2.0; // waveform bars
 
   // Legacy aliases — keep existing callsites compiling
   static const field = 14.0; // themed input border (within spec 12–14px range)
@@ -51,6 +59,12 @@ class ZuriDimensions {
   static const searchBarHeight = 44.0;
   static const avatarRowSize = 44.0;
   static const iconButtonSize = 36.0;
+  static const quickDialHeight = 56.0;
+  static const recentRowHeight = 64.0;
+  static const dialpadActionSize = 44.0;
+  static const primaryButtonHeight = 62.0;
+  static const secondaryButtonHeight = 56.0;
+  static const callButtonHeight = 48.0;
   static const navHeight = 56.0;
   static const quickDialNameMaxLength = 10;
 }
@@ -123,12 +137,13 @@ class ZuriTextStyles {
   );
 
   static const contactName = TextStyle(
-    fontFamily: uiFont,
+    fontFamily: displayFont, // DM Serif Display — spec: "never use DM Sans for primary display names"
     fontSize: 15,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
     letterSpacing: 0,
   );
 
+  @Deprecated('Use contactName')
   static const rowTitle = contactName;
 
   static const rowMeta = TextStyle(

@@ -67,7 +67,7 @@ class _ProfileHeader extends StatelessWidget {
               children: [
                 Text(
                   sessionSummary.displayName,
-                  style: ZuriTextStyles.rowTitle,
+                  style: ZuriTextStyles.contactName,
                 ),
                 Text(
                   sessionSummary.phoneDisplay,
@@ -105,7 +105,7 @@ class _SettingsRow extends StatelessWidget {
       leading: Icon(icon, color: color),
       title: Text(
         label,
-        style: ZuriTextStyles.rowTitle.copyWith(color: color),
+        style: ZuriTextStyles.contactName.copyWith(color: color),
       ),
       trailing: destructive
           ? null

@@ -470,7 +470,7 @@ class _HistorySummaryCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       decoration: BoxDecoration(
         color: dark ? ZuriColors.primary : ZuriColors.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(ZuriRadius.tile),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,7 +538,7 @@ class _HistoryFilterPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       decoration: BoxDecoration(
         color: selected ? ZuriColors.primary : Colors.transparent,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(ZuriRadius.round),
         border: selected
             ? null
             : Border.all(color: _WalletColors.border, width: 1.2),
@@ -653,7 +653,7 @@ class _HistoryTransactionRow extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTextStyles.rowTitle.copyWith(
+                  style: ZuriTextStyles.contactName.copyWith(
                     color: ZuriColors.ink,
                     fontSize: 18,
                   ),
@@ -787,7 +787,7 @@ class _RateLookupScreenState extends State<_RateLookupScreen> {
                   backgroundColor: ZuriColors.primary,
                   foregroundColor: ZuriColors.surface,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(ZuriRadius.pill),
                   ),
                   textStyle: ZuriTextStyles.label.copyWith(
                     fontSize: 18,
@@ -879,17 +879,17 @@ class _RateSearchField extends StatelessWidget {
               style: IconButton.styleFrom(
                 backgroundColor: ZuriColors.neutralBg,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(ZuriRadius.small),
                 ),
               ),
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(ZuriRadius.field),
             borderSide: const BorderSide(color: ZuriColors.searchBorder),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(ZuriRadius.field),
             borderSide: const BorderSide(color: ZuriColors.primary, width: 1.5),
           ),
         ),
@@ -907,7 +907,7 @@ class _FeaturedRateCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
       decoration: BoxDecoration(
         color: ZuriColors.primary,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(ZuriRadius.field),
       ),
       child: Column(
         children: [
@@ -1082,7 +1082,7 @@ class _RateDestinationRow extends StatelessWidget {
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTextStyles.rowTitle.copyWith(
+                  style: ZuriTextStyles.contactName.copyWith(
                     color: ZuriColors.ink,
                     fontSize: 20,
                   ),
@@ -1139,7 +1139,7 @@ class _CountryChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: ZuriColors.callSurface,
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(ZuriRadius.compact),
       ),
       child: Text(
         label,
@@ -1244,12 +1244,12 @@ class _PresetAmountCard extends StatelessWidget {
         Positioned.fill(
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(ZuriRadius.surface),
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: selected ? ZuriColors.primary : ZuriColors.card,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(ZuriRadius.surface),
                 border: Border.all(
                   color: selected ? ZuriColors.primary : _WalletColors.border,
                   width: 1.2,
@@ -1289,7 +1289,7 @@ class _PresetAmountCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: _WalletColors.popular,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(ZuriRadius.field),
               ),
               child: Text(
                 'Most popular',
@@ -1316,7 +1316,7 @@ class _CustomAmountField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 22),
       decoration: BoxDecoration(
         color: ZuriColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(ZuriRadius.surface),
         border: Border.all(color: _WalletColors.border, width: 1.2),
       ),
       child: Row(
@@ -1345,7 +1345,7 @@ class _PaymentMethodCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
       decoration: BoxDecoration(
         color: ZuriColors.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(ZuriRadius.tile),
         border: Border.all(color: ZuriColors.primary, width: 2),
       ),
       child: Row(
@@ -1356,7 +1356,7 @@ class _PaymentMethodCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: ZuriColors.primary,
-              borderRadius: BorderRadius.circular(7),
+              borderRadius: BorderRadius.circular(ZuriRadius.compact),
             ),
             child: const Icon(
               ZuriIcons.creditCard,
@@ -1417,7 +1417,7 @@ class _AddPaymentMethodCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(ZuriRadius.surface),
         border: Border.all(
           color: _WalletColors.border,
           width: 1.4,
@@ -1432,7 +1432,7 @@ class _AddPaymentMethodCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: ZuriColors.callSurface,
-              borderRadius: BorderRadius.circular(7),
+              borderRadius: BorderRadius.circular(ZuriRadius.compact),
             ),
             child: const Icon(ZuriIcons.add, color: ZuriColors.muted),
           ),
@@ -1469,7 +1469,7 @@ class _TopUpPreviewCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
       decoration: BoxDecoration(
         color: ZuriColors.card,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(ZuriRadius.tile),
       ),
       child: Column(
         children: [
@@ -1546,7 +1546,7 @@ class _SecurePayButton extends StatelessWidget {
           backgroundColor: ZuriColors.primary,
           foregroundColor: ZuriColors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(ZuriRadius.pill),
           ),
           textStyle: ZuriTextStyles.label.copyWith(
             fontSize: 15,
@@ -1590,7 +1590,7 @@ class _BalanceCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(28, 28, 28, 26),
       decoration: BoxDecoration(
         color: ZuriColors.primary,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(ZuriRadius.callAv),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1654,7 +1654,7 @@ class _ActiveBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: _WalletColors.activeSoft,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(ZuriRadius.round),
         border: Border.all(color: _WalletColors.activeBorder, width: 1.3),
       ),
       child: Row(
@@ -1736,7 +1736,7 @@ class _WalletActions extends StatelessWidget {
                 backgroundColor: ZuriColors.primary,
                 foregroundColor: ZuriColors.surface,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(ZuriRadius.pill),
                 ),
                 textStyle: ZuriTextStyles.label.copyWith(
                   fontSize: 15,
@@ -1758,7 +1758,7 @@ class _WalletActions extends StatelessWidget {
                 foregroundColor: ZuriColors.muted,
                 side: const BorderSide(color: _WalletColors.border, width: 1.4),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(ZuriRadius.pill),
                 ),
                 textStyle: ZuriTextStyles.label.copyWith(
                   fontSize: 15,
@@ -1858,7 +1858,7 @@ class _ActivityRow extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTextStyles.rowTitle.copyWith(
+                  style: ZuriTextStyles.contactName.copyWith(
                     color: ZuriColors.ink,
                     fontSize: 15,
                   ),
@@ -1901,7 +1901,7 @@ class _RunwayTip extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       decoration: BoxDecoration(
         color: _WalletColors.tipBackground,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(ZuriRadius.tile),
         border: Border.all(color: _WalletColors.tipBorder, width: 1.2),
       ),
       child: Row(
@@ -1933,16 +1933,16 @@ class _RunwayTip extends StatelessWidget {
 class _WalletColors {
   const _WalletColors._();
 
-  static const cardMuted = Color(0xFF91A08F);
-  static const cardDivider = Color(0xFF496748);
-  static const activeSoft = Color(0xFF315C31);
-  static const activeBorder = Color(0xFF4F8547);
-  static const activeText = Color(0xFF9ED18D);
-  static const border = Color(0xFFD8D0C7);
-  static const rowDivider = Color(0xFFE7DED4);
-  static const debit = Color(0xFFC0392D);
-  static const popular = Color(0xFFB56B2C);
-  static const tipBackground = Color(0xFFFFEBDD);
-  static const tipBorder = Color(0xFFEBC6A7);
-  static const tipText = Color(0xFF965616);
+  static const cardMuted = ZuriColors.walletCardMuted;
+  static const cardDivider = ZuriColors.walletCardDivider;
+  static const activeSoft = ZuriColors.walletActiveSoft;
+  static const activeBorder = ZuriColors.walletActiveBorder;
+  static const activeText = ZuriColors.walletActiveText;
+  static const border = ZuriColors.walletBorder;
+  static const rowDivider = ZuriColors.walletRowDivider;
+  static const debit = ZuriColors.walletDebit;
+  static const popular = ZuriColors.walletPopular;
+  static const tipBackground = ZuriColors.walletTipBackground;
+  static const tipBorder = ZuriColors.walletTipBorder;
+  static const tipText = ZuriColors.walletTipText;
 }
