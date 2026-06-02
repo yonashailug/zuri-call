@@ -14,6 +14,7 @@ dependencies:
   flutter_contacts: ^2.2.0
   http: ^1.6.0
   shared_preferences: ^2.5.5
+  tabler_icons: ^2.5.0+1
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +23,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DMSans-VariableFont_opsz,wght.ttf
+    - family: DMSerifDisplay
+      fonts:
+        - asset: assets/fonts/DMSerifDisplay-Regular.ttf

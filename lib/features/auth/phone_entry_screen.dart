@@ -171,7 +171,7 @@ class _CountrySelector extends StatelessWidget {
               ),
             ),
             const Icon(
-              Icons.keyboard_arrow_down_rounded,
+              ZuriIcons.chevronDown,
               color: ZuriColors.border,
               size: 32,
             ),

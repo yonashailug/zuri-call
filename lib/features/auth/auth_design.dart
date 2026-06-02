@@ -22,16 +22,16 @@ class AuthScaffold extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 22, 28, 10),
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ZuriCircleButton(
-                    icon: Icons.arrow_back_rounded,
+                    icon: ZuriIcons.back,
                     onPressed: onBack ?? () => Navigator.maybePop(context),
                   ),
                   ZuriCircleButton(
-                    icon: Icons.close_rounded,
+                    icon: ZuriIcons.close,
                     onPressed: onClose ??
                         () => Navigator.of(context).popUntil(
                               (route) => route.isFirst,

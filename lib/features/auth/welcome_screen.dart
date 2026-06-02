@@ -93,7 +93,7 @@ class _SignalMark extends StatelessWidget {
               height: 72,
               width: 72,
               child: Icon(
-                Icons.call_rounded,
+                ZuriIcons.phone,
                 color: ZuriColors.ink,
                 size: 30,
               ),

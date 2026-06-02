@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
+import '../auth/data/phone_country_data.dart';
+import '../auth/domain/phone_mask_input_formatter.dart';
 
 class DialpadScreen extends StatefulWidget {
   const DialpadScreen({
@@ -20,51 +22,46 @@ class DialpadScreen extends StatefulWidget {
 }
 
 class _DialpadScreenState extends State<DialpadScreen> {
-  late String number = _initialNumber;
+  late _DialState dialState = _DialState.fromInitialNumber(
+    widget.initialNumber,
+    widget.contactName,
+  );
 
-  String get _initialNumber {
-    final value = widget.initialNumber?.trim();
-    if (value != null && value.isNotEmpty) return value;
-    return '';
-  }
-
-  bool get canCall => number.replaceAll(RegExp(r'\D'), '').isNotEmpty;
+  bool get canCall => dialState.dialableNumber.isNotEmpty;
 
   @override
   void didUpdateWidget(DialpadScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialNumber != oldWidget.initialNumber) {
-      number = _initialNumber;
+    if (widget.initialNumber != oldWidget.initialNumber ||
+        widget.contactName != oldWidget.contactName) {
+      dialState = _DialState.fromInitialNumber(
+        widget.initialNumber,
+        widget.contactName,
+      );
     }
   }
 
   void append(String digit) {
     setState(() {
-      number += digit;
+      dialState = dialState.append(digit);
     });
   }
 
   void appendPlus() {
     setState(() {
-      if (number.isEmpty) {
-        number = '+';
-      } else {
-        number += '+';
-      }
+      dialState = dialState.appendPlus();
     });
   }
 
   void backspace() {
-    if (number.isEmpty) return;
-    setState(() => number = number.substring(0, number.length - 1));
+    if (!dialState.hasInput) return;
+    setState(() => dialState = dialState.backspace());
   }
 
   void startCall() {
-    final trimmedNumber = number.trim();
-    if (trimmedNumber.isEmpty) return;
+    final dialableNumber = dialState.dialableNumber;
+    if (dialableNumber.isEmpty) return;
 
-    final dialableNumber =
-        trimmedNumber.startsWith('+') ? trimmedNumber : '+1 $trimmedNumber';
     widget.onStartCall(dialableNumber);
   }
 
@@ -76,31 +73,30 @@ class _DialpadScreenState extends State<DialpadScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compactHeight = constraints.maxHeight < 720;
-            final horizontalPadding = constraints.maxWidth < 380 ? 24.0 : 28.0;
-            final padWidth = constraints.maxWidth * 0.76;
-            final keyGap = constraints.maxWidth * 0.055;
+            final padWidth = constraints.maxWidth * 0.62;
+            final keyGap = constraints.maxWidth * 0.04;
             final keyWidth =
-                ((padWidth - keyGap * 2) / 3).clamp(78.0, 94.0).toDouble();
-            final keyHeight = (keyWidth * 0.91).clamp(70.0, 84.0).toDouble();
+                ((padWidth - keyGap * 2) / 3).clamp(58.0, 68.0).toDouble();
+            final keyHeight = (keyWidth * 0.91).clamp(54.0, 62.0).toDouble();
             final rowGap = compactHeight ? 10.0 : 12.0;
             final topGap = compactHeight ? 14.0 : 18.0;
 
             return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
+              padding: const EdgeInsets.fromLTRB(
+                ZuriSpacing.s5,
                 18,
-                horizontalPadding,
+                ZuriSpacing.s5,
                 16,
               ),
               child: Column(
                 children: [
-                  const _DialHeader(),
+                  _DialHeader(country: dialState.country),
                   SizedBox(height: topGap),
-                  _NumberDisplay(number: number),
+                  _NumberDisplay(number: dialState.displayNumber),
                   const SizedBox(height: 12),
                   _RateRow(
-                    contactName:
-                        number.trim().isEmpty ? null : widget.contactName,
+                    country: dialState.country,
+                    contactName: dialState.contactName,
                   ),
                   SizedBox(height: compactHeight ? 16 : 22),
                   _DialPad(
@@ -129,7 +125,9 @@ class _DialpadScreenState extends State<DialpadScreen> {
 }
 
 class _DialHeader extends StatelessWidget {
-  const _DialHeader();
+  const _DialHeader({required this.country});
+
+  final _DialCountry country;
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +137,7 @@ class _DialHeader extends StatelessWidget {
           'Dial',
           style: ZuriTextStyles.screenTitle.copyWith(
             color: ZuriColors.ink,
-            fontSize: 30,
+            fontSize: 28,
           ),
         ),
         const Spacer(),
@@ -150,16 +148,290 @@ class _DialHeader extends StatelessWidget {
             shape: StadiumBorder(),
           ),
           child: Text(
-            'US +1',
+            '${country.shortCode} ${country.prefix}',
             style: ZuriTextStyles.eyebrow.copyWith(
               color: ZuriColors.surface,
-              fontSize: 12,
+              fontSize: 10,
             ),
           ),
         ),
       ],
     );
   }
+}
+
+class _DialState {
+  const _DialState({
+    required this.country,
+    required this.nationalDigits,
+    required this.rawInternational,
+    this.contactName,
+  });
+
+  factory _DialState.fromInitialNumber(String? initialNumber, String? name) {
+    final value = initialNumber?.trim();
+    if (value == null || value.isEmpty) {
+      return const _DialState(
+        country: _defaultCountry,
+        nationalDigits: '',
+        rawInternational: null,
+      );
+    }
+
+    if (value.startsWith('+')) {
+      final country = _countryForNumber(value);
+      final digits = value.replaceAll(RegExp(r'\D'), '');
+      final prefixDigits = country.prefix.replaceAll(RegExp(r'\D'), '');
+      final nationalDigits = digits.startsWith(prefixDigits)
+          ? digits.substring(prefixDigits.length)
+          : digits;
+
+      return _DialState(
+        country: country,
+        nationalDigits: nationalDigits,
+        rawInternational: null,
+        contactName: _cleanContactName(name),
+      );
+    }
+
+    return _DialState(
+      country: _defaultCountry,
+      nationalDigits: value.replaceAll(RegExp(r'\D'), ''),
+      rawInternational: null,
+      contactName: _cleanContactName(name),
+    );
+  }
+
+  final _DialCountry country;
+  final String nationalDigits;
+  final String? rawInternational;
+  final String? contactName;
+
+  bool get hasInput => rawInternational != null || nationalDigits.isNotEmpty;
+
+  String get displayNumber {
+    final raw = rawInternational;
+    if (raw != null) {
+      if (raw == '+') return raw;
+      final digits = raw.replaceAll(RegExp(r'\D'), '');
+      final prefixDigits = country.prefix.replaceAll(RegExp(r'\D'), '');
+      if (digits.startsWith(prefixDigits)) {
+        final national = digits.substring(prefixDigits.length);
+        final formattedNational = country.format(national);
+        return formattedNational.isEmpty
+            ? country.prefix
+            : '${country.prefix} $formattedNational';
+      }
+      return raw;
+    }
+    if (nationalDigits.isEmpty) return '';
+
+    final formattedNational = country.format(nationalDigits);
+    if (formattedNational.isEmpty) return country.prefix;
+    return '${country.prefix} $formattedNational';
+  }
+
+  String get dialableNumber {
+    final raw = rawInternational;
+    if (raw != null) return raw.length > 1 ? raw : '';
+    if (nationalDigits.isEmpty) return '';
+    return '${country.prefix} $nationalDigits';
+  }
+
+  _DialState append(String digit) {
+    final raw = rawInternational;
+    if (raw != null) {
+      final nextRaw = '$raw$digit';
+      return _DialState(
+        country: _countryForNumber(nextRaw),
+        nationalDigits: '',
+        rawInternational: nextRaw,
+      );
+    }
+
+    return _DialState(
+      country: country,
+      nationalDigits: '$nationalDigits$digit',
+      rawInternational: null,
+    );
+  }
+
+  _DialState appendPlus() {
+    if (!hasInput) {
+      return const _DialState(
+        country: _defaultCountry,
+        nationalDigits: '',
+        rawInternational: '+',
+      );
+    }
+
+    final raw = rawInternational;
+    if (raw != null) {
+      return _DialState(
+        country: country,
+        nationalDigits: '',
+        rawInternational: '$raw+',
+      );
+    }
+
+    return this;
+  }
+
+  _DialState backspace() {
+    final raw = rawInternational;
+    if (raw != null) {
+      final nextRaw = raw.substring(0, raw.length - 1);
+      return _DialState(
+        country: _countryForNumber(nextRaw),
+        nationalDigits: '',
+        rawInternational: nextRaw.isEmpty ? null : nextRaw,
+      );
+    }
+
+    if (nationalDigits.isEmpty) return this;
+
+    return _DialState(
+      country: country,
+      nationalDigits: nationalDigits.substring(0, nationalDigits.length - 1),
+      rawInternational: null,
+    );
+  }
+
+  static String? _cleanContactName(String? name) {
+    final value = name?.trim();
+    if (value == null || value.isEmpty) return null;
+    return value;
+  }
+}
+
+class _DialCountry {
+  const _DialCountry({
+    required this.name,
+    required this.prefix,
+    required this.shortCode,
+    required this.placeholder,
+    required this.rate,
+    required this.flag,
+  });
+
+  final String name;
+  final String prefix;
+  final String shortCode;
+  final String placeholder;
+  final String rate;
+  final String flag;
+
+  String format(String nationalDigits) {
+    if (nationalDigits.isEmpty) return '';
+    final formatted = PhoneMaskInputFormatter(placeholder).applyMask(
+      nationalDigits,
+    );
+    if (placeholder.startsWith('(') &&
+        nationalDigits.length >= 3 &&
+        !formatted.contains(')')) {
+      return '$formatted)';
+    }
+    return formatted;
+  }
+}
+
+const _defaultCountry = _DialCountry(
+  name: 'United States',
+  prefix: '+1',
+  shortCode: 'US',
+  placeholder: '(000) 000-0000',
+  rate: '\$0.02 / min',
+  flag: '🇺🇸',
+);
+
+final _dialCountries = <_DialCountry>[
+  _defaultCountry,
+  const _DialCountry(
+    name: 'Ethiopia',
+    prefix: '+251',
+    shortCode: 'ET',
+    placeholder: '00 000 0000',
+    rate: '\$0.22 / min',
+    flag: '🇪🇹',
+  ),
+  const _DialCountry(
+    name: 'United Kingdom',
+    prefix: '+44',
+    shortCode: 'GB',
+    placeholder: '0000 000000',
+    rate: '\$0.03 / min',
+    flag: '🇬🇧',
+  ),
+  const _DialCountry(
+    name: 'Kenya',
+    prefix: '+254',
+    shortCode: 'KE',
+    placeholder: '000 000000',
+    rate: '\$0.16 / min',
+    flag: '🇰🇪',
+  ),
+  const _DialCountry(
+    name: 'Nigeria',
+    prefix: '+234',
+    shortCode: 'NG',
+    placeholder: '000 000 0000',
+    rate: '\$0.18 / min',
+    flag: '🇳🇬',
+  ),
+  for (final country in countries)
+    if (country.name != 'United States')
+      _DialCountry(
+        name: country.name,
+        prefix: country.prefix,
+        shortCode: _shortCodeFor(country.name),
+        placeholder: country.placeholder,
+        rate: '\$0.02 / min',
+        flag: _flagFor(country.name),
+      ),
+];
+
+_DialCountry _countryForNumber(String value) {
+  final normalized = value.replaceAll(RegExp(r'\s'), '');
+  final matches = _dialCountries
+      .where((country) => normalized.startsWith(country.prefix))
+      .toList()
+    ..sort((a, b) => b.prefix.length.compareTo(a.prefix.length));
+  if (matches.isNotEmpty) return matches.first;
+  return _defaultCountry;
+}
+
+String _shortCodeFor(String countryName) {
+  return switch (countryName) {
+    'Argentina' => 'AR',
+    'Australia' => 'AU',
+    'Austria' => 'AT',
+    'Belgium' => 'BE',
+    'Brazil' => 'BR',
+    'Canada' => 'CA',
+    'Chile' => 'CL',
+    'Colombia' => 'CO',
+    'Costa Rica' => 'CR',
+    'Czech Republic' => 'CZ',
+    'Singapore' => 'SG',
+    _ => countryName.characters.take(2).toString().toUpperCase(),
+  };
+}
+
+String _flagFor(String countryName) {
+  return switch (countryName) {
+    'Argentina' => '🇦🇷',
+    'Australia' => '🇦🇺',
+    'Austria' => '🇦🇹',
+    'Belgium' => '🇧🇪',
+    'Brazil' => '🇧🇷',
+    'Canada' => '🇨🇦',
+    'Chile' => '🇨🇱',
+    'Colombia' => '🇨🇴',
+    'Costa Rica' => '🇨🇷',
+    'Czech Republic' => '🇨🇿',
+    'Singapore' => '🇸🇬',
+    _ => '🌐',
+  };
 }
 
 class _NumberDisplay extends StatelessWidget {
@@ -197,8 +469,12 @@ class _NumberDisplay extends StatelessWidget {
 }
 
 class _RateRow extends StatelessWidget {
-  const _RateRow({required this.contactName});
+  const _RateRow({
+    required this.country,
+    required this.contactName,
+  });
 
+  final _DialCountry country;
   final String? contactName;
 
   @override
@@ -222,11 +498,11 @@ class _RateRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🇺🇸', style: TextStyle(fontSize: 15)),
+          Text(country.flag, style: const TextStyle(fontSize: 15)),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              'United States',
+              country.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: ZuriTextStyles.bodyLarge.copyWith(
@@ -239,7 +515,7 @@ class _RateRow extends StatelessWidget {
           const SizedBox(width: 10),
           Flexible(
             child: Text(
-              '\$0.02 / min',
+              country.rate,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: ZuriTextStyles.bodyLarge.copyWith(
@@ -343,10 +619,10 @@ class _CallActions extends StatelessWidget {
         children: [
           ZuriCircleButton(
             onPressed: () {},
-            icon: Icons.person_add_alt_1_rounded,
+            icon: ZuriIcons.userPlus,
             foregroundColor: ZuriColors.ink,
             backgroundColor: ZuriColors.callSurface,
-            size: 52,
+            size: 44,
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -358,10 +634,10 @@ class _CallActions extends StatelessWidget {
           const SizedBox(width: 14),
           ZuriCircleButton(
             onPressed: onBackspace,
-            icon: Icons.backspace_outlined,
+            icon: ZuriIcons.backspace,
             foregroundColor: ZuriColors.ink,
             backgroundColor: ZuriColors.callSurface,
-            size: 52,
+            size: 44,
           ),
         ],
       ),
@@ -383,10 +659,10 @@ class _DialCallButton extends StatelessWidget {
     final foregroundColor =
         enabled ? ZuriColors.surface : ZuriColors.ink.withValues(alpha: 0.38);
     return SizedBox(
-      height: 52,
+      height: 48,
       child: TextButton.icon(
         onPressed: enabled ? onPressed : null,
-        icon: const Icon(Icons.call_outlined, size: 20),
+        icon: const Icon(ZuriIcons.phone, size: 18),
         label: const Text('Call now'),
         style: TextButton.styleFrom(
           backgroundColor: enabled
@@ -399,8 +675,8 @@ class _DialCallButton extends StatelessWidget {
           disabledForegroundColor: foregroundColor,
           shape: const StadiumBorder(),
           textStyle: ZuriTextStyles.control.copyWith(
-            fontSize: 21,
-            fontWeight: FontWeight.w700,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -455,8 +731,8 @@ class _DialKey extends StatelessWidget {
                               fontWeight: FontWeight.w400,
                             )
                           : ZuriTextStyles.compactTitle.copyWith(
-                              fontSize: 29,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w400,
                             ))
                       .copyWith(color: ZuriColors.ink),
                 ),
@@ -466,9 +742,11 @@ class _DialKey extends StatelessWidget {
                     child: Text(
                       sublabel ?? '',
                       style: ZuriTextStyles.eyebrow.copyWith(
-                        color: ZuriColors.muted.withValues(alpha: 0.62),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
+                        // Spec: rgba(44,74,46,0.40) — forest-green tone at 40%
+                        color: const Color(0x662C4A2E),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.08,
                       ),
                     ),
                   ),

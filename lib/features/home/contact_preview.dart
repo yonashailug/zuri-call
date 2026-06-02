@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/zuri_theme.dart';
+import '../../core/ui/zuri_ui.dart';
 
 class ContactPreview {
   const ContactPreview({
@@ -53,19 +53,6 @@ class ContactPreview {
   }
 
   static Color _colorFor(String value) {
-    const colors = [
-      ZuriColors.primary,
-      ZuriColors.accent,
-      Color(0xFFD97706),
-      Color(0xFF7C3AED),
-      Color(0xFF0F766E),
-      ZuriColors.danger,
-    ];
-
-    final hash = value.codeUnits.fold<int>(
-      0,
-      (previous, codeUnit) => previous + codeUnit,
-    );
-    return colors[hash % colors.length];
+    return ZuriAvatarColors.forInitial(value);
   }
 }

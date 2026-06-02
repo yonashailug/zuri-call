@@ -32,18 +32,17 @@ class CallDetailsScreen extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: ZuriCircleButton(
-              icon: Icons.arrow_back_rounded,
+              icon: ZuriIcons.back,
               onPressed: onBack,
-              size: 46,
+              size: 36,
               foregroundColor: ZuriColors.ink,
-              backgroundColor: ZuriColors.callSurface,
+              backgroundColor: ZuriColors.neutralBg,
             ),
           ),
           const SizedBox(height: 18),
           Center(
             child: ZuriAvatar(
               label: contact.initials,
-              color: contact.color,
               size: 84,
             ),
           ),
@@ -64,14 +63,14 @@ class CallDetailsScreen extends StatelessWidget {
           const SizedBox(height: 26),
           ZuriPillButton(
             label: 'Call back',
-            icon: Icons.call_rounded,
+            icon: ZuriIcons.phone,
             onPressed: () => onCallBack(contact),
           ),
           const SizedBox(height: 24),
           _DetailsPanel(call: call),
           const SizedBox(height: 18),
           _DetailsAction(
-            icon: Icons.content_copy_rounded,
+            icon: ZuriIcons.copy,
             label: 'Copy number',
             onTap: () {
               Clipboard.setData(ClipboardData(text: call.phone));
@@ -84,7 +83,7 @@ class CallDetailsScreen extends StatelessWidget {
             },
           ),
           _DetailsAction(
-            icon: Icons.delete_outline_rounded,
+            icon: ZuriIcons.trash,
             label: 'Delete from recents',
             destructive: true,
             onTap: () => onDelete(call),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/zuri_theme.dart';
 import 'zuri_tokens.dart';
 
 class ZuriPillButton extends StatelessWidget {
@@ -8,7 +9,7 @@ class ZuriPillButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
-    this.height = 66,
+    this.height = 48,
     super.key,
   });
 
@@ -24,7 +25,7 @@ class ZuriPillButton extends StatelessWidget {
 
     final style = TextButton.styleFrom(
       backgroundColor: enabled ? colors.primary : colors.outlineVariant,
-      foregroundColor: Colors.white,
+      foregroundColor: const Color(0xFFF2EAE3),
       shape: const StadiumBorder(),
       textStyle: ZuriTextStyles.control,
     );
@@ -54,7 +55,8 @@ class ZuriCircleButton extends StatelessWidget {
     required this.onPressed,
     this.foregroundColor,
     this.backgroundColor,
-    this.size = 50,
+    this.size = 36,
+    this.iconSize,
     super.key,
   });
 
@@ -63,6 +65,7 @@ class ZuriCircleButton extends StatelessWidget {
   final Color? foregroundColor;
   final Color? backgroundColor;
   final double size;
+  final double? iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +74,11 @@ class ZuriCircleButton extends StatelessWidget {
       dimension: size,
       child: IconButton(
         onPressed: onPressed,
-        icon: Icon(icon),
+        icon: Icon(icon, size: iconSize),
         color: foregroundColor ?? colors.primary,
         style: IconButton.styleFrom(
-          backgroundColor: backgroundColor ?? colors.primaryContainer,
+          // Spec: icon button bg = rgba(28,56,32,0.07)
+          backgroundColor: backgroundColor ?? ZuriColors.iconButtonBg,
           shape: const CircleBorder(),
         ),
       ),
@@ -117,8 +121,8 @@ class ZuriTextField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 17,
+          horizontal: 14,
+          vertical: 11,
         ),
       ),
     );
@@ -183,13 +187,13 @@ class ZuriScreenHeadline extends StatelessWidget {
 class ZuriAvatar extends StatelessWidget {
   const ZuriAvatar({
     required this.label,
-    required this.color,
-    this.size = 52,
+    this.color,
+    this.size = 44,
     super.key,
   });
 
   final String label;
-  final Color color;
+  final Color? color;
   final double size;
 
   @override
@@ -199,7 +203,7 @@ class ZuriAvatar extends StatelessWidget {
       width: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color,
+        color: color ?? ZuriAvatarColors.forInitial(label),
         shape: BoxShape.circle,
       ),
       child: Text(
@@ -208,4 +212,38 @@ class ZuriAvatar extends StatelessWidget {
       ),
     );
   }
+}
+
+class ZuriAvatarColors {
+  const ZuriAvatarColors._();
+
+  static const indigo = Color(0xFF7B68D9);
+  static const coral = Color(0xFFE74C3C);
+  static const teal = Color(0xFF2E86AB);
+  static const amber = Color(0xFFD4845A);
+  static const purple = Color(0xFF8E44AD);
+  static const forestGreen = Color(0xFF1C7A3E);
+  static const red = Color(0xFFC0392B);
+  static const slate = Color(0xFF546E7A);
+
+  static Color forInitial(String initial) {
+    final first = initial.trim().characters.take(1).toString().toUpperCase();
+    return switch (first) {
+      'A' || 'H' || 'O' || 'V' => indigo,
+      'B' || 'I' || 'P' || 'W' => coral,
+      'C' || 'J' || 'Q' || 'X' => teal,
+      'D' || 'K' || 'R' || 'Y' => amber,
+      'E' || 'L' || 'S' || 'Z' => purple,
+      'F' || 'M' || 'T' => forestGreen,
+      'G' || 'N' || 'U' => red,
+      _ => slate,
+    };
+  }
+}
+
+@Deprecated('Use ZuriAvatarColors.forInitial instead.')
+class ZuriAvatarColor {
+  const ZuriAvatarColor._();
+
+  static Color fromLabel(String label) => ZuriAvatarColors.forInitial(label);
 }

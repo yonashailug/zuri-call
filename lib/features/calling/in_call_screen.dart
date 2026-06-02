@@ -76,6 +76,7 @@ class _InCallScreenState extends State<InCallScreen>
     if (endedCall != null) {
       return _EndedCallSummaryScreen(
         call: endedCall,
+        onClose: () => _finishEndedCall(widget.onCallEnded),
         onCallBack: () => _finishEndedCall(
           widget.onCallBackAfterEnded ?? widget.onCallEnded,
         ),
@@ -393,7 +394,7 @@ class _StatusPill extends StatelessWidget {
                       : 1.0;
                   return Opacity(opacity: opacity, child: child);
                 },
-                child: Icon(Icons.circle, size: 10, color: foreground),
+                child: Icon(ZuriIcons.check, size: 10, color: foreground),
               ),
             const SizedBox(width: 9),
             Text(
@@ -413,12 +414,14 @@ class _StatusPill extends StatelessWidget {
 class _EndedCallSummaryScreen extends StatelessWidget {
   const _EndedCallSummaryScreen({
     required this.call,
+    required this.onClose,
     required this.onCallBack,
     required this.onSaveContact,
     required this.onReportQuality,
   });
 
   final CallRecord call;
+  final VoidCallback onClose;
   final VoidCallback onCallBack;
   final VoidCallback onSaveContact;
   final VoidCallback onReportQuality;
@@ -434,8 +437,25 @@ class _EndedCallSummaryScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(28, 22, 28, 28),
           child: Column(
             children: [
-              const SizedBox(height: 16),
-              const _EndedStatusPill(),
+              Row(
+                children: [
+                  const SizedBox.square(dimension: 44),
+                  const Expanded(child: Center(child: _EndedStatusPill())),
+                  SizedBox.square(
+                    dimension: 44,
+                    child: IconButton(
+                      onPressed: onClose,
+                      icon: const Icon(ZuriIcons.close),
+                      color: _EndedCallColors.muted,
+                      tooltip: 'Close',
+                      style: IconButton.styleFrom(
+                        backgroundColor: _EndedCallColors.pill,
+                        shape: const CircleBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 28),
               _EndedAvatar(label: _initialsFor(call.name)),
               const SizedBox(height: 24),
@@ -469,7 +489,7 @@ class _EndedCallSummaryScreen extends StatelessWidget {
                       height: 60,
                       child: FilledButton.icon(
                         onPressed: onCallBack,
-                        icon: const Icon(Icons.phone_in_talk_rounded),
+                        icon: const Icon(ZuriIcons.phone),
                         label: const Text('Call\nback'),
                         style: FilledButton.styleFrom(
                           backgroundColor: ZuriColors.primary,
@@ -489,7 +509,7 @@ class _EndedCallSummaryScreen extends StatelessWidget {
                       height: 60,
                       child: OutlinedButton.icon(
                         onPressed: onSaveContact,
-                        icon: const Icon(Icons.person_add_alt_rounded),
+                        icon: const Icon(ZuriIcons.userPlus),
                         label: const Text('Save\ncontact'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: ZuriColors.muted,
@@ -511,7 +531,7 @@ class _EndedCallSummaryScreen extends StatelessWidget {
               const SizedBox(height: 22),
               TextButton.icon(
                 onPressed: onReportQuality,
-                icon: const Icon(Icons.flag_outlined),
+                icon: const Icon(ZuriIcons.warning),
                 label: const Text('Report call quality'),
                 style: TextButton.styleFrom(
                   foregroundColor: _EndedCallColors.muted,
@@ -735,7 +755,7 @@ class _QualitySummaryRow extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(left: i == 0 ? 0 : 4),
                 child: Icon(
-                  Icons.circle,
+                  ZuriIcons.check,
                   size: 12,
                   color: i < 4
                       ? _EndedCallColors.quality
@@ -827,13 +847,13 @@ class _CallAvatar extends StatelessWidget {
                     ),
                     if (mode == _CallUiMode.muted)
                       const Icon(
-                        Icons.mic_off_rounded,
+                        ZuriIcons.microphoneOff,
                         size: 42,
                         color: _InCallColors.text,
                       ),
                     if (mode == _CallUiMode.onHold)
                       Icon(
-                        Icons.pause_rounded,
+                        ZuriIcons.pause,
                         size: 42,
                         color: _InCallColors.holdText.withValues(alpha: 0.75),
                       ),
@@ -1011,9 +1031,8 @@ class _CallNoticeBanner extends StatelessWidget {
     final background = mode == _CallUiMode.onHold
         ? _InCallColors.holdSoft
         : _InCallColors.dangerSoft;
-    final icon = mode == _CallUiMode.onHold
-        ? Icons.info_outline_rounded
-        : Icons.warning_amber_rounded;
+    final icon =
+        mode == _CallUiMode.onHold ? ZuriIcons.pause : ZuriIcons.warning;
 
     return Container(
       width: double.infinity,
@@ -1090,27 +1109,27 @@ class _CallControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _CallControlButton(
-          icon: isMuted ? Icons.mic_off_rounded : Icons.mic_rounded,
+          icon: isMuted ? ZuriIcons.microphoneOff : ZuriIcons.microphone,
           label: isMuted ? 'Muted' : 'Mute',
           isActive: isMuted,
           isDanger: isMuted,
           onPressed: controlsDisabled ? null : onMute,
         ),
         _CallControlButton(
-          icon: Icons.volume_up_rounded,
+          icon: ZuriIcons.speaker,
           label: 'Speaker',
           isActive: isSpeakerOn,
           onPressed: controlsDisabled ? null : onSpeaker,
         ),
         _CallControlButton(
-          icon: isHoldOn ? Icons.play_arrow_rounded : Icons.pause_rounded,
+          icon: isHoldOn ? ZuriIcons.play : ZuriIcons.pause,
           label: isHoldOn ? 'Resume' : 'Hold',
           isActive: isHoldOn,
           isHold: isHoldOn,
           onPressed: onHold,
         ),
         _CallControlButton(
-          icon: Icons.dialpad_rounded,
+          icon: ZuriIcons.dialpad,
           label: 'Keypad',
           isActive: isKeypadOpen,
           onPressed: controlsDisabled ? null : onKeypad,
@@ -1166,33 +1185,33 @@ class _CallControlButton extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(
-              width: 66,
-              height: 78,
+              width: 58,
+              height: 58,
               child: TextButton(
                 onPressed: onPressed,
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                   backgroundColor: backgroundColor,
                   foregroundColor: foregroundColor,
                   disabledForegroundColor: foregroundColor,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   side: BorderSide(color: borderColor, width: 1.2),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(icon, size: 26),
-                    const SizedBox(height: 7),
+                    Icon(icon, size: 22),
+                    const SizedBox(height: 4),
                     Text(
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: ZuriTextStyles.rowMeta.copyWith(
                         color: foregroundColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -1221,14 +1240,14 @@ class _BottomCallActions extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _RoundCallAction(
-          icon: Icons.videocam_outlined,
+          icon: ZuriIcons.video,
           onPressed: () {},
         ),
         SizedBox.square(
-          dimension: 76,
+          dimension: 58,
           child: IconButton(
             onPressed: onEndCall,
-            icon: const Icon(Icons.call_end_rounded, size: 36),
+            icon: const Icon(ZuriIcons.phoneOff, size: 22),
             color: Colors.white,
             style: IconButton.styleFrom(
               backgroundColor: _InCallColors.endCall,
@@ -1237,7 +1256,7 @@ class _BottomCallActions extends StatelessWidget {
           ),
         ),
         _RoundCallAction(
-          icon: Icons.more_horiz_rounded,
+          icon: ZuriIcons.more,
           onPressed: onMore,
         ),
       ],
@@ -1308,10 +1327,10 @@ enum _CallUiMode {
 
   IconData? get badgeIcon {
     return switch (this) {
-      _CallUiMode.muted => Icons.mic_off_rounded,
-      _CallUiMode.onHold => Icons.pause_rounded,
-      _CallUiMode.poorNetwork => Icons.wifi_off_rounded,
-      _CallUiMode.ended => Icons.call_end_rounded,
+      _CallUiMode.muted => ZuriIcons.microphoneOff,
+      _CallUiMode.onHold => ZuriIcons.pause,
+      _CallUiMode.poorNetwork => ZuriIcons.wifiOff,
+      _CallUiMode.ended => ZuriIcons.phoneOff,
       _ => null,
     };
   }
@@ -1346,25 +1365,25 @@ class _RoundCallAction extends StatelessWidget {
 class _InCallColors {
   const _InCallColors._();
 
-  static const background = Color(0xFF17391F);
-  static const text = Color(0xFFF5F0E8);
-  static const muted = Color(0xFF9DA89A);
+  static const background = ZuriColors.forest900;
+  static const text = ZuriColors.surface;
+  static const muted = Color(0xA6F2EAE3);
   static const avatarFill = Color(0xFF39533A);
   static const avatarRing = Color(0xFFA6B29E);
   static const waveform = Color(0xFF93A18D);
-  static const control = Color(0xFF2D482F);
-  static const controlActive = Color(0xFF456A3F);
-  static const controlIcon = Color(0xFFC2C8BC);
-  static const endCall = Color(0xFFC74736);
-  static const liveSoft = Color(0xFF315C31);
-  static const liveBorder = Color(0xFF4F8547);
-  static const liveText = Color(0xFF8BC47D);
-  static const dangerSoft = Color(0xFF472B25);
-  static const dangerBorder = Color(0xFF934538);
-  static const dangerText = Color(0xFFF09A91);
-  static const holdSoft = Color(0xFF3F3A1F);
-  static const holdBorder = Color(0xFF926622);
-  static const holdText = Color(0xFFF4CF79);
+  static const control = Color(0x14FFFFFF);
+  static const controlActive = Color(0x24FFFFFF);
+  static const controlIcon = Color(0xB3F2EAE3);
+  static const endCall = ZuriColors.danger;
+  static const liveSoft = Color(0x264CAF50);
+  static const liveBorder = Color(0x4D4CAF50);
+  static const liveText = Color(0xFF1C5C30);
+  static const dangerSoft = Color(0x33C0392B);
+  static const dangerBorder = Color(0x59C0392B);
+  static const dangerText = Color(0xFF8C2A1E);
+  static const holdSoft = Color(0x2EB7651D);
+  static const holdBorder = Color(0x59B7651D);
+  static const holdText = Color(0xFF8C4D0A);
 }
 
 class _EndedCallColors {

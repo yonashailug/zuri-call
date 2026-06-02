@@ -23,22 +23,18 @@ class SettingsScreen extends StatelessWidget {
         children: [
           _ProfileHeader(sessionSummary: sessionSummary),
           const SizedBox(height: 22),
+          const _SettingsRow(icon: ZuriIcons.account, label: 'Account'),
+          const _SettingsRow(icon: ZuriIcons.wallet, label: 'Wallet'),
+          const _SettingsRow(icon: ZuriIcons.world, label: 'Rates'),
+          const _SettingsRow(icon: ZuriIcons.support, label: 'Support'),
+          const _SettingsRow(icon: ZuriIcons.privacy, label: 'Privacy policy'),
           const _SettingsRow(
-              icon: Icons.account_circle_rounded, label: 'Account'),
+              icon: ZuriIcons.document, label: 'Terms of service'),
           const _SettingsRow(
-              icon: Icons.account_balance_wallet_rounded, label: 'Wallet'),
-          const _SettingsRow(icon: Icons.price_check_rounded, label: 'Rates'),
-          const _SettingsRow(
-              icon: Icons.support_agent_rounded, label: 'Support'),
-          const _SettingsRow(
-              icon: Icons.privacy_tip_rounded, label: 'Privacy policy'),
-          const _SettingsRow(
-              icon: Icons.description_rounded, label: 'Terms of service'),
-          const _SettingsRow(
-              icon: Icons.emergency_rounded, label: 'Emergency calling notice'),
+              icon: ZuriIcons.emergency, label: 'Emergency calling notice'),
           const SizedBox(height: 12),
           _SettingsRow(
-            icon: Icons.logout_rounded,
+            icon: ZuriIcons.logout,
             label: 'Sign out',
             destructive: true,
             onTap: authController.signOut,
@@ -62,8 +58,7 @@ class _ProfileHeader extends StatelessWidget {
         children: [
           ZuriAvatar(
             label: sessionSummary.initials,
-            color: ZuriColors.primary,
-            size: 52,
+            size: 36,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -114,7 +109,7 @@ class _SettingsRow extends StatelessWidget {
       ),
       trailing: destructive
           ? null
-          : const Icon(Icons.chevron_right_rounded, color: ZuriColors.muted),
+          : const Icon(ZuriIcons.chevronRight, color: ZuriColors.muted),
       onTap: onTap ?? () {},
     );
   }

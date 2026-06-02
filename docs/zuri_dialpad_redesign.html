@@ -1,0 +1,442 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+.scene{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:2rem 0 3rem;
+  gap:28px;
+  flex-wrap:wrap;
+}
+
+.phone{
+  width:300px;
+  border-radius:44px;
+  background:#F2EAE3;
+  border:1.5px solid rgba(0,0,0,0.08);
+  overflow:hidden;
+  position:relative;
+  box-shadow:0 2px 0 rgba(0,0,0,0.04);
+}
+
+.notch{
+  width:90px;height:26px;
+  background:#F2EAE3;
+  border-radius:0 0 16px 16px;
+  position:absolute;top:0;left:50%;
+  transform:translateX(-50%);
+  z-index:10;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.n-mic{width:26px;height:4px;border-radius:2px;background:#D8CFC8;}
+.n-cam{width:8px;height:8px;border-radius:50%;background:#D8CFC8;}
+
+.sb{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:34px 20px 0;
+  font-size:11px;font-weight:500;
+  color:#2C4A2E;
+  font-family:'DM Sans',sans-serif;
+}
+.sb-r{display:flex;gap:4px;align-items:center;font-size:13px;}
+
+.screen{
+  min-height:580px;
+  display:flex;flex-direction:column;
+  padding:0 0 0;
+}
+
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 0;
+}
+.top-title{
+  font-family:'DM Serif Display',serif;
+  font-size:26px;
+  color:#1C3820;
+  letter-spacing:-0.01em;
+}
+.top-badge{
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;font-weight:500;
+  background:#1C3820;
+  color:#F2EAE3;
+  padding:4px 10px;
+  border-radius:20px;
+  letter-spacing:0.02em;
+}
+
+.number-display{
+  display:flex;flex-direction:column;
+  align-items:center;
+  padding:20px 24px 8px;
+  min-height:72px;
+  justify-content:flex-end;
+}
+.number-text{
+  font-family:'DM Sans',sans-serif;
+  font-size:28px;
+  font-weight:300;
+  color:#1C3820;
+  letter-spacing:0.06em;
+  min-height:36px;
+  text-align:center;
+  line-height:1;
+}
+.number-text.placeholder{
+  color:rgba(44,74,46,0.25);
+  font-size:16px;
+  font-weight:400;
+  letter-spacing:0.01em;
+}
+
+.rate-row{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:6px 24px 0;
+}
+.rate-flag{font-size:14px;}
+.rate-txt{
+  font-family:'DM Sans',sans-serif;
+  font-size:12px;
+  color:rgba(44,74,46,0.5);
+  font-weight:400;
+}
+.rate-price{
+  font-family:'DM Sans',sans-serif;
+  font-size:12px;
+  color:#1C3820;
+  font-weight:500;
+}
+
+.pad-wrap{
+  flex:1;
+  display:flex;flex-direction:column;
+  align-items:center;
+  padding:18px 32px 0;
+  gap:10px;
+}
+
+.key-row{
+  display:flex;
+  gap:12px;
+  width:100%;
+  justify-content:center;
+}
+
+.key{
+  flex:1;
+  max-width:68px;
+  height:62px;
+  border-radius:18px;
+  background:#fff;
+  border:1px solid rgba(44,74,46,0.1);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  cursor:pointer;
+  transition:background 0.12s, transform 0.1s;
+  position:relative;
+  overflow:hidden;
+}
+.key:active{background:#E8DED7;transform:scale(0.96);}
+
+.key-num{
+  font-family:'DM Serif Display',serif;
+  font-size:22px;
+  color:#1C3820;
+  line-height:1;
+}
+.key-sub{
+  font-family:'DM Sans',sans-serif;
+  font-size:9px;
+  font-weight:500;
+  color:rgba(44,74,46,0.4);
+  letter-spacing:0.12em;
+  min-height:11px;
+}
+.key.sym .key-num{
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  font-size:20px;
+}
+
+.key.ghost{
+  background:transparent;
+  border-color:transparent;
+  pointer-events:none;
+}
+
+.action-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 32px 16px;
+  gap:0;
+}
+
+.action-side{
+  width:44px;height:44px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  font-size:18px;
+}
+.action-add{
+  background:rgba(28,56,32,0.07);
+  color:#1C3820;
+}
+.action-del{
+  background:rgba(28,56,32,0.07);
+  color:#1C3820;
+}
+
+.call-btn{
+  flex:1;
+  max-width:160px;
+  height:52px;
+  border-radius:26px;
+  background:#1C3820;
+  border:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;
+  font-weight:500;
+  color:#F2EAE3;
+  letter-spacing:0.01em;
+}
+.call-btn-icon{font-size:17px;}
+
+.bnav{
+  display:flex;justify-content:space-around;align-items:center;
+  padding:12px 0 24px;
+  border-top:1px solid rgba(44,74,46,0.08);
+  background:#F2EAE3;
+}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.ni-ic{font-size:20px;color:rgba(44,74,46,0.35);}
+.ni-ic.on{color:#1C3820;}
+.ni-lb{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;color:rgba(44,74,46,0.35);letter-spacing:0.04em;}
+.ni-lb.on{color:#1C3820;}
+
+.fab-nav{
+  width:44px;height:44px;
+  border-radius:50%;
+  background:#1C3820;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  color:#F2EAE3;
+  margin-top:-18px;
+  box-shadow:0 4px 12px rgba(28,56,32,0.3);
+}
+
+.label-col{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-top:2.5rem;
+  max-width:180px;
+}
+.lbl-card{
+  background:var(--color-background-primary);
+  border:0.5px solid var(--color-border-tertiary);
+  border-radius:var(--border-radius-lg);
+  padding:12px 14px;
+}
+.lbl-head{
+  font-size:11px;font-weight:500;
+  color:var(--color-text-tertiary);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:6px;
+}
+.lbl-item{
+  font-size:12px;
+  color:var(--color-text-secondary);
+  line-height:1.6;
+  margin-bottom:2px;
+}
+.lbl-item span{
+  color:var(--color-text-primary);
+  font-weight:500;
+}
+</style>
+
+<div class="scene">
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Zuri dialpad redesign — warm cream aesthetic with forest green brand color and refined narrow keys</h2>
+
+<div class="phone">
+  <div class="notch"><div class="n-mic"></div><div class="n-cam"></div></div>
+  <div class="screen">
+    <div class="sb">
+      <span>9:41</span>
+      <div class="sb-r">
+        <i class="ti ti-wifi" aria-hidden="true"></i>
+        <i class="ti ti-battery-3" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <div class="top-bar">
+      <p class="top-title">Dial</p>
+      <span class="top-badge">US +1</span>
+    </div>
+
+    <div class="number-display" id="num-display">
+      <div class="number-text placeholder" id="num-text">Enter number</div>
+    </div>
+
+    <div class="rate-row">
+      <span class="rate-flag">🇺🇸</span>
+      <span class="rate-txt">United States</span>
+      <span class="rate-price">$0.02 / min</span>
+    </div>
+
+    <div class="pad-wrap">
+      <div class="key-row">
+        <div class="key" onclick="pressKey('1')">
+          <span class="key-num">1</span>
+          <span class="key-sub"></span>
+        </div>
+        <div class="key" onclick="pressKey('2')">
+          <span class="key-num">2</span>
+          <span class="key-sub">ABC</span>
+        </div>
+        <div class="key" onclick="pressKey('3')">
+          <span class="key-num">3</span>
+          <span class="key-sub">DEF</span>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key" onclick="pressKey('4')">
+          <span class="key-num">4</span>
+          <span class="key-sub">GHI</span>
+        </div>
+        <div class="key" onclick="pressKey('5')">
+          <span class="key-num">5</span>
+          <span class="key-sub">JKL</span>
+        </div>
+        <div class="key" onclick="pressKey('6')">
+          <span class="key-num">6</span>
+          <span class="key-sub">MNO</span>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key" onclick="pressKey('7')">
+          <span class="key-num">7</span>
+          <span class="key-sub">PQRS</span>
+        </div>
+        <div class="key" onclick="pressKey('8')">
+          <span class="key-num">8</span>
+          <span class="key-sub">TUV</span>
+        </div>
+        <div class="key" onclick="pressKey('9')">
+          <span class="key-num">9</span>
+          <span class="key-sub">WXYZ</span>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key sym" onclick="pressKey('*')">
+          <span class="key-num">✱</span>
+          <span class="key-sub"></span>
+        </div>
+        <div class="key" onclick="pressKey('0')">
+          <span class="key-num">0</span>
+          <span class="key-sub">+</span>
+        </div>
+        <div class="key sym" onclick="pressKey('#')">
+          <span class="key-num">#</span>
+          <span class="key-sub"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <div class="action-side action-add" title="Add contact">
+        <i class="ti ti-user-plus" aria-label="Add contact"></i>
+      </div>
+      <button class="call-btn">
+        <i class="ti ti-phone call-btn-icon" aria-hidden="true"></i>
+        Call now
+      </button>
+      <div class="action-side action-del" onclick="deleteKey()" title="Delete">
+        <i class="ti ti-backspace" aria-label="Delete digit"></i>
+      </div>
+    </div>
+
+    <div class="bnav">
+      <div class="ni">
+        <i class="ti ti-clock ni-ic" aria-hidden="true"></i>
+        <span class="ni-lb">Recents</span>
+      </div>
+      <div class="ni">
+        <i class="ti ti-users ni-ic" aria-hidden="true"></i>
+        <span class="ni-lb">Contacts</span>
+      </div>
+      <div class="fab-nav">
+        <i class="ti ti-phone-plus" style="font-size:19px" aria-hidden="true"></i>
+      </div>
+      <div class="ni">
+        <i class="ti ti-wallet ni-ic" aria-hidden="true"></i>
+        <span class="ni-lb">Wallet</span>
+      </div>
+      <div class="ni">
+        <i class="ti ti-settings ni-ic" aria-hidden="true"></i>
+        <span class="ni-lb">Settings</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="label-col">
+  <div class="lbl-card">
+    <div class="lbl-head">What changed</div>
+    <div class="lbl-item"><span>Key size</span> — narrower, taller 68×62px keys with breathing room</div>
+    <div class="lbl-item"><span>Typography</span> — DM Serif Display for numerals, DM Sans for labels</div>
+    <div class="lbl-item"><span>Heading</span> — compact "Dial" replaces heavy "Dial pad"</div>
+    <div class="lbl-item"><span>Country</span> — pill badge top-right instead of big centred text</div>
+    <div class="lbl-item"><span>Number input</span> — live display above pad, placeholder state</div>
+    <div class="lbl-item"><span>Call button</span> — centred pill, flanked by add + backspace</div>
+    <div class="lbl-item"><span>Rate display</span> — subtle flag + muted text, not dominant</div>
+  </div>
+
+  <div class="lbl-card">
+    <div class="lbl-head">Try it</div>
+    <div class="lbl-item">Tap the keys — they're <span>interactive</span></div>
+    <div class="lbl-item">Backspace clears the last digit</div>
+  </div>
+</div>
+</div>
+
+<script>
+let digits = '';
+function render(){
+  const el = document.getElementById('num-text');
+  if(!digits){
+    el.textContent = 'Enter number';
+    el.className = 'number-text placeholder';
+  } else {
+    const fmt = digits.replace(/(\d{0,3})(\d{0,3})(\d{0,4})/, (_,a,b,c)=>[a,b,c].filter(Boolean).join(' '));
+    el.textContent = fmt;
+    el.className = 'number-text';
+  }
+}
+function pressKey(k){
+  if(digits.length >= 12) return;
+  digits += k;
+  render();
+}
+function deleteKey(){
+  if(!digits) return;
+  digits = digits.slice(0,-1);
+  render();
+}
+</script>

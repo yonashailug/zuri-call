@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/zuri_theme.dart';
+import '../../core/ui/zuri_ui.dart';
 import '../calling/call_service.dart';
 import '../calling/in_call_screen.dart';
 import '../dialpad/dialpad_screen.dart';
@@ -79,7 +80,7 @@ class _AppShellState extends State<AppShell> {
         contactName: dialContactName,
         onStartCall: _startDialpadCall,
       ),
-      const WalletScreen(),
+      WalletScreen(onCallDestination: _startRateDestinationCall),
       const SettingsScreen(),
     ];
 
@@ -101,42 +102,50 @@ class _AppShellState extends State<AppShell> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _selectTab(2),
         backgroundColor: ZuriColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: ZuriColors.surface,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add_ic_call_rounded),
+        child: const Icon(ZuriIcons.phonePlus, size: 20),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: _selectTab,
-        backgroundColor: ZuriColors.surface,
-        indicatorColor: ZuriColors.callSurface,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.history_rounded),
-            selectedIcon: Icon(Icons.history_rounded),
-            label: 'Recents',
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(color: ZuriColors.navBorderTop),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outline_rounded),
-            selectedIcon: Icon(Icons.people_rounded),
-            label: 'Contacts',
-          ),
-          NavigationDestination(
-            icon: SizedBox.shrink(),
-            label: 'Call',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet_rounded),
-            label: 'Wallet',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings_rounded),
-            label: 'Settings',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          height: 56,
+          selectedIndex: selectedIndex,
+          onDestinationSelected: _selectTab,
+          backgroundColor: ZuriColors.surface,
+          indicatorColor: Colors.transparent,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(ZuriIcons.recents),
+              selectedIcon: Icon(ZuriIcons.recents),
+              label: 'Recents',
+            ),
+            NavigationDestination(
+              icon: Icon(ZuriIcons.contacts),
+              selectedIcon: Icon(ZuriIcons.contacts),
+              label: 'Contacts',
+            ),
+            NavigationDestination(
+              icon: SizedBox.shrink(),
+              label: 'Call',
+            ),
+            NavigationDestination(
+              icon: Icon(ZuriIcons.wallet),
+              selectedIcon: Icon(ZuriIcons.wallet),
+              label: 'Wallet',
+            ),
+            NavigationDestination(
+              icon: Icon(ZuriIcons.settings),
+              selectedIcon: Icon(ZuriIcons.settings),
+              label: 'Settings',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -144,18 +153,37 @@ class _AppShellState extends State<AppShell> {
   void _selectContactForCall(ContactPreview contact) {
     setState(() {
       selectedCall = null;
-      dialNumber = contact.phone;
-      dialContactName = contact.name;
-      selectedIndex = 2;
+      dialNumber = null;
+      dialContactName = null;
+      activeCall = OutgoingCallRequest(
+        phone: contact.phone,
+        name: contact.name,
+        startedAt: DateTime.now(),
+      );
     });
   }
 
   void _startDialpadCall(String number) {
+    final matchingPrefilledContact =
+        dialNumber != null && _sameDialableNumber(dialNumber!, number);
     setState(() {
       selectedCall = null;
       activeCall = OutgoingCallRequest(
         phone: number,
-        name: dialContactName,
+        name: matchingPrefilledContact ? dialContactName : null,
+        startedAt: DateTime.now(),
+      );
+    });
+  }
+
+  void _startRateDestinationCall(RateDestination destination) {
+    setState(() {
+      selectedCall = null;
+      dialNumber = null;
+      dialContactName = null;
+      activeCall = OutgoingCallRequest(
+        phone: destination.phone,
+        name: destination.name,
         startedAt: DateTime.now(),
       );
     });
@@ -239,5 +267,10 @@ class _AppShellState extends State<AppShell> {
 
   Future<void> _saveRecentCalls() {
     return callHistoryRepository.saveRecentCalls(recentCalls);
+  }
+
+  bool _sameDialableNumber(String left, String right) {
+    return left.replaceAll(RegExp(r'\D'), '') ==
+        right.replaceAll(RegExp(r'\D'), '');
   }
 }

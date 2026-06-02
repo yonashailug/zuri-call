@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'package:zuri_call/core/theme/zuri_theme.dart';
+import 'package:zuri_call/core/ui/zuri_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zuri_call/app.dart';
 import 'package:zuri_call/features/calling/call_service.dart';
@@ -8,6 +11,7 @@ import 'package:zuri_call/features/home/call_history_repository.dart';
 import 'package:zuri_call/features/home/call_record.dart';
 import 'package:zuri_call/features/home/contact_preview.dart';
 import 'package:zuri_call/features/home/device_contacts_repository.dart';
+import 'package:zuri_call/features/wallet/wallet_screen.dart';
 
 void main() {
   testWidgets('renders Zuri welcome screen', (tester) async {
@@ -94,15 +98,11 @@ void main() {
     expect(find.text('Search contacts or numbers'), findsOneWidget);
     expect(find.text('Maya Kim'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.call_rounded).first);
-    await tester.pumpAndSettle();
-    expect(find.text('Dial'), findsOneWidget);
-    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
-
-    await tester.tap(find.text('Call now'));
+    await tester.tap(find.byIcon(ZuriIcons.phone).first);
     await tester.pump();
     await tester.pump();
     expect(find.text('Active call'), findsOneWidget);
+    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
     expect(find.text('0:00'), findsOneWidget);
     expect(find.text('Mute'), findsOneWidget);
     expect(find.text('Speaker'), findsOneWidget);
@@ -110,7 +110,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1100));
     expect(find.text('0:01'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.call_end_rounded));
+    await tester.tap(find.byIcon(ZuriIcons.phoneOff));
     await tester.pump();
     expect(find.text('Call ended'), findsOneWidget);
     expect(find.text('DURATION'), findsOneWidget);
@@ -129,14 +129,14 @@ void main() {
     await tester.tap(find.text('Maya Kim').first);
     await tester.pumpAndSettle();
     expect(find.text('Call details'), findsNothing);
-    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+    expect(find.byIcon(ZuriIcons.back), findsOneWidget);
     expect(find.text('Recents'), findsOneWidget);
     expect(find.text('Status'), findsOneWidget);
     expect(find.text('Completed'), findsOneWidget);
     expect(find.text('Duration'), findsOneWidget);
     expect(find.text('1s'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.tap(find.byIcon(ZuriIcons.back));
     await tester.pumpAndSettle();
     expect(find.text('Recents'), findsOneWidget);
     expect(find.text('Just now'), findsOneWidget);
@@ -145,8 +145,9 @@ void main() {
     await tester.tap(find.text('Maya Kim').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Call back'));
-    await tester.pumpAndSettle();
-    expect(find.text('Dial'), findsOneWidget);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Active call'), findsOneWidget);
     expect(find.text('+1 (206) 555-0142'), findsOneWidget);
   });
 
@@ -163,9 +164,7 @@ void main() {
 
     await _signIn(tester, displayName: 'Alex Johnson');
 
-    await tester.tap(find.byIcon(Icons.call_rounded).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Call now'));
+    await tester.tap(find.byIcon(ZuriIcons.phone).first);
     await tester.pump();
     await tester.pump();
 
@@ -206,7 +205,7 @@ void main() {
     await tester.tap(find.text('Jordan Rivera'));
     await tester.pumpAndSettle();
     expect(find.text('Call details'), findsNothing);
-    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+    expect(find.byIcon(ZuriIcons.back), findsOneWidget);
     expect(find.text('Recents'), findsOneWidget);
 
     await tester.tap(find.text('Delete from recents'));
@@ -245,6 +244,77 @@ void main() {
     expect(find.text('Outgoing'), findsOneWidget);
   });
 
+  testWidgets('recents shows first-name quick dial and missed call banner', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final repository = _FakeCallHistoryRepository(
+      initialCalls: [
+        CallRecord(
+          name: 'Jordan Rivera',
+          phone: '+1 (503) 555-0278',
+          startedAt: DateTime.now().subtract(const Duration(minutes: 12)),
+          direction: CallDirection.missed,
+          status: CallStatus.missed,
+        ),
+        CallRecord(
+          name: 'Maya Kim',
+          phone: '+1 (206) 555-0142',
+          startedAt: DateTime.now().subtract(const Duration(minutes: 18)),
+          durationSeconds: 74,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_testApp(repository));
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jordan'), findsOneWidget);
+    expect(find.text('Jordan R.'), findsNothing);
+    expect(find.text('1 missed call'), findsOneWidget);
+    expect(find.text('Call back'), findsOneWidget);
+  });
+
+  testWidgets('recents call button starts the in-call screen', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final callHistoryRepository = _FakeCallHistoryRepository(
+      initialCalls: [
+        CallRecord.fromDialpad(
+          number: '+1 (503) 555-0278',
+          name: 'Jordan Rivera',
+          startedAt: DateTime.now(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_testApp(callHistoryRepository));
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(ZuriIcons.phone));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Active call'), findsOneWidget);
+    expect(find.text('Jordan Rivera'), findsOneWidget);
+    expect(find.text('+1 (503) 555-0278'), findsOneWidget);
+  });
+
   testWidgets('keeps contacts loaded when switching from recents', (
     tester,
   ) async {
@@ -268,6 +338,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Maya Kim'), findsOneWidget);
     expect(find.text('No contacts found'), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is SizedBox &&
+            widget.height == ZuriDimensions.searchBarHeight &&
+            widget.child is TextField,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is ZuriCircleButton &&
+            widget.icon == ZuriIcons.phone &&
+            widget.size == ZuriDimensions.callBackBtnSize &&
+            widget.iconSize == 15 &&
+            widget.foregroundColor == ZuriColors.forest800 &&
+            widget.backgroundColor == ZuriColors.iconButtonBg,
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows network-building empty contacts state', (tester) async {
@@ -300,7 +391,7 @@ void main() {
     expect(find.text('Dial'), findsOneWidget);
   });
 
-  testWidgets('dialpad keeps selected US prefix for manual numbers', (
+  testWidgets('dialpad formats manual US numbers with selected prefix', (
     tester,
   ) async {
     String? startedNumber;
@@ -318,12 +409,185 @@ void main() {
     await tester.tap(find.text('6'));
     await tester.pumpAndSettle();
 
-    expect(find.text('206'), findsOneWidget);
+    expect(find.text('+1 (206)'), findsOneWidget);
+
+    await tester.tap(find.text('5'));
+    await tester.tap(find.text('5'));
+    await tester.tap(find.text('5'));
+    await tester.tap(find.text('0'));
+    await tester.tap(find.text('1'));
+    await tester.tap(find.text('4'));
+    await tester.tap(find.text('2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
 
     await tester.tap(find.text('Call now'));
     await tester.pump();
 
-    expect(startedNumber, '+1 206');
+    expect(startedNumber, '+1 2065550142');
+  });
+
+  testWidgets('dialpad clears contact label after editing prefilled number', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DialpadScreen(
+          initialNumber: '+1 (206) 555-0142',
+          contactName: 'Maya Kim',
+          onStartCall: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
+
+    await tester.tap(find.byIcon(ZuriIcons.backspace));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Maya Kim'), findsNothing);
+    expect(find.text('United States'), findsOneWidget);
+    expect(find.text('+1 (206) 555-014'), findsOneWidget);
+  });
+
+  testWidgets('dialpad syncs international prefix with country pill', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DialpadScreen(
+          onStartCall: (_) {},
+        ),
+      ),
+    );
+
+    await tester.longPress(find.text('0'));
+    await tester.tap(find.text('2'));
+    await tester.tap(find.text('5'));
+    await tester.tap(find.text('1'));
+    await tester.tap(find.text('9'));
+    await tester.tap(find.text('1'));
+    await tester.tap(find.text('3'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ET +251'), findsOneWidget);
+    expect(find.text('+251 91 3'), findsOneWidget);
+  });
+
+  testWidgets('wallet opens top-up flow with balance preview', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: WalletScreen(),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Top up'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Top up wallet'), findsOneWidget);
+    expect(find.text('Current balance'), findsOneWidget);
+    expect(find.text('~83 min to ET'), findsOneWidget);
+    expect(find.text('Most popular'), findsOneWidget);
+    expect(find.text('New balance'), findsOneWidget);
+    expect(find.text('\$14.88'), findsOneWidget);
+    expect(find.text('Pay \$10.00 securely'), findsOneWidget);
+
+    await tester.tap(find.text('\$20'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('\$24.88'), findsOneWidget);
+    expect(find.text('Pay \$20.00 securely'), findsOneWidget);
+  });
+
+  testWidgets('wallet opens full transaction history ledger', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: WalletScreen(),
+      ),
+    );
+
+    await tester.tap(find.text('See all'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('History'), findsOneWidget);
+    expect(find.text('Filter'), findsOneWidget);
+    expect(find.text('Export'), findsOneWidget);
+    expect(find.text('Total spent'), findsOneWidget);
+    expect(find.text('\$2.14'), findsOneWidget);
+    expect(find.text('Total topped up'), findsOneWidget);
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Calls'), findsOneWidget);
+    expect(find.text('Top-ups'), findsOneWidget);
+    expect(find.text('TODAY'), findsOneWidget);
+    expect(find.text('-\$0.12'), findsNWidgets(2));
+    expect(find.text('YESTERDAY'), findsOneWidget);
+    expect(find.text('+\$4.99'), findsOneWidget);
+    expect(find.text('Top-up • Visa •••4242'), findsOneWidget);
+    expect(find.text('2:14 PM • Ref #ZW8847'), findsOneWidget);
+    expect(find.text('ET'), findsNWidgets(2));
+    expect(find.text('US'), findsOneWidget);
+    expect(find.textContaining('\$0.02/min'), findsNWidgets(3));
+  });
+
+  testWidgets('wallet opens rate lookup with Ethiopia CTA', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: WalletScreen(),
+      ),
+    );
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Rates'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Call rates'), findsOneWidget);
+    expect(find.text('Ethiopia'), findsWidgets);
+    expect(find.text('\$0.02'), findsOneWidget);
+    expect(find.text('50 min'), findsOneWidget);
+    expect(find.text('250 min'), findsOneWidget);
+    expect(find.text('500 min'), findsOneWidget);
+    expect(find.text('FREQUENTLY CALLED'), findsOneWidget);
+    expect(find.text('your top destination'), findsOneWidget);
+    expect(find.text('Call Ethiopia now'), findsOneWidget);
+  });
+
+  testWidgets('wallet rate lookup can start Ethiopia call', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.text('Wallet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Rates'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Call Ethiopia now'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Active call'), findsOneWidget);
+    expect(find.text('Ethiopia'), findsOneWidget);
+    expect(find.text('+251'), findsOneWidget);
   });
 
   testWidgets('in-call hold state disables irrelevant controls', (
@@ -435,7 +699,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byIcon(Icons.call_end_rounded));
+    await tester.tap(find.byIcon(ZuriIcons.phoneOff));
     await tester.pump();
 
     expect(find.text('Call ended'), findsOneWidget);
@@ -461,13 +725,11 @@ void main() {
     await tester.pumpAndSettle();
     await _signIn(tester, displayName: 'Alex Johnson');
 
-    await tester.tap(find.byIcon(Icons.call_rounded).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Call now'));
+    await tester.tap(find.byIcon(ZuriIcons.phone).first);
     await tester.pump();
     await tester.pump();
 
-    await tester.tap(find.byIcon(Icons.call_end_rounded));
+    await tester.tap(find.byIcon(ZuriIcons.phoneOff));
     await tester.pump();
 
     expect(find.text('Call ended'), findsOneWidget);
@@ -475,6 +737,34 @@ void main() {
     expect(find.text('COST'), findsOneWidget);
     expect(find.text('Report call quality'), findsOneWidget);
     expect(find.text('Maya Kim'), findsOneWidget);
+  });
+
+  testWidgets('app shell close button exits ended summary to recents', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.byIcon(ZuriIcons.phone).first);
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.byIcon(ZuriIcons.phoneOff));
+    await tester.pump();
+    expect(find.text('Call ended'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('Just now'), findsOneWidget);
+    expect(find.text('Outgoing'), findsOneWidget);
   });
 
   testWidgets('service ended status opens call summary', (
