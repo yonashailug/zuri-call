@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/data/phone_country_lookup.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import '../../core/widgets/zuri_scaffold.dart';
@@ -20,6 +21,7 @@ class ContactsScreen extends StatefulWidget {
     this.recentCalls = const [],
     this.onOpenDialpad,
     this.onOpenContacts,
+    this.onRecentCallDelete,
     super.key,
   });
 
@@ -30,6 +32,7 @@ class ContactsScreen extends StatefulWidget {
   final List<CallRecord> recentCalls;
   final VoidCallback? onOpenDialpad;
   final VoidCallback? onOpenContacts;
+  final ValueChanged<CallRecord>? onRecentCallDelete;
 
   @override
   State<ContactsScreen> createState() => _ContactsScreenState();
@@ -84,7 +87,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       widget.mode == ContactsMode.recents
                           ? 'Good morning'
                           : 'Your network',
-                      style: ZuriTextStyles.bodyLarge.copyWith(
+                      style: ZuriTextStyles.pageSubtitle.copyWith(
                         color: ZuriColors.muted,
                       ),
                     ),
@@ -93,10 +96,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       widget.mode == ContactsMode.recents
                           ? sessionSummary.greetingName
                           : 'Contacts',
-                      style: ZuriTextStyles.screenTitle.copyWith(
-                        fontSize: 28,
-                        height: 1,
-                      ),
+                      style: widget.mode == ContactsMode.recents
+                          ? ZuriTextStyles.greetingTitle
+                          : ZuriTextStyles.pageTitle.copyWith(height: 1),
                     ),
                   ],
                 ),
@@ -119,6 +121,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               onRecentCallOpen: widget.onRecentCallOpen,
               onOpenDialpad: widget.onOpenDialpad,
               onOpenContacts: widget.onOpenContacts,
+              onRecentCallDelete: widget.onRecentCallDelete,
             ),
           ] else ...[
             const _ContactsFilterTabs(),
@@ -180,6 +183,7 @@ class _RecentsContent extends StatelessWidget {
     required this.onRecentCallOpen,
     this.onOpenDialpad,
     this.onOpenContacts,
+    this.onRecentCallDelete,
   });
 
   final List<CallRecord> recentCalls;
@@ -187,6 +191,7 @@ class _RecentsContent extends StatelessWidget {
   final ValueChanged<CallRecord> onRecentCallOpen;
   final VoidCallback? onOpenDialpad;
   final VoidCallback? onOpenContacts;
+  final ValueChanged<CallRecord>? onRecentCallDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +231,9 @@ class _RecentsContent extends StatelessWidget {
             call: call,
             onTap: () => onRecentCallOpen(call),
             onCallBack: () => onContactCall(call.contact),
+            onDelete: onRecentCallDelete == null
+                ? null
+                : () => onRecentCallDelete?.call(call),
           ),
       ],
     );
@@ -264,7 +272,7 @@ class _SearchField extends StatelessWidget {
       height: ZuriDimensions.searchBarHeight,
       child: TextField(
         controller: controller,
-        style: ZuriTextStyles.bodyLarge.copyWith(color: ZuriColors.ink),
+        style: ZuriTextStyles.inputText.copyWith(color: ZuriColors.ink),
         decoration: InputDecoration(
           hintText: hintText,
           contentPadding: const EdgeInsets.symmetric(
@@ -353,10 +361,8 @@ class _ContactFilterChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: ZuriTextStyles.label.copyWith(
+        style: ZuriTextStyles.chipLabel.copyWith(
           color: selected ? Colors.white : ZuriColors.muted,
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -383,18 +389,16 @@ class _EmptyRecentsState extends StatelessWidget {
           Text(
             'No calls yet',
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.compactTitle.copyWith(
+            style: ZuriTextStyles.stateTitle.copyWith(
               color: ZuriColors.ink,
-              fontSize: 27,
             ),
           ),
           const SizedBox(height: 18),
           Text(
             'Your recent calls will appear\nhere. Make your first call to get\nstarted.',
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.bodyLarge.copyWith(
+            style: ZuriTextStyles.supportingText.copyWith(
               color: ZuriColors.muted,
-              fontWeight: FontWeight.w500,
               height: 1.45,
             ),
           ),
@@ -410,10 +414,7 @@ class _EmptyRecentsState extends StatelessWidget {
                 backgroundColor: ZuriColors.primary,
                 foregroundColor: Colors.white,
                 shape: const StadiumBorder(),
-                textStyle: ZuriTextStyles.label.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
+                textStyle: ZuriTextStyles.primaryButtonLabel,
               ),
             ),
           ),
@@ -427,10 +428,7 @@ class _EmptyRecentsState extends StatelessWidget {
                 foregroundColor: ZuriColors.muted,
                 side: const BorderSide(color: ZuriColors.border, width: 1.6),
                 shape: const StadiumBorder(),
-                textStyle: ZuriTextStyles.label.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
+                textStyle: ZuriTextStyles.chipLabel,
               ),
               child: const Text('Import contacts'),
             ),
@@ -505,7 +503,7 @@ class _QuickDialStrip extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: contacts.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final contact = contacts[index];
           final selected = index == 0;
@@ -544,32 +542,37 @@ class _QuickDialPill extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(ZuriRadius.callAv),
+      borderRadius: BorderRadius.circular(ZuriRadius.round),
       child: Container(
-        width: selected ? 128 : 124,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        constraints: const BoxConstraints(minWidth: 88, maxWidth: 128),
+        height: ZuriDimensions.quickDialHeight,
+        padding: const EdgeInsets.only(left: 5, right: 14),
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(ZuriRadius.callAv),
+          borderRadius: BorderRadius.circular(ZuriRadius.round),
           border: selected ? null : Border.all(color: ZuriColors.callSurface),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _Avatar(
               contact: contact,
-              size: 38,
+              size: 34,
               flag: flag,
               labelOverride: contact.isPhoneOnly ? countryLabel : null,
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                contact.firstDisplayName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: ZuriTextStyles.contactName.copyWith(
-                  color: foreground,
-                  height: 1.05,
+            const SizedBox(width: 8),
+            Flexible(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 74),
+                child: Text(
+                  contact.firstDisplayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: ZuriTextStyles.chipLabel.copyWith(
+                    color: foreground,
+                    height: 1.05,
+                  ),
                 ),
               ),
             ),
@@ -616,20 +619,16 @@ class MissedCallBanner extends StatelessWidget {
               children: [
                 Text(
                   '$missedCount missed ${missedCount == 1 ? 'call' : 'calls'}',
-                  style: ZuriTypography.contactName.copyWith(
+                  style: ZuriTextStyles.recentRowTitle.copyWith(
                     color: ZuriColors.danger,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${call.name} • ${call.relativeTime}',
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTypography.caption.copyWith(
+                  style: ZuriTextStyles.meta.copyWith(
                     color: ZuriColors.danger.withValues(alpha: 0.66),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -648,10 +647,7 @@ class MissedCallBanner extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(ZuriRadius.action),
               ),
-              textStyle: ZuriTypography.caption.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
+              textStyle: ZuriTextStyles.primaryButtonLabel,
             ),
             child: const Text('Call back'),
           ),
@@ -672,21 +668,16 @@ class _RecentSectionHeader extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            'Today',
-            style: ZuriTextStyles.label.copyWith(
+            'TODAY',
+            style: ZuriTextStyles.sectionHeader.copyWith(
               color: ZuriColors.muted,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.6,
             ),
           ),
         ),
         Text(
           '$count ${count == 1 ? 'call' : 'calls'}',
-          style: ZuriTextStyles.rowMeta.copyWith(
+          style: ZuriTextStyles.sectionCount.copyWith(
             color: ZuriColors.muted,
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
           ),
         ),
       ],
@@ -699,19 +690,22 @@ class _RecentCallRow extends StatelessWidget {
     required this.call,
     required this.onTap,
     required this.onCallBack,
+    required this.onDelete,
   });
 
   final CallRecord call;
   final VoidCallback onTap;
   final VoidCallback onCallBack;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
     final missed = call.isMissed;
     final rowColor = missed ? ZuriColors.danger : ZuriColors.ink;
-    final metaColor = missed ? ZuriColors.danger : ZuriColors.muted;
+    final iconColor = call.directionIconColor;
+    final metaColor = missed ? ZuriColors.danger : ZuriColors.subtitleText;
 
-    return InkWell(
+    final row = InkWell(
       onTap: onTap,
       child: SizedBox(
         height: ZuriDimensions.recentRowHeight,
@@ -746,7 +740,7 @@ class _RecentCallRow extends StatelessWidget {
                               call.contact.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: ZuriTextStyles.contactName.copyWith(
+                              style: ZuriTextStyles.recentRowTitle.copyWith(
                                 color: rowColor,
                               ),
                             ),
@@ -754,9 +748,9 @@ class _RecentCallRow extends StatelessWidget {
                             Row(
                               children: [
                                 Icon(
-                                  call.typeIcon,
+                                  call.directionIcon,
                                   size: 16,
-                                  color: metaColor,
+                                  color: iconColor,
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
@@ -764,10 +758,9 @@ class _RecentCallRow extends StatelessWidget {
                                     call.recentsSubtitle,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: ZuriTextStyles.rowMeta.copyWith(
+                                    style: ZuriTextStyles.recentRowSubtitle
+                                        .copyWith(
                                       color: metaColor,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w300,
                                     ),
                                   ),
                                 ),
@@ -778,32 +771,37 @@ class _RecentCallRow extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          call.relativeTime,
-                          style: ZuriTextStyles.rowMeta.copyWith(
-                            color: metaColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w300,
+                    SizedBox(
+                      width: 96,
+                      height: ZuriDimensions.recentRowHeight - 10,
+                      child: Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Text(
+                              call.relativeTime,
+                              style: ZuriTextStyles.recentRowSubtitle.copyWith(
+                                color: metaColor,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        ZuriCircleButton(
-                          icon:
-                              missed ? ZuriIcons.phoneMissed : ZuriIcons.phone,
-                          onPressed: onCallBack,
-                          foregroundColor:
-                              missed ? ZuriColors.danger : ZuriColors.forest800,
-                          backgroundColor: missed
-                              ? ZuriColors.danger.withValues(alpha: 0.10)
-                              : ZuriColors.iconButtonBg,
-                          size: ZuriDimensions.callBackBtnSize,
-                          iconSize: 15,
-                        ),
-                      ],
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: ZuriCircleButton(
+                              icon: ZuriIcons.phone,
+                              onPressed: onCallBack,
+                              foregroundColor: missed
+                                  ? ZuriColors.danger
+                                  : ZuriColors.forest800,
+                              backgroundColor: missed
+                                  ? ZuriColors.danger.withValues(alpha: 0.10)
+                                  : ZuriColors.iconButtonBg,
+                              size: ZuriDimensions.callBackBtnSize,
+                              iconSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -812,6 +810,32 @@ class _RecentCallRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    final onDelete = this.onDelete;
+    if (onDelete == null) return row;
+
+    return Dismissible(
+      key: ValueKey('recent-${call.startedAt.toIso8601String()}-${call.phone}'),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) => onDelete(),
+      background: Container(
+        height: ZuriDimensions.recentRowHeight,
+        padding: const EdgeInsets.only(right: ZuriSpacing.s4),
+        alignment: Alignment.centerRight,
+        decoration: const BoxDecoration(
+          color: ZuriColors.dangerBg,
+          border: Border(
+            bottom: BorderSide(color: ZuriColors.rowDivider),
+          ),
+        ),
+        child: const Icon(
+          ZuriIcons.trash,
+          color: ZuriColors.danger,
+          size: 20,
+        ),
+      ),
+      child: row,
     );
   }
 }
@@ -920,18 +944,16 @@ class _EmptyContactsState extends StatelessWidget {
           Text(
             'Build your network',
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.compactTitle.copyWith(
+            style: ZuriTextStyles.stateTitle.copyWith(
               color: ZuriColors.ink,
-              fontSize: 27,
             ),
           ),
           const SizedBox(height: 18),
           Text(
             'Sync your phone contacts or add\npeople manually to start calling for\nless.',
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.bodyLarge.copyWith(
+            style: ZuriTextStyles.supportingText.copyWith(
               color: ZuriColors.muted,
-              fontWeight: FontWeight.w500,
               height: 1.45,
             ),
           ),
@@ -947,10 +969,7 @@ class _EmptyContactsState extends StatelessWidget {
                 backgroundColor: ZuriColors.primary,
                 foregroundColor: Colors.white,
                 shape: const StadiumBorder(),
-                textStyle: ZuriTextStyles.label.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
+                textStyle: ZuriTextStyles.primaryButtonLabel,
               ),
             ),
           ),
@@ -969,10 +988,7 @@ class _EmptyContactsState extends StatelessWidget {
                 ),
                 side: const BorderSide(color: ZuriColors.border, width: 1.6),
                 shape: const StadiumBorder(),
-                textStyle: ZuriTextStyles.label.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
+                textStyle: ZuriTextStyles.secondaryButtonLabel,
               ),
             ),
           ),
@@ -980,11 +996,9 @@ class _EmptyContactsState extends StatelessWidget {
           Text(
             'Your contacts are hashed before matching -\nnever stored on our servers.',
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.rowMeta.copyWith(
+            style: ZuriTextStyles.supportingText.copyWith(
               color: ZuriColors.muted.withValues(alpha: 0.55),
-              fontSize: 15,
               height: 1.35,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -1086,7 +1100,7 @@ class _ContactRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
           _Avatar(contact: contact, size: 44),
@@ -1097,12 +1111,12 @@ class _ContactRow extends StatelessWidget {
               children: [
                 Text(
                   contact.name,
-                  style: ZuriTextStyles.contactName,
+                  style: ZuriTextStyles.contactRowTitle,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: ZuriTextStyles.rowMeta.copyWith(
+                  style: ZuriTextStyles.contactRowSubtitle.copyWith(
                     color: ZuriColors.muted,
                   ),
                 ),
@@ -1212,12 +1226,18 @@ extension on CallRecord {
   bool get isMissed =>
       direction == CallDirection.missed || status == CallStatus.missed;
 
-  IconData get typeIcon {
-    if (isMissed) return ZuriIcons.phoneMissed;
+  IconData get directionIcon {
+    if (isMissed) return ZuriIcons.arrowDownLeft;
     if (direction == CallDirection.incoming) {
-      return ZuriIcons.phoneIncoming;
+      return ZuriIcons.arrowDownLeft;
     }
-    return ZuriIcons.phoneOutgoing;
+    return ZuriIcons.arrowUpRight;
+  }
+
+  Color get directionIconColor {
+    if (isMissed) return ZuriColors.danger;
+    if (direction == CallDirection.incoming) return ZuriColors.success;
+    return ZuriColors.subtitleText;
   }
 
   String get recentsSubtitle {
@@ -1239,25 +1259,9 @@ extension on CallRecord {
   }
 }
 
-String? _countryFlagFor(String phone) {
-  final normalized = phone.replaceAll(RegExp(r'\s'), '');
-  if (normalized.startsWith('+251')) return '🇪🇹';
-  if (normalized.startsWith('+1')) return '🇺🇸';
-  if (normalized.startsWith('+44')) return '🇬🇧';
-  if (normalized.startsWith('+254')) return '🇰🇪';
-  if (normalized.startsWith('+234')) return '🇳🇬';
-  return null;
-}
+String? _countryFlagFor(String phone) => PhoneCountryLookup.flagFor(phone);
 
-String? _countryLabelFor(String phone) {
-  final normalized = phone.replaceAll(RegExp(r'\s'), '');
-  if (normalized.startsWith('+251')) return 'ET';
-  if (normalized.startsWith('+1')) return 'US';
-  if (normalized.startsWith('+44')) return 'GB';
-  if (normalized.startsWith('+254')) return 'KE';
-  if (normalized.startsWith('+234')) return 'NG';
-  return null;
-}
+String? _countryLabelFor(String phone) => PhoneCountryLookup.codeFor(phone);
 
 extension on String {
   String get shortTimeAgo {
@@ -1291,13 +1295,14 @@ class _EmptyState extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.contactName,
+            style: ZuriTextStyles.cardTitle,
           ),
           const SizedBox(height: 6),
           Text(
             body,
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.rowMeta.copyWith(color: ZuriColors.muted),
+            style:
+                ZuriTextStyles.cardSubtitle.copyWith(color: ZuriColors.muted),
           ),
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: 14),
@@ -1309,7 +1314,7 @@ class _EmptyState extends StatelessWidget {
                   backgroundColor: ZuriColors.primary,
                   foregroundColor: Colors.white,
                   shape: const StadiumBorder(),
-                  textStyle: ZuriTextStyles.label,
+                  textStyle: ZuriTextStyles.secondaryButtonLabel,
                 ),
                 child: Text(actionLabel!),
               ),

@@ -59,8 +59,8 @@ class ZuriDimensions {
   static const searchBarHeight = 44.0;
   static const avatarRowSize = 44.0;
   static const iconButtonSize = 36.0;
-  static const quickDialHeight = 56.0;
-  static const recentRowHeight = 64.0;
+  static const quickDialHeight = 40.0;
+  static const recentRowHeight = 72.0;
   static const dialpadActionSize = 44.0;
   static const primaryButtonHeight = 62.0;
   static const secondaryButtonHeight = 56.0;
@@ -72,125 +72,371 @@ class ZuriDimensions {
 class ZuriTextStyles {
   const ZuriTextStyles._();
 
-  // Keep these names aligned with pubspec font family declarations.
-  static const displayFont = 'DMSerifDisplay';
-  static const uiFont = 'DMSans';
-
-  static const display = TextStyle(
-    fontFamily: displayFont,
-    fontSize: 32,
-    height: 1,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-  );
-
-  static const screenTitle = TextStyle(
-    fontFamily: displayFont,
-    fontSize: 28,
+  // ── Page / hero roles ─────────────────────────────────────────────────────
+  /// Page titles: Wallet, Contacts, Dial, Settings, subpage titles. 30sp Bold.
+  static const pageTitle = TextStyle(
+    fontSize: 30,
     height: 1.08,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
   );
 
-  static const compactTitle = TextStyle(
-    fontFamily: displayFont,
-    fontSize: 22,
-    height: 1.08,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-  );
-
-  static const sectionTitle = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 1,
-  );
-
-  static const bodyLarge = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 12,
+  /// Page subtitles and small header descriptors. 15sp SemiBold.
+  static const pageSubtitle = TextStyle(
+    fontSize: 15,
     height: 1.25,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w600,
     letterSpacing: 0,
   );
 
-  static const label = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
+  /// Recents greeting name. 32sp Bold.
+  static const greetingTitle = TextStyle(
+    fontSize: 32,
+    height: 1.0,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
   );
 
-  static const control = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 15,
-    fontWeight: FontWeight.w500,
+  /// Empty state and in-call state titles. 28sp Bold.
+  static const stateTitle = TextStyle(
+    fontSize: 28,
+    height: 1.1,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
   );
 
-  static const controlStrong = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 15,
-    fontWeight: FontWeight.w500,
+  /// Compact page/title text for call details and dialpad placeholders. 24sp Bold.
+  static const compactTitle = TextStyle(
+    fontSize: 24,
+    height: 1.08,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
   );
+  static const compactPageTitle = compactTitle;
+  static const callParticipantName = compactTitle;
+  static const dialpadPlaceholder = compactTitle;
 
-  static const contactName = TextStyle(
-    fontFamily: displayFont, // DM Serif Display — spec: "never use DM Sans for primary display names"
-    fontSize: 15,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-  );
-
-  @Deprecated('Use contactName')
-  static const rowTitle = contactName;
-
-  static const rowMeta = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 11,
+  // ── Metric / numeric roles ────────────────────────────────────────────────
+  /// Wallet balance hero figure ($4.88). 52sp Light.
+  static const metricHero = TextStyle(
+    fontSize: 52,
+    height: 0.95,
     fontWeight: FontWeight.w300,
     letterSpacing: 0,
   );
 
-  // Spec: caption — 10sp Light 300 (timestamps, durations, per-minute rates)
-  static const caption = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 10,
+  /// Balance figures, preset amounts, large numerics. 34sp Light.
+  static const metricValue = TextStyle(
+    fontSize: 34,
+    height: 1.0,
     fontWeight: FontWeight.w300,
     letterSpacing: 0,
   );
 
-  // Spec: callTimer — DM Sans 20sp Light 300 tabular figures (call duration display)
-  static const callTimer = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 20,
+  /// Avatar initials on in-call and ended-call screens. 36sp Light.
+  static const avatarDisplay = TextStyle(
+    fontSize: 36,
+    height: 1.0,
+    fontWeight: FontWeight.w300,
+    letterSpacing: 0,
+  );
+
+  /// Live call duration counter. 22sp Light, tabular figures.
+  static const callTimerText = TextStyle(
+    fontSize: 22,
     fontWeight: FontWeight.w300,
     fontFeatures: [FontFeature.tabularFigures()],
     letterSpacing: 0,
   );
 
-  static const eyebrow = TextStyle(
-    fontFamily: uiFont,
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 1,
+  /// Dialpad number entry display. 26sp Bold.
+  static const dialpadEntry = TextStyle(
+    fontSize: 26,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
   );
-}
 
-class ZuriTypography {
-  const ZuriTypography._();
+  /// Wallet card sub-figures (spent, top-up amounts). 20sp Bold.
+  static const metricLabel = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
 
-  static const displayFont = ZuriTextStyles.displayFont;
-  static const uiFont = ZuriTextStyles.uiFont;
+  // ── Top-up wallet roles ────────────────────────────────────────────────────
+  /// Top-up flow page title. 26sp Bold.
+  static const topUpTitle = TextStyle(
+    fontSize: 26,
+    height: 1.08,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
 
-  static const screenTitle = ZuriTextStyles.screenTitle;
-  static const greetingName = ZuriTextStyles.screenTitle;
-  static const balanceLarge = ZuriTextStyles.display;
-  static const contactName = ZuriTextStyles.contactName;
-  static const btnPrimary = ZuriTextStyles.label;
-  static const bodyRegular = ZuriTextStyles.bodyLarge;
-  static const caption = ZuriTextStyles.caption;
-  static const sectionLabel = ZuriTextStyles.eyebrow;
-  static const callTimer = ZuriTextStyles.callTimer;
+  /// Top-up balance caption. 14sp Medium.
+  static const topUpBalanceLabel = TextStyle(
+    fontSize: 14,
+    height: 1.2,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+
+  /// Top-up balance figure. 28sp Bold.
+  static const topUpBalanceValue = TextStyle(
+    fontSize: 28,
+    height: 1.0,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+
+  /// Preset top-up amount figures. 26sp Bold.
+  static const topUpOptionAmount = TextStyle(
+    fontSize: 26,
+    height: 1.0,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+
+  /// Preset top-up minute estimates. 13sp SemiBold.
+  static const topUpOptionMinutes = TextStyle(
+    fontSize: 13,
+    height: 1.2,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
+
+  /// Top-up popularity badge. 13sp Bold.
+  static const topUpBadge = TextStyle(
+    fontSize: 13,
+    height: 1.15,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+
+  /// Top-up field and payment row primary labels. 16sp Bold.
+  static const topUpFieldText = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+
+  /// Top-up payment method title. 16sp Bold.
+  static const topUpPaymentTitle = topUpFieldText;
+
+  /// Top-up payment method subtitle. 14sp Medium.
+  static const topUpPaymentSubtitle = TextStyle(
+    fontSize: 14,
+    height: 1.2,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+
+  /// Top-up summary labels. 14sp Medium.
+  static const topUpSummaryLabel = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+
+  /// Top-up summary values. 15sp Bold.
+  static const topUpSummaryValue = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+
+  // ── Row / list roles ──────────────────────────────────────────────────────
+  /// Primary contact/list row labels. 16sp Bold.
+  static const rowPrimary = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+  static const contactRowTitle = rowPrimary;
+  static const recentRowTitle = rowPrimary;
+  static const settingsRowTitle = rowPrimary;
+  static const cardTitle = rowPrimary;
+  static const avatarInitials = rowPrimary;
+
+  /// High-emphasis transaction/list row titles. 18sp ExtraBold.
+  static const rowTitle = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+  );
+
+  /// Secondary row metadata and subtitles. 14sp Medium.
+  static const rowSecondary = TextStyle(
+    fontSize: 14,
+    height: 1.2,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+  static const contactRowSubtitle = rowSecondary;
+  static const recentRowSubtitle = rowSecondary;
+  static const cardSubtitle = rowSecondary;
+  static const walletTransactionSubtitle = TextStyle(
+    fontSize: 14,
+    height: 1.2,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0,
+  );
+  static const walletTransactionAmount = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
+
+  /// Chip and pill labels. 15sp Bold.
+  static const chipLabel = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+  static const secondaryButtonLabel = chipLabel;
+  static const sectionCount = chipLabel;
+
+  // ── Body ──────────────────────────────────────────────────────────────────
+  /// Primary body text: descriptions, banners, inline copy. 16sp SemiBold.
+  static const body = TextStyle(
+    fontSize: 16,
+    height: 1.4,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
+  static const bodyText = body;
+  static const paragraphText = body;
+
+  /// Medium-emphasis body: hold status line, signal quality. 16sp Medium.
+  static const bodyMedium = TextStyle(
+    fontSize: 16,
+    height: 1.4,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+  static const supportingText = bodyMedium;
+  static const emptyStateBody = bodyMedium;
+
+  /// High-emphasis body: tip banners, inline warnings. 16sp ExtraBold.
+  static const bodyStrong = TextStyle(
+    fontSize: 16,
+    height: 1.45,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+  );
+  static const emphasisText = bodyStrong;
+  static const bannerText = bodyStrong;
+
+  /// Secondary body: panel rows, phone subtitles, compact copy. 14sp Medium.
+  static const bodySmall = TextStyle(
+    fontSize: 14,
+    height: 1.25,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+
+  /// Subtitle labels ("Good morning", "Your balance"). 15sp SemiBold.
+  static const bodySubtle = pageSubtitle;
+
+  // ── Metadata ──────────────────────────────────────────────────────────────
+  /// Timestamps, durations, rate notes, country chip labels. 14sp Medium.
+  static const meta = TextStyle(
+    fontSize: 14,
+    height: 1.2,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+  static const metadata = meta;
+
+  /// Card metric sub-labels, minute calculation labels. 14sp ExtraBold.
+  static const metaStrong = TextStyle(
+    fontSize: 14,
+    height: 1.2,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+  );
+  static const metadataStrong = metaStrong;
+
+  /// Phone number subtitle directly under rowPrimary. 14sp Medium.
+  static const rowMeta = rowSecondary;
+
+  // ── Labels / controls ─────────────────────────────────────────────────────
+  /// Form field labels, chip labels. 15sp Bold.
+  static const label = chipLabel;
+
+  /// Primary CTA buttons ("Call now", "Top up"). 16sp Bold.
+  static const buttonPrimary = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+  static const primaryButtonLabel = buttonPrimary;
+
+  /// High-emphasis CTAs ("Call back", "Pay securely"). 16sp ExtraBold.
+  static const buttonStrong = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+  );
+  static const strongButtonLabel = buttonStrong;
+
+  /// Input field text, country picker list items. 16sp Bold.
+  static const control = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+  static const inputText = control;
+  static const formControl = control;
+
+  // ── Section / navigation ──────────────────────────────────────────────────
+  /// Section headers, eyebrow labels, date group headers. 11sp ExtraBold, tracked.
+  static const sectionLabel = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 1.0,
+  );
+  static const sectionHeader = sectionLabel;
+
+  /// Dialpad letter sub-labels (ABC, DEF …). Same spec as sectionLabel.
+  static const dialpadSublabel = sectionLabel;
+
+  /// Navigation bar tab labels. 11sp Bold.
+  static const navLabel = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+  static const navItemLabel = navLabel;
+
+  // ── Deprecated aliases (remove after migration) ───────────────────────────
+  @Deprecated('Use body')
+  static const bodyLarge = body;
+  @Deprecated('Use pageTitle')
+  static const screenTitle = pageTitle;
+  @Deprecated('Use greetingTitle')
+  static const greetingName = greetingTitle;
+  @Deprecated('Use pageSubtitle')
+  static const subheading = pageSubtitle;
+  @Deprecated('Use metricHero')
+  static const displayHero = metricHero;
+  @Deprecated('Use metricValue')
+  static const display = metricValue;
+  @Deprecated('Use avatarDisplay')
+  static const displayAvatar = avatarDisplay;
+  @Deprecated('Use rowPrimary')
+  static const contactName = rowPrimary;
+  @Deprecated('Use callTimerText')
+  static const callTimer = callTimerText;
+  @Deprecated('Use dialpadEntry')
+  static const dialpadNumber = dialpadEntry;
+  @Deprecated('Use metricLabel')
+  static const balanceMetric = metricLabel;
+  @Deprecated('Use sectionLabel')
+  static const sectionTitle = sectionLabel;
+  @Deprecated('Use sectionLabel')
+  static const eyebrow = sectionLabel;
+  @Deprecated('Use buttonStrong')
+  static const controlStrong = buttonStrong;
+  @Deprecated('Use meta')
+  static const caption = meta;
 }

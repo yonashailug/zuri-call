@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/data/phone_country_lookup.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import '../home/call_record.dart';
@@ -118,7 +119,7 @@ class _InCallScreenState extends State<InCallScreen>
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: ZuriTextStyles.compactTitle.copyWith(
+                style: ZuriTextStyles.compactPageTitle.copyWith(
                   color: _InCallColors.text,
                 ),
               ),
@@ -126,22 +127,18 @@ class _InCallScreenState extends State<InCallScreen>
               Text(
                 widget.request.phone,
                 textAlign: TextAlign.center,
-                style: ZuriTextStyles.bodyLarge.copyWith(
+                style: ZuriTextStyles.rowSecondary.copyWith(
                   color: _InCallColors.muted,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 14),
               Text(
                 _supportingStatusText,
                 textAlign: TextAlign.center,
-                style: ZuriTextStyles.control.copyWith(
+                style: ZuriTextStyles.pageSubtitle.copyWith(
                   color: mode == _CallUiMode.poorNetwork
                       ? _InCallColors.dangerText
                       : _InCallColors.muted,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 16),
@@ -399,9 +396,8 @@ class _StatusPill extends StatelessWidget {
             const SizedBox(width: 9),
             Text(
               label,
-              style: ZuriTextStyles.label.copyWith(
+              style: ZuriTextStyles.chipLabel.copyWith(
                 color: foreground,
-                fontSize: 15,
               ),
             ),
           ],
@@ -464,19 +460,16 @@ class _EndedCallSummaryScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: ZuriTextStyles.compactTitle.copyWith(
+                style: ZuriTextStyles.stateTitle.copyWith(
                   color: ZuriColors.ink,
-                  fontSize: 26,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 call.phone,
                 textAlign: TextAlign.center,
-                style: ZuriTextStyles.bodyLarge.copyWith(
+                style: ZuriTextStyles.rowSecondary.copyWith(
                   color: _EndedCallColors.muted,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 28),
@@ -495,8 +488,7 @@ class _EndedCallSummaryScreen extends StatelessWidget {
                           backgroundColor: ZuriColors.primary,
                           foregroundColor: Colors.white,
                           shape: const StadiumBorder(),
-                          textStyle: ZuriTextStyles.label.copyWith(
-                            fontWeight: FontWeight.w900,
+                          textStyle: ZuriTextStyles.strongButtonLabel.copyWith(
                             height: 1.05,
                           ),
                         ),
@@ -518,8 +510,7 @@ class _EndedCallSummaryScreen extends StatelessWidget {
                             width: 1.4,
                           ),
                           shape: const StadiumBorder(),
-                          textStyle: ZuriTextStyles.label.copyWith(
-                            fontWeight: FontWeight.w800,
+                          textStyle: ZuriTextStyles.strongButtonLabel.copyWith(
                             height: 1.05,
                           ),
                         ),
@@ -535,9 +526,7 @@ class _EndedCallSummaryScreen extends StatelessWidget {
                 label: const Text('Report call quality'),
                 style: TextButton.styleFrom(
                   foregroundColor: _EndedCallColors.muted,
-                  textStyle: ZuriTextStyles.label.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  textStyle: ZuriTextStyles.strongButtonLabel,
                 ),
               ),
             ],
@@ -563,10 +552,8 @@ class _EndedStatusPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         child: Text(
           'Call ended',
-          style: ZuriTextStyles.label.copyWith(
+          style: ZuriTextStyles.strongButtonLabel.copyWith(
             color: _EndedCallColors.muted,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
           ),
         ),
       ),
@@ -591,9 +578,8 @@ class _EndedAvatar extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: ZuriTextStyles.display.copyWith(
+        style: ZuriTextStyles.avatarDisplay.copyWith(
           color: Colors.white,
-          fontSize: 36,
         ),
       ),
     );
@@ -677,10 +663,8 @@ class _SummaryMetric extends StatelessWidget {
       children: [
         Text(
           label,
-          style: ZuriTextStyles.rowMeta.copyWith(
+          style: ZuriTextStyles.metadataStrong.copyWith(
             color: _EndedCallColors.muted,
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 12),
@@ -688,7 +672,6 @@ class _SummaryMetric extends StatelessWidget {
           value,
           style: ZuriTextStyles.compactTitle.copyWith(
             color: ZuriColors.ink,
-            fontSize: 27,
           ),
         ),
       ],
@@ -712,19 +695,15 @@ class _SummaryRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: ZuriTextStyles.rowMeta.copyWith(
+            style: ZuriTextStyles.meta.copyWith(
               color: _EndedCallColors.muted,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
             ),
           ),
         ),
         Text(
           value,
-          style: ZuriTextStyles.rowMeta.copyWith(
+          style: ZuriTextStyles.body.copyWith(
             color: ZuriColors.ink,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
           ),
         ),
       ],
@@ -742,10 +721,8 @@ class _QualitySummaryRow extends StatelessWidget {
         Expanded(
           child: Text(
             'Call quality',
-            style: ZuriTextStyles.rowMeta.copyWith(
+            style: ZuriTextStyles.meta.copyWith(
               color: _EndedCallColors.muted,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -840,9 +817,8 @@ class _CallAvatar extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: ZuriTextStyles.display.copyWith(
+                      style: ZuriTextStyles.avatarDisplay.copyWith(
                         color: _InCallColors.text,
-                        fontSize: 36,
                       ),
                     ),
                     if (mode == _CallUiMode.muted)
@@ -944,10 +920,8 @@ class _HoldStatusLine extends StatelessWidget {
     return Text(
       'Call paused • ${_formatShortDuration(seconds)} on hold',
       textAlign: TextAlign.center,
-      style: ZuriTextStyles.bodyLarge.copyWith(
+      style: ZuriTextStyles.emphasisText.copyWith(
         color: _InCallColors.muted,
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
       ),
     );
   }
@@ -965,10 +939,8 @@ class _SignalQuality extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           'Weak signal',
-          style: ZuriTextStyles.bodyLarge.copyWith(
+          style: ZuriTextStyles.emphasisText.copyWith(
             color: _InCallColors.dangerText,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
           ),
         ),
       ],
@@ -1049,10 +1021,8 @@ class _CallNoticeBanner extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: ZuriTextStyles.bodyLarge.copyWith(
+              style: ZuriTextStyles.emphasisText.copyWith(
                 color: foreground,
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
                 height: 1.2,
               ),
             ),
@@ -1066,9 +1036,7 @@ class _CallNoticeBanner extends StatelessWidget {
                 foregroundColor: foreground,
                 shape: const StadiumBorder(),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
-                textStyle: ZuriTextStyles.rowMeta.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                textStyle: ZuriTextStyles.strongButtonLabel,
               ),
               child: Text(actionLabel!),
             ),
@@ -1208,10 +1176,8 @@ class _CallControlButton extends StatelessWidget {
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: ZuriTextStyles.rowMeta.copyWith(
+                      style: ZuriTextStyles.navItemLabel.copyWith(
                         color: foregroundColor,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -1423,22 +1389,6 @@ String _initialsFor(String value) {
   return parts.map((part) => part[0].toUpperCase()).join();
 }
 
-String? _countryFlagFor(String phone) {
-  final normalized = phone.replaceAll(RegExp(r'\s'), '');
-  if (normalized.startsWith('+251')) return '🇪🇹';
-  if (normalized.startsWith('+1')) return '🇺🇸';
-  if (normalized.startsWith('+44')) return '🇬🇧';
-  if (normalized.startsWith('+254')) return '🇰🇪';
-  if (normalized.startsWith('+234')) return '🇳🇬';
-  return null;
-}
+String? _countryFlagFor(String phone) => PhoneCountryLookup.flagFor(phone);
 
-String? _countryLabelFor(String phone) {
-  final normalized = phone.replaceAll(RegExp(r'\s'), '');
-  if (normalized.startsWith('+251')) return 'ET';
-  if (normalized.startsWith('+1')) return 'US';
-  if (normalized.startsWith('+44')) return 'GB';
-  if (normalized.startsWith('+254')) return 'KE';
-  if (normalized.startsWith('+234')) return 'NG';
-  return null;
-}
+String? _countryLabelFor(String phone) => PhoneCountryLookup.codeFor(phone);
