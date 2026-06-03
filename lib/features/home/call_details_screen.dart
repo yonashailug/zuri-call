@@ -50,7 +50,7 @@ class CallDetailsScreen extends StatelessWidget {
           Text(
             call.name,
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.compactTitle.copyWith(
+            style: ZuriTextStyles.compactPageTitle.copyWith(
               color: ZuriColors.ink,
             ),
           ),
@@ -58,7 +58,7 @@ class CallDetailsScreen extends StatelessWidget {
           Text(
             call.phone,
             textAlign: TextAlign.center,
-            style: ZuriTextStyles.bodyLarge.copyWith(color: ZuriColors.muted),
+            style: ZuriTextStyles.bodyText.copyWith(color: ZuriColors.muted),
           ),
           const SizedBox(height: 26),
           ZuriPillButton(
@@ -67,11 +67,23 @@ class CallDetailsScreen extends StatelessWidget {
             onPressed: () => onCallBack(contact),
           ),
           const SizedBox(height: 24),
-          _DetailsPanel(call: call),
+          ZuriPanel(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                ZuriInfoRow(label: 'Status', value: call.status.label),
+                ZuriInfoRow(label: 'Direction', value: call.direction.label),
+                ZuriInfoRow(label: 'Duration', value: call.durationLabel),
+                ZuriInfoRow(label: 'Started', value: call.startedAtLabel),
+              ],
+            ),
+          ),
           const SizedBox(height: 18),
-          _DetailsAction(
+          ZuriMenuRow(
             icon: ZuriIcons.copy,
             label: 'Copy number',
+            showChevron: false,
+            contentPadding: EdgeInsets.zero,
             onTap: () {
               Clipboard.setData(ClipboardData(text: call.phone));
               ScaffoldMessenger.of(context).showSnackBar(
@@ -82,95 +94,15 @@ class CallDetailsScreen extends StatelessWidget {
               );
             },
           ),
-          _DetailsAction(
+          ZuriMenuRow(
             icon: ZuriIcons.trash,
             label: 'Delete from recents',
             destructive: true,
+            contentPadding: EdgeInsets.zero,
             onTap: () => onDelete(call),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DetailsPanel extends StatelessWidget {
-  const _DetailsPanel({required this.call});
-
-  final CallRecord call;
-
-  @override
-  Widget build(BuildContext context) {
-    return ZuriPanel(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        children: [
-          _DetailsRow(label: 'Status', value: call.status.label),
-          _DetailsRow(label: 'Direction', value: call.direction.label),
-          _DetailsRow(label: 'Duration', value: call.durationLabel),
-          _DetailsRow(label: 'Started', value: call.startedAtLabel),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailsRow extends StatelessWidget {
-  const _DetailsRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: ZuriTextStyles.bodyLarge.copyWith(color: ZuriColors.muted),
-          ),
-          const SizedBox(width: 18),
-          Expanded(
-            child: Text(
-              value,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
-              style: ZuriTextStyles.bodyLarge.copyWith(color: ZuriColors.ink),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailsAction extends StatelessWidget {
-  const _DetailsAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.destructive = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool destructive;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = destructive ? ZuriColors.danger : ZuriColors.ink;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: color),
-      title: Text(
-        label,
-        style: ZuriTextStyles.contactName.copyWith(color: color),
-      ),
-      onTap: onTap,
     );
   }
 }

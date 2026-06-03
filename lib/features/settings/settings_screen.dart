@@ -23,17 +23,15 @@ class SettingsScreen extends StatelessWidget {
         children: [
           _ProfileHeader(sessionSummary: sessionSummary),
           const SizedBox(height: 22),
-          const _SettingsRow(icon: ZuriIcons.account, label: 'Account'),
-          const _SettingsRow(icon: ZuriIcons.wallet, label: 'Wallet'),
-          const _SettingsRow(icon: ZuriIcons.world, label: 'Rates'),
-          const _SettingsRow(icon: ZuriIcons.support, label: 'Support'),
-          const _SettingsRow(icon: ZuriIcons.privacy, label: 'Privacy policy'),
-          const _SettingsRow(
-              icon: ZuriIcons.document, label: 'Terms of service'),
-          const _SettingsRow(
-              icon: ZuriIcons.emergency, label: 'Emergency calling notice'),
+          ZuriMenuRow(icon: ZuriIcons.account, label: 'Account', onTap: () {}),
+          ZuriMenuRow(icon: ZuriIcons.wallet, label: 'Wallet', onTap: () {}),
+          ZuriMenuRow(icon: ZuriIcons.world, label: 'Rates', onTap: () {}),
+          ZuriMenuRow(icon: ZuriIcons.support, label: 'Support', onTap: () {}),
+          ZuriMenuRow(icon: ZuriIcons.privacy, label: 'Privacy policy', onTap: () {}),
+          ZuriMenuRow(icon: ZuriIcons.document, label: 'Terms of service', onTap: () {}),
+          ZuriMenuRow(icon: ZuriIcons.emergency, label: 'Emergency calling notice', onTap: () {}),
           const SizedBox(height: 12),
-          _SettingsRow(
+          ZuriMenuRow(
             icon: ZuriIcons.logout,
             label: 'Sign out',
             destructive: true,
@@ -67,11 +65,11 @@ class _ProfileHeader extends StatelessWidget {
               children: [
                 Text(
                   sessionSummary.displayName,
-                  style: ZuriTextStyles.contactName,
+                  style: ZuriTextStyles.settingsRowTitle,
                 ),
                 Text(
                   sessionSummary.phoneDisplay,
-                  style: ZuriTextStyles.bodyLarge.copyWith(
+                  style: ZuriTextStyles.bodyText.copyWith(
                     color: ZuriColors.muted,
                   ),
                 ),
@@ -80,37 +78,6 @@ class _ProfileHeader extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SettingsRow extends StatelessWidget {
-  const _SettingsRow({
-    required this.icon,
-    required this.label,
-    this.destructive = false,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool destructive;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = destructive ? ZuriColors.danger : ZuriColors.ink;
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(vertical: 2),
-      leading: Icon(icon, color: color),
-      title: Text(
-        label,
-        style: ZuriTextStyles.contactName.copyWith(color: color),
-      ),
-      trailing: destructive
-          ? null
-          : const Icon(ZuriIcons.chevronRight, color: ZuriColors.muted),
-      onTap: onTap ?? () {},
     );
   }
 }

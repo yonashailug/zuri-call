@@ -27,7 +27,7 @@ class ZuriPillButton extends StatelessWidget {
       backgroundColor: enabled ? colors.primary : colors.outlineVariant,
       foregroundColor: const Color(0xFFF2EAE3),
       shape: const StadiumBorder(),
-      textStyle: ZuriTextStyles.control,
+      textStyle: ZuriTextStyles.formControl,
     );
 
     return SizedBox(
@@ -117,7 +117,7 @@ class ZuriTextField extends StatelessWidget {
       inputFormatters: inputFormatters,
       onChanged: onChanged,
       cursorColor: colors.primary,
-      style: ZuriTextStyles.control.copyWith(color: colors.primary),
+      style: ZuriTextStyles.inputText.copyWith(color: colors.primary),
       decoration: InputDecoration(
         hintText: hintText,
         contentPadding: const EdgeInsets.symmetric(
@@ -164,7 +164,7 @@ class ZuriFieldLabel extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Text(
       text,
-      style: ZuriTextStyles.label.copyWith(color: colors.onSurfaceVariant),
+      style: ZuriTextStyles.chipLabel.copyWith(color: colors.onSurfaceVariant),
     );
   }
 }
@@ -179,7 +179,7 @@ class ZuriScreenHeadline extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Text(
       text,
-      style: ZuriTextStyles.screenTitle.copyWith(color: colors.primary),
+      style: ZuriTextStyles.pageTitle.copyWith(color: colors.primary),
     );
   }
 }
@@ -189,6 +189,7 @@ class ZuriAvatar extends StatelessWidget {
     required this.label,
     this.color,
     this.size = 44,
+    this.badge,
     super.key,
   });
 
@@ -196,9 +197,13 @@ class ZuriAvatar extends StatelessWidget {
   final Color? color;
   final double size;
 
+  /// Optional widget overlaid at the bottom-right of the avatar.
+  /// Typically a flag emoji or status dot wrapped in a small Container.
+  final Widget? badge;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final circle = Container(
       height: size,
       width: size,
       alignment: Alignment.center,
@@ -208,7 +213,24 @@ class ZuriAvatar extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: ZuriTextStyles.contactName.copyWith(color: Colors.white),
+        style: ZuriTextStyles.avatarInitials.copyWith(color: Colors.white),
+      ),
+    );
+
+    if (badge == null) return circle;
+
+    return SizedBox.square(
+      dimension: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          circle,
+          Positioned(
+            right: -2,
+            bottom: 3,
+            child: badge!,
+          ),
+        ],
       ),
     );
   }

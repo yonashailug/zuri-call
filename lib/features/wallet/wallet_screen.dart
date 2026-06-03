@@ -80,10 +80,21 @@ class _WalletOverview extends StatelessWidget {
           const SizedBox(height: 18),
           _WalletActions(onTopUp: onTopUp, onRates: onRates),
           const SizedBox(height: 28),
-          _ActivityHeader(onSeeAll: onSeeAll),
+          ZuriSectionHeader(
+            label: 'RECENT ACTIVITY',
+            trailing: TextButton(
+              onPressed: onSeeAll,
+              style: TextButton.styleFrom(
+                foregroundColor: ZuriColors.primary,
+                padding: EdgeInsets.zero,
+                textStyle: ZuriTextStyles.chipLabel,
+              ),
+              child: const Text('See all'),
+            ),
+          ),
           const SizedBox(height: 14),
           const _ActivityRow(
-            icon: ZuriIcons.phoneOutgoing,
+            icon: ZuriIcons.arrowUpRight,
             title: 'Call • Yonas Hailu',
             subtitle: 'Today • 6m 12s • Ethiopia',
             amount: '-\$0.12',
@@ -97,14 +108,14 @@ class _WalletOverview extends StatelessWidget {
             positive: true,
           ),
           const _ActivityRow(
-            icon: ZuriIcons.phoneOutgoing,
+            icon: ZuriIcons.arrowUpRight,
             title: 'Call • +251 91 393 9493',
             subtitle: 'Yesterday • 0m 04s • Ethiopia',
             amount: '-\$0.01',
             positive: false,
           ),
           const _ActivityRow(
-            icon: ZuriIcons.phoneOutgoing,
+            icon: ZuriIcons.arrowUpRight,
             title: 'Call • +1 206 825 2969',
             subtitle: '2 days ago • 2m 30s • USA',
             amount: '-\$0.05',
@@ -132,17 +143,15 @@ class _WalletHeader extends StatelessWidget {
             children: [
               Text(
                 'Your balance',
-                style: ZuriTextStyles.bodyLarge.copyWith(
+                style: ZuriTextStyles.pageSubtitle.copyWith(
                   color: ZuriColors.muted,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Wallet',
-                style: ZuriTextStyles.screenTitle.copyWith(
+                style: ZuriTextStyles.pageTitle.copyWith(
                   color: ZuriColors.ink,
-                  fontSize: 32,
                   height: 1,
                 ),
               ),
@@ -188,17 +197,15 @@ class _TopUpWalletScreenState extends State<_TopUpWalletScreen> {
               children: [
                 Text(
                   'Current balance',
-                  style: ZuriTextStyles.bodyLarge.copyWith(
+                  style: ZuriTextStyles.topUpBalanceLabel.copyWith(
                     color: ZuriColors.muted,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 Text(
                   '\$${currentBalance.toStringAsFixed(2)}',
-                  style: ZuriTextStyles.display.copyWith(
+                  style: ZuriTextStyles.topUpBalanceValue.copyWith(
                     color: ZuriColors.ink,
-                    fontSize: 32,
                   ),
                 ),
               ],
@@ -259,9 +266,8 @@ class _TopUpHeader extends StatelessWidget {
             'Top up wallet',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: ZuriTextStyles.screenTitle.copyWith(
+            style: ZuriTextStyles.topUpTitle.copyWith(
               color: ZuriColors.ink,
-              fontSize: 28,
               height: 1,
             ),
           ),
@@ -294,7 +300,7 @@ class _TransactionHistoryScreen extends StatelessWidget {
             positive: false,
             rows: [
               _HistoryTransactionRow(
-                icon: ZuriIcons.phoneOutgoing,
+                icon: ZuriIcons.arrowUpRight,
                 title: 'Yonas Hailu',
                 details: '6m 12s  •  \$0.02/min  •',
                 chip: 'ET',
@@ -316,7 +322,7 @@ class _TransactionHistoryScreen extends StatelessWidget {
                 positive: true,
               ),
               _HistoryTransactionRow(
-                icon: ZuriIcons.phoneOutgoing,
+                icon: ZuriIcons.arrowUpRight,
                 title: '+251 91 393 9493',
                 details: '4s  •  \$0.02/min  •',
                 chip: 'ET',
@@ -324,7 +330,7 @@ class _TransactionHistoryScreen extends StatelessWidget {
                 positive: false,
               ),
               _HistoryTransactionRow(
-                icon: ZuriIcons.phoneOutgoing,
+                icon: ZuriIcons.arrowUpRight,
                 title: 'Maya Kim • +1 206',
                 details: '2m 30s  •  \$0.02/min  •',
                 chip: 'US',
@@ -366,9 +372,8 @@ class _HistoryHeader extends StatelessWidget {
             'History',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: ZuriTextStyles.screenTitle.copyWith(
+            style: ZuriTextStyles.pageTitle.copyWith(
               color: ZuriColors.ink,
-              fontSize: 28,
               height: 1,
             ),
           ),
@@ -410,10 +415,7 @@ class _HistoryToolButton extends StatelessWidget {
           side: const BorderSide(color: _WalletColors.border, width: 1.1),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 13),
-          textStyle: ZuriTextStyles.rowMeta.copyWith(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-          ),
+          textStyle: ZuriTextStyles.emphasisText,
         ),
       ),
     );
@@ -477,28 +479,17 @@ class _HistorySummaryCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: ZuriTextStyles.rowMeta.copyWith(
-              color: muted,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
+            style: ZuriTextStyles.metadataStrong.copyWith(color: muted),
           ),
           const SizedBox(height: 16),
           Text(
             value,
-            style: ZuriTextStyles.compactTitle.copyWith(
-              color: foreground,
-              fontSize: 30,
-            ),
+            style: ZuriTextStyles.metricValue.copyWith(color: foreground),
           ),
           const SizedBox(height: 10),
           Text(
             subtitle,
-            style: ZuriTextStyles.rowMeta.copyWith(
-              color: muted,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
+            style: ZuriTextStyles.metadataStrong.copyWith(color: muted),
           ),
         ],
       ),
@@ -513,47 +504,16 @@ class _HistoryFilters extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        _HistoryFilterPill(label: 'All', selected: true),
+        ZuriFilterChip(height: null, horizontalPadding: 18,label: 'All', selected: true),
         SizedBox(width: 10),
-        _HistoryFilterPill(label: 'Calls'),
+        ZuriFilterChip(height: null, horizontalPadding: 18,label: 'Calls'),
         SizedBox(width: 10),
-        _HistoryFilterPill(label: 'Top-ups'),
+        ZuriFilterChip(height: null, horizontalPadding: 18,label: 'Top-ups'),
       ],
     );
   }
 }
 
-class _HistoryFilterPill extends StatelessWidget {
-  const _HistoryFilterPill({
-    required this.label,
-    this.selected = false,
-  });
-
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      decoration: BoxDecoration(
-        color: selected ? ZuriColors.primary : Colors.transparent,
-        borderRadius: BorderRadius.circular(ZuriRadius.round),
-        border: selected
-            ? null
-            : Border.all(color: _WalletColors.border, width: 1.2),
-      ),
-      child: Text(
-        label,
-        style: ZuriTextStyles.rowMeta.copyWith(
-          color: selected ? Colors.white : ZuriColors.muted,
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
 
 class _HistoryDateGroup extends StatelessWidget {
   const _HistoryDateGroup({
@@ -577,18 +537,15 @@ class _HistoryDateGroup extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: ZuriTextStyles.eyebrow.copyWith(
+                style: ZuriTextStyles.supportingText.copyWith(
                   color: ZuriColors.muted,
-                  fontSize: 15,
                 ),
               ),
             ),
             Text(
               netAmount,
-              style: ZuriTextStyles.rowMeta.copyWith(
+              style: ZuriTextStyles.emphasisText.copyWith(
                 color: positive ? ZuriColors.success : ZuriColors.muted,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -635,7 +592,7 @@ class _HistoryTransactionRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: positive
                   ? ZuriColors.success.withValues(alpha: 0.10)
-                  : ZuriColors.callSurface,
+                  : ZuriColors.neutralBg,
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -653,9 +610,8 @@ class _HistoryTransactionRow extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTextStyles.contactName.copyWith(
+                  style: ZuriTextStyles.cardTitle.copyWith(
                     color: ZuriColors.ink,
-                    fontSize: 18,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -666,10 +622,9 @@ class _HistoryTransactionRow extends StatelessWidget {
                         details,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: ZuriTextStyles.rowMeta.copyWith(
+                        style:
+                            ZuriTextStyles.walletTransactionSubtitle.copyWith(
                           color: ZuriColors.muted,
-                          fontSize: 14,
-                          height: 1.1,
                         ),
                       ),
                     ),
@@ -685,10 +640,8 @@ class _HistoryTransactionRow extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             amount,
-            style: ZuriTextStyles.label.copyWith(
+            style: ZuriTextStyles.walletTransactionAmount.copyWith(
               color: positive ? ZuriColors.success : _WalletColors.debit,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -789,10 +742,7 @@ class _RateLookupScreenState extends State<_RateLookupScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(ZuriRadius.pill),
                   ),
-                  textStyle: ZuriTextStyles.label.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  textStyle: ZuriTextStyles.primaryButtonLabel,
                 ),
               ),
             ),
@@ -830,9 +780,8 @@ class _RateLookupHeader extends StatelessWidget {
             'Call rates',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: ZuriTextStyles.screenTitle.copyWith(
+            style: ZuriTextStyles.pageTitle.copyWith(
               color: ZuriColors.ink,
-              fontSize: 28,
               height: 1,
             ),
           ),
@@ -858,10 +807,8 @@ class _RateSearchField extends StatelessWidget {
       child: TextField(
         controller: controller,
         autofocus: true,
-        style: ZuriTextStyles.bodyLarge.copyWith(
+        style: ZuriTextStyles.metadata.copyWith(
           color: ZuriColors.ink,
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
         ),
         decoration: InputDecoration(
           hintText: 'Search country or code',
@@ -930,18 +877,15 @@ class _FeaturedRateCard extends StatelessWidget {
                   children: [
                     Text(
                       'Ethiopia',
-                      style: ZuriTextStyles.compactTitle.copyWith(
+                      style: ZuriTextStyles.pageTitle.copyWith(
                         color: Colors.white,
-                        fontSize: 28,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       '+251 • East Africa',
-                      style: ZuriTextStyles.rowMeta.copyWith(
+                      style: ZuriTextStyles.emphasisText.copyWith(
                         color: _WalletColors.cardMuted,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -952,19 +896,16 @@ class _FeaturedRateCard extends StatelessWidget {
                 children: [
                   Text(
                     '\$0.02',
-                    style: ZuriTextStyles.display.copyWith(
+                    style: ZuriTextStyles.metricValue.copyWith(
                       color: Colors.white,
-                      fontSize: 32,
                       height: 0.95,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'per minute',
-                    style: ZuriTextStyles.rowMeta.copyWith(
+                    style: ZuriTextStyles.metadataStrong.copyWith(
                       color: _WalletColors.cardMuted,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
@@ -976,14 +917,34 @@ class _FeaturedRateCard extends StatelessWidget {
           const SizedBox(height: 22),
           const Row(
             children: [
-              Expanded(child: _RateMinuteCalc(amount: '\$1.00', minutes: '50')),
-              _RateCalcDivider(),
               Expanded(
-                child: _RateMinuteCalc(amount: '\$5.00', minutes: '250'),
+                child: ZuriMetricTile(
+                  label: '50 min',
+                  value: '\$1.00',
+                  valueStyle: ZuriTextStyles.metricLabel,
+                  valueColor: Colors.white,
+                  labelColor: _WalletColors.cardMuted,
+                ),
               ),
               _RateCalcDivider(),
               Expanded(
-                child: _RateMinuteCalc(amount: '\$10.00', minutes: '500'),
+                child: ZuriMetricTile(
+                  label: '250 min',
+                  value: '\$5.00',
+                  valueStyle: ZuriTextStyles.metricLabel,
+                  valueColor: Colors.white,
+                  labelColor: _WalletColors.cardMuted,
+                ),
+              ),
+              _RateCalcDivider(),
+              Expanded(
+                child: ZuriMetricTile(
+                  label: '500 min',
+                  value: '\$10.00',
+                  valueStyle: ZuriTextStyles.metricLabel,
+                  valueColor: Colors.white,
+                  labelColor: _WalletColors.cardMuted,
+                ),
               ),
             ],
           ),
@@ -993,39 +954,6 @@ class _FeaturedRateCard extends StatelessWidget {
   }
 }
 
-class _RateMinuteCalc extends StatelessWidget {
-  const _RateMinuteCalc({
-    required this.amount,
-    required this.minutes,
-  });
-
-  final String amount;
-  final String minutes;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          amount,
-          style: ZuriTextStyles.sectionTitle.copyWith(
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '$minutes min',
-          style: ZuriTextStyles.rowMeta.copyWith(
-            color: _WalletColors.cardMuted,
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _RateCalcDivider extends StatelessWidget {
   const _RateCalcDivider();
@@ -1082,17 +1010,15 @@ class _RateDestinationRow extends StatelessWidget {
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTextStyles.contactName.copyWith(
+                  style: ZuriTextStyles.metricLabel.copyWith(
                     color: ZuriColors.ink,
-                    fontSize: 20,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: ZuriTextStyles.rowMeta.copyWith(
+                  style: ZuriTextStyles.bodyText.copyWith(
                     color: ZuriColors.muted,
-                    fontSize: 15,
                   ),
                 ),
               ],
@@ -1104,19 +1030,16 @@ class _RateDestinationRow extends StatelessWidget {
             children: [
               Text(
                 rate,
-                style: ZuriTextStyles.label.copyWith(
+                style: ZuriTextStyles.rowTitle.copyWith(
                   color: ZuriColors.ink,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
               if (note != null) ...[
                 const SizedBox(height: 4),
                 Text(
                   note!,
-                  style: ZuriTextStyles.rowMeta.copyWith(
+                  style: ZuriTextStyles.metadata.copyWith(
                     color: ZuriColors.muted,
-                    fontSize: 13,
                   ),
                 ),
               ],
@@ -1143,10 +1066,8 @@ class _CountryChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: ZuriTextStyles.rowMeta.copyWith(
+        style: ZuriTextStyles.pageSubtitle.copyWith(
           color: ZuriColors.muted,
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
         ),
       ),
     );
@@ -1162,9 +1083,8 @@ class _WalletSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: ZuriTextStyles.eyebrow.copyWith(
+      style: ZuriTextStyles.supportingText.copyWith(
         color: ZuriColors.muted,
-        fontSize: 15,
       ),
     );
   }
@@ -1260,18 +1180,15 @@ class _PresetAmountCard extends StatelessWidget {
                 children: [
                   Text(
                     '\$${option.amount.toInt()}',
-                    style: ZuriTextStyles.compactTitle.copyWith(
+                    style: ZuriTextStyles.topUpOptionAmount.copyWith(
                       color: foreground,
-                      fontSize: 32,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 7),
                   Text(
                     '~${option.minutes} min to ET',
-                    style: ZuriTextStyles.rowMeta.copyWith(
+                    style: ZuriTextStyles.topUpOptionMinutes.copyWith(
                       color: muted,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
@@ -1293,10 +1210,8 @@ class _PresetAmountCard extends StatelessWidget {
               ),
               child: Text(
                 'Most popular',
-                style: ZuriTextStyles.rowMeta.copyWith(
+                style: ZuriTextStyles.topUpBadge.copyWith(
                   color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -1325,9 +1240,8 @@ class _CustomAmountField extends StatelessWidget {
           const SizedBox(width: 14),
           Text(
             'Custom amount',
-            style: ZuriTextStyles.bodyLarge.copyWith(
+            style: ZuriTextStyles.topUpFieldText.copyWith(
               color: ZuriColors.muted,
-              fontSize: 18,
             ),
           ),
         ],
@@ -1371,18 +1285,15 @@ class _PaymentMethodCard extends StatelessWidget {
               children: [
                 Text(
                   'Visa •••4242',
-                  style: ZuriTextStyles.label.copyWith(
+                  style: ZuriTextStyles.topUpPaymentTitle.copyWith(
                     color: ZuriColors.ink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Expires 08/27',
-                  style: ZuriTextStyles.rowMeta.copyWith(
+                  style: ZuriTextStyles.topUpPaymentSubtitle.copyWith(
                     color: ZuriColors.muted,
-                    fontSize: 15,
                   ),
                 ),
               ],
@@ -1442,9 +1353,8 @@ class _AddPaymentMethodCard extends StatelessWidget {
               'Add payment method',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: ZuriTextStyles.bodyLarge.copyWith(
+              style: ZuriTextStyles.topUpFieldText.copyWith(
                 color: ZuriColors.muted,
-                fontSize: 18,
               ),
             ),
           ),
@@ -1473,12 +1383,12 @@ class _TopUpPreviewCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _PreviewRow(
+          ZuriInfoRow(compact: true,
             label: 'Top-up amount',
             value: '\$${amount.toStringAsFixed(2)}',
           ),
           const Divider(color: _WalletColors.rowDivider, height: 22),
-          _PreviewRow(
+          ZuriInfoRow(compact: true,
             label: 'New balance',
             value: '\$${newBalance.toStringAsFixed(2)}',
             strong: true,
@@ -1489,44 +1399,6 @@ class _TopUpPreviewCard extends StatelessWidget {
   }
 }
 
-class _PreviewRow extends StatelessWidget {
-  const _PreviewRow({
-    required this.label,
-    required this.value,
-    this.strong = false,
-  });
-
-  final String label;
-  final String value;
-  final bool strong;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: ZuriTextStyles.bodyLarge.copyWith(
-              color: ZuriColors.muted,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: (strong ? ZuriTextStyles.sectionTitle : ZuriTextStyles.label)
-              .copyWith(
-            color: ZuriColors.ink,
-            fontSize: strong ? 20 : 17,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _SecurePayButton extends StatelessWidget {
   const _SecurePayButton({required this.amount});
@@ -1548,10 +1420,7 @@ class _SecurePayButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ZuriRadius.pill),
           ),
-          textStyle: ZuriTextStyles.label.copyWith(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-          ),
+          textStyle: ZuriTextStyles.buttonStrong,
         ),
       ),
     );
@@ -1601,10 +1470,8 @@ class _BalanceCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Available balance',
-                  style: ZuriTextStyles.bodyLarge.copyWith(
+                  style: ZuriTextStyles.emphasisText.copyWith(
                     color: _WalletColors.cardMuted,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -1614,27 +1481,33 @@ class _BalanceCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             '\$4.88',
-            style: ZuriTextStyles.display.copyWith(
+            style: ZuriTextStyles.metricHero.copyWith(
               color: Colors.white,
-              fontSize: 52,
-              height: 0.95,
             ),
           ),
           const SizedBox(height: 26),
           const Divider(color: _WalletColors.cardDivider, height: 1),
           const SizedBox(height: 22),
-          const Row(
+          Row(
             children: [
               Expanded(
-                child: _BalanceMetric(
+                child: ZuriMetricTile(
                   label: 'This month',
                   value: '\$2.14 spent',
+                  valueStyle: ZuriTextStyles.metricLabel,
+                  valueColor: Colors.white.withValues(alpha: 0.86),
+                  labelColor: _WalletColors.cardMuted,
+                  alignment: CrossAxisAlignment.start,
                 ),
               ),
               Expanded(
-                child: _BalanceMetric(
+                child: ZuriMetricTile(
                   label: 'Avg. per call',
                   value: '\$0.08',
+                  valueStyle: ZuriTextStyles.metricLabel,
+                  valueColor: Colors.white.withValues(alpha: 0.86),
+                  labelColor: _WalletColors.cardMuted,
+                  alignment: CrossAxisAlignment.start,
                 ),
               ),
             ],
@@ -1664,10 +1537,8 @@ class _ActiveBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Active',
-            style: ZuriTextStyles.rowMeta.copyWith(
+            style: ZuriTextStyles.supportingText.copyWith(
               color: _WalletColors.activeText,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -1676,41 +1547,6 @@ class _ActiveBadge extends StatelessWidget {
   }
 }
 
-class _BalanceMetric extends StatelessWidget {
-  const _BalanceMetric({
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: ZuriTextStyles.rowMeta.copyWith(
-            color: _WalletColors.cardMuted,
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: ZuriTextStyles.label.copyWith(
-            color: Colors.white.withValues(alpha: 0.86),
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _WalletActions extends StatelessWidget {
   const _WalletActions({
@@ -1738,10 +1574,7 @@ class _WalletActions extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(ZuriRadius.pill),
                 ),
-                textStyle: ZuriTextStyles.label.copyWith(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
+                textStyle: ZuriTextStyles.primaryButtonLabel,
               ),
             ),
           ),
@@ -1760,10 +1593,7 @@ class _WalletActions extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(ZuriRadius.pill),
                 ),
-                textStyle: ZuriTextStyles.label.copyWith(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                ),
+                textStyle: ZuriTextStyles.strongButtonLabel,
               ),
             ),
           ),
@@ -1773,40 +1603,6 @@ class _WalletActions extends StatelessWidget {
   }
 }
 
-class _ActivityHeader extends StatelessWidget {
-  const _ActivityHeader({required this.onSeeAll});
-
-  final VoidCallback onSeeAll;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            'RECENT ACTIVITY',
-            style: ZuriTextStyles.eyebrow.copyWith(
-              color: ZuriColors.muted,
-              fontSize: 15,
-            ),
-          ),
-        ),
-        TextButton(
-          onPressed: onSeeAll,
-          style: TextButton.styleFrom(
-            foregroundColor: ZuriColors.primary,
-            padding: EdgeInsets.zero,
-            textStyle: ZuriTextStyles.rowMeta.copyWith(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          child: const Text('See all'),
-        ),
-      ],
-    );
-  }
-}
 
 class _ActivityRow extends StatelessWidget {
   const _ActivityRow({
@@ -1840,7 +1636,7 @@ class _ActivityRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: positive
                   ? ZuriColors.success.withValues(alpha: 0.10)
-                  : ZuriColors.callSurface,
+                  : ZuriColors.neutralBg,
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -1858,9 +1654,8 @@ class _ActivityRow extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTextStyles.contactName.copyWith(
+                  style: ZuriTextStyles.primaryButtonLabel.copyWith(
                     color: ZuriColors.ink,
-                    fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1868,9 +1663,8 @@ class _ActivityRow extends StatelessWidget {
                   subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: ZuriTextStyles.rowMeta.copyWith(
+                  style: ZuriTextStyles.walletTransactionSubtitle.copyWith(
                     color: ZuriColors.muted,
-                    fontSize: 15,
                     height: 1.2,
                   ),
                 ),
@@ -1880,10 +1674,8 @@ class _ActivityRow extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             amount,
-            style: ZuriTextStyles.label.copyWith(
+            style: ZuriTextStyles.walletTransactionAmount.copyWith(
               color: positive ? ZuriColors.success : _WalletColors.debit,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -1916,11 +1708,8 @@ class _RunwayTip extends StatelessWidget {
           Expanded(
             child: Text(
               'At this rate your balance covers ~40 more minutes of calls to Ethiopia.',
-              style: ZuriTextStyles.bodyLarge.copyWith(
+              style: ZuriTextStyles.emphasisText.copyWith(
                 color: _WalletColors.tipText,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                height: 1.45,
               ),
             ),
           ),

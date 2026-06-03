@@ -609,9 +609,10 @@ class _CostSummaryCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _SummaryMetric(
+                child: ZuriMetricTile(
                   label: 'DURATION',
                   value: _formatCallSummaryDuration(call.durationSeconds),
+                  labelColor: _EndedCallColors.muted,
                 ),
               ),
               Container(
@@ -620,9 +621,10 @@ class _CostSummaryCard extends StatelessWidget {
                 color: _EndedCallColors.divider,
               ),
               Expanded(
-                child: _SummaryMetric(
+                child: ZuriMetricTile(
                   label: 'COST',
                   value: '\$${cost.toStringAsFixed(2)}',
+                  labelColor: _EndedCallColors.muted,
                 ),
               ),
             ],
@@ -630,17 +632,21 @@ class _CostSummaryCard extends StatelessWidget {
           const SizedBox(height: 16),
           const Divider(color: _EndedCallColors.divider, height: 1),
           const SizedBox(height: 16),
-          _SummaryRow(
+          ZuriInfoRow(
+            compact: true,
             label: 'Rate',
             value: '\$0.02 / min • ${_countryFlagFor(call.phone) ?? ''} '
                 '${_countryLabelFor(call.phone) ?? ''}',
+            padding: EdgeInsets.zero,
           ),
           const SizedBox(height: 12),
           const _QualitySummaryRow(),
           const SizedBox(height: 12),
-          const _SummaryRow(
+          const ZuriInfoRow(
+            compact: true,
             label: 'Wallet balance',
             value: '\$4.88 remaining',
+            padding: EdgeInsets.zero,
           ),
         ],
       ),
@@ -648,68 +654,7 @@ class _CostSummaryCard extends StatelessWidget {
   }
 }
 
-class _SummaryMetric extends StatelessWidget {
-  const _SummaryMetric({
-    required this.label,
-    required this.value,
-  });
 
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: ZuriTextStyles.metadataStrong.copyWith(
-            color: _EndedCallColors.muted,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          value,
-          style: ZuriTextStyles.compactTitle.copyWith(
-            color: ZuriColors.ink,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: ZuriTextStyles.meta.copyWith(
-              color: _EndedCallColors.muted,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: ZuriTextStyles.body.copyWith(
-            color: ZuriColors.ink,
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _QualitySummaryRow extends StatelessWidget {
   const _QualitySummaryRow();
