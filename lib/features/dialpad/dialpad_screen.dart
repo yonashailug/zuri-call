@@ -73,13 +73,11 @@ class _DialpadScreenState extends State<DialpadScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compactHeight = constraints.maxHeight < 720;
-            final padWidth = constraints.maxWidth * 0.62;
-            final keyGap = constraints.maxWidth * 0.04;
-            final keyWidth =
-                ((padWidth - keyGap * 2) / 3).clamp(58.0, 68.0).toDouble();
-            final keyHeight = (keyWidth * 0.91).clamp(54.0, 62.0).toDouble();
-            final rowGap = compactHeight ? 10.0 : 12.0;
-            final topGap = compactHeight ? 14.0 : 18.0;
+            const keySize = 88.0;
+            const keyGap = 20.0;
+            const rowGap = 20.0;
+            final topGap = compactHeight ? 10.0 : 14.0;
+            final actionGap = compactHeight ? 14.0 : 20.0;
 
             return Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -93,27 +91,32 @@ class _DialpadScreenState extends State<DialpadScreen> {
                   _DialHeader(country: dialState.country),
                   SizedBox(height: topGap),
                   _NumberDisplay(number: dialState.displayNumber),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   _RateRow(
                     country: dialState.country,
                     contactName: dialState.contactName,
                   ),
-                  SizedBox(height: compactHeight ? 16 : 22),
-                  _DialPad(
-                    keyWidth: keyWidth,
-                    keyHeight: keyHeight,
-                    rowGap: rowGap,
-                    keyGap: keyGap,
-                    onTap: append,
-                    onPlus: appendPlus,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        const Spacer(flex: 2),
+                        _DialPad(
+                          keySize: keySize,
+                          keyGap: keyGap,
+                          rowGap: rowGap,
+                          onTap: append,
+                          onPlus: appendPlus,
+                        ),
+                        SizedBox(height: actionGap),
+                        _CallActions(
+                          canCall: canCall,
+                          onStartCall: startCall,
+                          onBackspace: backspace,
+                        ),
+                        const Spacer(flex: 1),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
-                  _CallActions(
-                    canCall: canCall,
-                    onStartCall: startCall,
-                    onBackspace: backspace,
-                  ),
-                  const SizedBox(height: 10),
                 ],
               ),
             );
@@ -135,9 +138,8 @@ class _DialHeader extends StatelessWidget {
       children: [
         Text(
           'Dial',
-          style: ZuriTextStyles.screenTitle.copyWith(
+          style: ZuriTextStyles.pageTitle.copyWith(
             color: ZuriColors.ink,
-            fontSize: 28,
           ),
         ),
         const Spacer(),
@@ -149,9 +151,8 @@ class _DialHeader extends StatelessWidget {
           ),
           child: Text(
             '${country.shortCode} ${country.prefix}',
-            style: ZuriTextStyles.eyebrow.copyWith(
+            style: ZuriTextStyles.sectionHeader.copyWith(
               color: ZuriColors.surface,
-              fontSize: 10,
             ),
           ),
         ),
@@ -450,18 +451,10 @@ class _NumberDisplay extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: (hasNumber
-                  ? ZuriTextStyles.control.copyWith(
-                      color: ZuriColors.ink,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 24,
-                    )
-                  : ZuriTextStyles.bodyLarge.copyWith(
-                      color: ZuriColors.disabled,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 22,
-                    ))
-              .copyWith(letterSpacing: 0),
+          style: hasNumber
+              ? ZuriTextStyles.dialpadEntry.copyWith(color: ZuriColors.ink)
+              : ZuriTextStyles.compactPageTitle
+                  .copyWith(color: ZuriColors.disabled),
         ),
       ),
     );
@@ -485,9 +478,8 @@ class _RateRow extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,
-        style: ZuriTextStyles.bodyLarge.copyWith(
+        style: ZuriTextStyles.pageSubtitle.copyWith(
           color: ZuriColors.muted,
-          fontWeight: FontWeight.w600,
         ),
       );
     }
@@ -498,30 +490,26 @@ class _RateRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(country.flag, style: const TextStyle(fontSize: 15)),
-          const SizedBox(width: 8),
+          Text(country.flag, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 7),
           Flexible(
             child: Text(
               country.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: ZuriTextStyles.bodyLarge.copyWith(
+              style: ZuriTextStyles.dialpadContext.copyWith(
                 color: ZuriColors.muted.withValues(alpha: 0.72),
-                fontWeight: FontWeight.w500,
-                fontSize: 15,
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 9),
           Flexible(
             child: Text(
               country.rate,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: ZuriTextStyles.bodyLarge.copyWith(
+              style: ZuriTextStyles.dialpadRate.copyWith(
                 color: ZuriColors.ink,
-                fontWeight: FontWeight.w800,
-                fontSize: 15,
               ),
             ),
           ),
@@ -533,18 +521,16 @@ class _RateRow extends StatelessWidget {
 
 class _DialPad extends StatelessWidget {
   const _DialPad({
-    required this.keyWidth,
-    required this.keyHeight,
-    required this.rowGap,
+    required this.keySize,
     required this.keyGap,
+    required this.rowGap,
     required this.onTap,
     required this.onPlus,
   });
 
-  final double keyWidth;
-  final double keyHeight;
-  final double rowGap;
+  final double keySize;
   final double keyGap;
+  final double rowGap;
   final ValueChanged<String> onTap;
   final VoidCallback onPlus;
 
@@ -580,16 +566,15 @@ class _DialPad extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (final item in row) ...[
+              for (int i = 0; i < row.length; i++) ...[
                 _DialKey(
-                  label: item.$1,
-                  sublabel: item.$2,
-                  width: keyWidth,
-                  height: keyHeight,
+                  label: row[i].$1,
+                  sublabel: row[i].$2,
+                  size: keySize,
                   onTap: onTap,
-                  onLongPress: item.$1 == '0' ? onPlus : null,
+                  onLongPress: row[i].$1 == '0' ? onPlus : null,
                 ),
-                if (item != row.last) SizedBox(width: keyGap),
+                if (i < row.length - 1) SizedBox(width: keyGap),
               ],
             ],
           ),
@@ -616,27 +601,26 @@ class _CallActions extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ZuriCircleButton(
-            onPressed: () {},
-            icon: ZuriIcons.userPlus,
-            foregroundColor: ZuriColors.ink,
-            backgroundColor: ZuriColors.callSurface,
-            size: ZuriDimensions.dialpadActionSize,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
+          SizedBox(
+            width: 200,
+            height: ZuriDimensions.callButtonHeight,
             child: _DialCallButton(
               enabled: canCall,
               onPressed: onStartCall,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
           ZuriCircleButton(
             onPressed: onBackspace,
             icon: ZuriIcons.backspace,
-            foregroundColor: ZuriColors.ink,
-            backgroundColor: ZuriColors.callSurface,
+            foregroundColor: canCall
+                ? ZuriColors.ink
+                : ZuriColors.ink.withValues(alpha: 0.34),
+            backgroundColor: ZuriColors.callSurface.withValues(
+              alpha: canCall ? 1 : 0.55,
+            ),
             size: ZuriDimensions.dialpadActionSize,
           ),
         ],
@@ -674,10 +658,7 @@ class _DialCallButton extends StatelessWidget {
           foregroundColor: foregroundColor,
           disabledForegroundColor: foregroundColor,
           shape: const StadiumBorder(),
-          textStyle: ZuriTextStyles.control.copyWith(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-          ),
+          textStyle: ZuriTextStyles.primaryButtonLabel,
         ),
       ),
     );
@@ -688,67 +669,52 @@ class _DialKey extends StatelessWidget {
   const _DialKey({
     required this.label,
     required this.onTap,
-    required this.width,
-    required this.height,
+    required this.size,
     this.sublabel,
     this.onLongPress,
   });
 
   final String label;
   final ValueChanged<String> onTap;
-  final double width;
-  final double height;
+  final double size;
   final String? sublabel;
   final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
     final isSymbol = label == '*' || label == '#';
-    return SizedBox(
-      width: width,
-      height: height,
+    final radius = BorderRadius.circular(size / 2);
+    return SizedBox.square(
+      dimension: size,
       child: Material(
         color: ZuriColors.card,
-        borderRadius: BorderRadius.circular(ZuriRadius.key),
+        borderRadius: radius,
         child: InkWell(
-          borderRadius: BorderRadius.circular(ZuriRadius.key),
+          borderRadius: radius,
           onTap: () => onTap(label),
           onLongPress: onLongPress,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(ZuriRadius.key),
-              border: Border.all(
-                color: ZuriColors.ink.withValues(alpha: 0.08),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: (isSymbol
+                        ? ZuriTextStyles.bodyText
+                        : ZuriTextStyles.dialpadKey)
+                    .copyWith(color: ZuriColors.ink),
               ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: (isSymbol
-                          ? ZuriTextStyles.control.copyWith(
-                              fontWeight: FontWeight.w400,
-                            )
-                          : ZuriTextStyles.compactTitle.copyWith(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w400,
-                            ))
-                      .copyWith(color: ZuriColors.ink),
-                ),
-                SizedBox(
-                  height: 16,
-                  child: Center(
-                    child: Text(
-                      sublabel ?? '',
-                      style: ZuriTextStyles.eyebrow.copyWith(
-                        color: ZuriColors.subtleForestText,
-                      ),
+              SizedBox(
+                height: 15,
+                child: Center(
+                  child: Text(
+                    sublabel ?? '',
+                    style: ZuriTextStyles.dialpadSublabel.copyWith(
+                      color: ZuriColors.subtleForestText,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

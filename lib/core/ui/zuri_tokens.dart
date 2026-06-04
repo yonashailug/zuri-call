@@ -152,7 +152,31 @@ class ZuriTextStyles {
   /// Dialpad number entry display. 26sp Bold.
   static const dialpadEntry = TextStyle(
     fontSize: 26,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
+
+  /// Dialpad country/contact context. 16sp Medium.
+  static const dialpadContext = TextStyle(
+    fontSize: 16,
+    height: 1.2,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
+
+  /// Dialpad rate text. 16sp SemiBold.
+  static const dialpadRate = TextStyle(
+    fontSize: 16,
+    height: 1.2,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  );
+
+  /// Dialpad key numerals. 24sp SemiBold.
+  static const dialpadKey = TextStyle(
+    fontSize: 32,
+    height: 1.0,
+    fontWeight: FontWeight.w600,
     letterSpacing: 0,
   );
 
