@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_core/firebase_core.dart';
 
+import 'app/di/app_dependencies.dart';
 import 'app.dart';
 import 'features/auth/data/firebase_auth_repository.dart';
 import 'firebase_options.dart';
@@ -32,16 +33,19 @@ Future<void> main() async {
 
   runApp(
     ZuriApp(
-      authRepository: useFirebaseAuth
-          ? FirebaseAuthRepository(
-              appVerificationDisabledForTesting: disableFirebaseAppVerification,
-              testPhoneNumber: firebaseTestPhoneNumber.isEmpty
-                  ? null
-                  : firebaseTestPhoneNumber,
-              testSmsCode:
-                  firebaseTestSmsCode.isEmpty ? null : firebaseTestSmsCode,
-            )
-          : null,
+      dependencies: AppDependencies.defaults(
+        authRepository: useFirebaseAuth
+            ? FirebaseAuthRepository(
+                appVerificationDisabledForTesting:
+                    disableFirebaseAppVerification,
+                testPhoneNumber: firebaseTestPhoneNumber.isEmpty
+                    ? null
+                    : firebaseTestPhoneNumber,
+                testSmsCode:
+                    firebaseTestSmsCode.isEmpty ? null : firebaseTestSmsCode,
+              )
+            : null,
+      ),
     ),
   );
 }

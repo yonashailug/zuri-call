@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/di/app_dependencies.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import '../calling/call_service.dart';
@@ -9,23 +10,12 @@ import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
 import 'application/recent_calls_controller.dart';
 import 'call_details_screen.dart';
-import 'call_history_repository.dart';
 import 'call_record.dart';
 import 'contact_preview.dart';
 import 'contacts_screen.dart';
-import 'device_contacts_repository.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({
-    this.contactsRepository,
-    this.callHistoryRepository,
-    this.callService = const MockCallService(),
-    super.key,
-  });
-
-  final ContactsRepository? contactsRepository;
-  final CallHistoryRepository? callHistoryRepository;
-  final CallService callService;
+  const AppShell({super.key});
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -33,10 +23,7 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int selectedIndex = 1;
-  late final CallHistoryRepository callHistoryRepository =
-      widget.callHistoryRepository ?? LocalCallHistoryRepository();
-  late final RecentCallsController recentCallsController =
-      RecentCallsController(repository: callHistoryRepository);
+  RecentCallsController? recentCallsController;
   String? dialNumber;
   String? dialContactName;
   OutgoingCallRequest? activeCall;
@@ -44,31 +31,51 @@ class _AppShellState extends State<AppShell> {
   bool selectedCallIsRecent = false;
 
   @override
-  void initState() {
-    super.initState();
-    recentCallsController.restore();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (recentCallsController != null) return;
+
+    final dependencies = AppDependenciesScope.of(context);
+    final controller = RecentCallsController(
+      repository: dependencies.callHistoryRepository,
+    );
+    recentCallsController = controller;
+    controller.restore();
   }
 
   @override
   void dispose() {
-    recentCallsController.dispose();
+    recentCallsController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final recentCallsController = this.recentCallsController;
+    if (recentCallsController == null) {
+      return const SizedBox.shrink();
+    }
+
     return AnimatedBuilder(
       animation: recentCallsController,
-      builder: (context, _) => _buildShell(context),
+      builder: (context, _) => _buildShell(
+        context,
+        recentCallsController,
+        AppDependenciesScope.of(context),
+      ),
     );
   }
 
-  Widget _buildShell(BuildContext context) {
+  Widget _buildShell(
+    BuildContext context,
+    RecentCallsController recentCallsController,
+    AppDependencies dependencies,
+  ) {
     final activeCall = this.activeCall;
     if (activeCall != null) {
       return InCallScreen(
         request: activeCall,
-        callService: widget.callService,
+        callService: dependencies.callService,
         onCallEnded: _recordCompletedCall,
         onCallBackAfterEnded: _recordCompletedCallAndCallBack,
       );
@@ -76,7 +83,7 @@ class _AppShellState extends State<AppShell> {
     final screens = [
       ContactsScreen(
         mode: ContactsMode.recents,
-        contactsRepository: widget.contactsRepository,
+        contactsRepository: dependencies.contactsRepository,
         recentCalls: recentCallsController.calls,
         onContactCall: _selectContactForCall,
         onContactOpen: _openContactDetails,
@@ -87,7 +94,7 @@ class _AppShellState extends State<AppShell> {
       ),
       ContactsScreen(
         mode: ContactsMode.contacts,
-        contactsRepository: widget.contactsRepository,
+        contactsRepository: dependencies.contactsRepository,
         onContactCall: _selectContactForCall,
         onContactOpen: _openContactDetails,
         onRecentCallOpen: _openCallDetails,
@@ -96,6 +103,8 @@ class _AppShellState extends State<AppShell> {
       DialpadScreen(
         initialNumber: dialNumber,
         contactName: dialContactName,
+        suggestionContacts:
+            recentCallsController.calls.map((call) => call.contact).toList(),
         onStartCall: _startDialpadCall,
       ),
       WalletScreen(onCallDestination: _startRateDestinationCall),
@@ -219,7 +228,7 @@ class _AppShellState extends State<AppShell> {
       selectedIndex = 0;
     });
 
-    recentCallsController.record(call);
+    recentCallsController?.record(call);
   }
 
   void _recordCompletedCallAndCallBack(CallRecord call) {
@@ -232,7 +241,7 @@ class _AppShellState extends State<AppShell> {
       selectedIndex = 2;
     });
 
-    recentCallsController.record(call);
+    recentCallsController?.record(call);
   }
 
   void _openCallDetails(CallRecord call) {
@@ -266,7 +275,7 @@ class _AppShellState extends State<AppShell> {
       selectedIndex = 0;
     });
 
-    recentCallsController.delete(call);
+    recentCallsController?.delete(call);
   }
 
   void _selectTab(int index) {

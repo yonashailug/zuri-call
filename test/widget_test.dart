@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:zuri_call/app/di/app_dependencies.dart';
 import 'package:zuri_call/core/theme/zuri_theme.dart';
 import 'package:zuri_call/core/ui/zuri_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -881,10 +882,12 @@ Widget _testApp([
   ContactsRepository? contactsRepository,
 ]) {
   return ZuriApp(
-    contactsRepository: contactsRepository ?? _FakeContactsRepository(),
-    callHistoryRepository:
-        callHistoryRepository ?? _FakeCallHistoryRepository(),
-    callService: callService,
+    dependencies: AppDependencies.defaults(
+      contactsRepository: contactsRepository ?? _FakeContactsRepository(),
+      callHistoryRepository:
+          callHistoryRepository ?? _FakeCallHistoryRepository(),
+      callService: callService,
+    ),
   );
 }
 
