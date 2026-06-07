@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/routing/app_routes.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import 'application/auth_scope.dart';
 import 'auth_design.dart';
-import 'code_verification_screen.dart';
 import 'data/phone_country_data.dart';
 import 'domain/phone_mask_input_formatter.dart';
 import 'domain/phone_number.dart';
@@ -84,18 +85,11 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
             label: isBusy ? 'Sending...' : 'Continue',
             onPressed: canContinue && !isBusy
                 ? () async {
-                    final navigator = Navigator.of(context);
                     final didSend = await authController.startPhoneAuth(
                       phoneNumber,
                     );
-                    if (!mounted || !didSend) return;
-                    await navigator.push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => CodeVerificationScreen(
-                          phoneNumber: phoneNumber,
-                        ),
-                      ),
-                    );
+                    if (!context.mounted || !didSend) return;
+                    context.push(AppRoutes.authVerify);
                   }
                 : null,
           ),

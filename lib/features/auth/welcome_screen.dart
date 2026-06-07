@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/routing/app_routes.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
-import 'phone_entry_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -38,19 +39,11 @@ class WelcomeScreen extends StatelessWidget {
                     SizedBox(height: constraints.maxHeight < 520 ? 32 : 80),
                     ZuriPillButton(
                       label: 'Continue with phone',
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const PhoneEntryScreen(),
-                        ),
-                      ),
+                      onPressed: () => context.push(AppRoutes.authPhone),
                     ),
                     const SizedBox(height: 12),
                     TextButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const PhoneEntryScreen(),
-                        ),
-                      ),
+                      onPressed: () => context.push(AppRoutes.authPhone),
                       style: TextButton.styleFrom(
                         foregroundColor: ZuriColors.muted,
                         textStyle: ZuriTextStyles.chipLabel,

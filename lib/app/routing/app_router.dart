@@ -1,6 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/code_verification_screen.dart';
+import '../../features/auth/phone_entry_screen.dart';
+import '../../features/auth/profile_name_screen.dart';
+import '../../features/auth/welcome_screen.dart';
 import 'app_routes.dart';
 
 GoRouter createAppRouter({
@@ -17,7 +21,22 @@ GoRouter createAppRouter({
       GoRoute(
         path: AppRoutes.authWelcome,
         name: AppRouteNames.authWelcome,
-        builder: (context, state) => rootBuilder(context),
+        builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.authPhone,
+        name: AppRouteNames.authPhone,
+        builder: (context, state) => const PhoneEntryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.authVerify,
+        name: AppRouteNames.authVerify,
+        builder: (context, state) => const CodeVerificationScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.authProfile,
+        name: AppRouteNames.authProfile,
+        builder: (context, state) => const ProfileNameScreen(),
       ),
       GoRoute(
         path: AppRoutes.tabsRecents,

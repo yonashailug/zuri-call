@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/routing/app_routes.dart';
 import '../../core/ui/zuri_ui.dart';
 
 class AuthScaffold extends StatelessWidget {
@@ -31,10 +33,7 @@ class AuthScaffold extends StatelessWidget {
                   ),
                   ZuriCircleButton(
                     icon: ZuriIcons.close,
-                    onPressed: onClose ??
-                        () => Navigator.of(context).popUntil(
-                              (route) => route.isFirst,
-                            ),
+                    onPressed: onClose ?? () => context.go(AppRoutes.root),
                   ),
                 ],
               ),

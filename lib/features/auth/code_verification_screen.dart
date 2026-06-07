@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/routing/app_routes.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import 'application/auth_scope.dart';
 import 'auth_design.dart';
-import 'domain/phone_number.dart';
-import 'profile_name_screen.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
-  const CodeVerificationScreen({
-    required this.phoneNumber,
-    super.key,
-  });
-
-  final PhoneNumber phoneNumber;
+  const CodeVerificationScreen({super.key});
 
   @override
   State<CodeVerificationScreen> createState() => _CodeVerificationScreenState();
@@ -45,6 +40,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
   Widget build(BuildContext context) {
     final authController = AuthScope.of(context);
     final authState = authController.state;
+    final phoneNumber = authState.phoneNumber;
     final isBusy = authState.isBusy;
 
     return AuthScaffold(
@@ -83,7 +79,8 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
             onPressed: isBusy
                 ? null
                 : () async {
-                    await authController.startPhoneAuth(widget.phoneNumber);
+                    if (phoneNumber == null) return;
+                    await authController.startPhoneAuth(phoneNumber);
                   },
             style: TextButton.styleFrom(
               foregroundColor: ZuriColors.accent,
@@ -105,16 +102,11 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
             label: isBusy ? 'Verifying...' : 'Continue',
             onPressed: canContinue && !isBusy
                 ? () async {
-                    final navigator = Navigator.of(context);
                     final didVerify = await authController.verifyCode(
                       codeController.text,
                     );
-                    if (!mounted || !didVerify) return;
-                    await navigator.push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ProfileNameScreen(),
-                      ),
-                    );
+                    if (!context.mounted || !didVerify) return;
+                    context.push(AppRoutes.authProfile);
                   }
                 : null,
           ),

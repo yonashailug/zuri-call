@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:zuri_call/app/di/app_dependencies.dart';
+import 'package:zuri_call/app/routing/app_routes.dart';
 import 'package:zuri_call/core/storage/zuri_database.dart';
 import 'package:zuri_call/core/theme/zuri_theme.dart';
 import 'package:zuri_call/core/ui/zuri_ui.dart';
@@ -55,6 +56,33 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Zuri'), findsOneWidget);
+  });
+
+  testWidgets('renders direct auth routes', (tester) async {
+    await tester.pumpWidget(
+      _testApp(),
+    );
+    await tester.pumpAndSettle();
+
+    final router = GoRouter.of(tester.element(find.text('Zuri')));
+
+    router.go(AppRoutes.authPhone);
+    await tester.pumpAndSettle();
+    expect(find.text('Please enter your phone number below:'), findsOneWidget);
+
+    router.go(AppRoutes.authVerify);
+    await tester.pumpAndSettle();
+    expect(
+      find.text("We've sent you a security code. Please type it here:"),
+      findsOneWidget,
+    );
+
+    router.go(AppRoutes.authProfile);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Please enter your name to create an account.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('walks through auth onboarding screens', (tester) async {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../app/routing/app_routes.dart';
 import '../../core/ui/zuri_ui.dart';
 import 'application/auth_scope.dart';
 import 'auth_design.dart';
@@ -60,12 +62,11 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
             label: isBusy ? 'Creating...' : 'Create an account',
             onPressed: canContinue && !isBusy
                 ? () async {
-                    final navigator = Navigator.of(context);
                     final didCreate = await authController.createProfile(
                       nameController.text,
                     );
-                    if (!mounted || !didCreate) return;
-                    navigator.popUntil((route) => route.isFirst);
+                    if (!context.mounted || !didCreate) return;
+                    context.go(AppRoutes.root);
                   }
                 : null,
           ),
