@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../core/storage/zuri_database.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/data/fake_auth_repository.dart';
 import '../../features/calling/call_service.dart';
@@ -10,6 +11,7 @@ import '../../features/profile/data/user_profile_repository.dart';
 
 class AppDependencies {
   const AppDependencies({
+    required this.database,
     required this.authRepository,
     required this.userProfileRepository,
     required this.contactsRepository,
@@ -18,28 +20,36 @@ class AppDependencies {
   });
 
   factory AppDependencies.defaults({
+    ZuriDatabase? database,
     AuthRepository? authRepository,
     UserProfileRepository? userProfileRepository,
     ContactsRepository? contactsRepository,
     CallHistoryRepository? callHistoryRepository,
     CallService? callService,
   }) {
+    final resolvedDatabase = database ?? ZuriDatabase.production();
     return AppDependencies(
+      database: resolvedDatabase,
       authRepository: authRepository ?? FakeAuthRepository(),
       userProfileRepository:
           userProfileRepository ?? FirestoreUserProfileRepository(),
       contactsRepository: contactsRepository ?? DeviceContactsRepository(),
-      callHistoryRepository:
-          callHistoryRepository ?? LocalCallHistoryRepository(),
+      callHistoryRepository: callHistoryRepository ??
+          LocalCallHistoryRepository(database: resolvedDatabase),
       callService: callService ?? const MockCallService(),
     );
   }
 
+  final ZuriDatabase database;
   final AuthRepository authRepository;
   final UserProfileRepository userProfileRepository;
   final ContactsRepository contactsRepository;
   final CallHistoryRepository callHistoryRepository;
   final CallService callService;
+
+  Future<void> dispose() {
+    return database.close();
+  }
 }
 
 class AppDependenciesScope extends InheritedWidget {

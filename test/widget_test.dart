@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:drift/native.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:zuri_call/app/di/app_dependencies.dart';
+import 'package:zuri_call/core/storage/zuri_database.dart';
 import 'package:zuri_call/core/theme/zuri_theme.dart';
 import 'package:zuri_call/core/ui/zuri_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -934,8 +936,10 @@ Widget _testApp([
   CallService callService = const _FakeCallService(),
   ContactsRepository? contactsRepository,
 ]) {
+  final database = ZuriDatabase(NativeDatabase.memory());
   return ZuriApp(
     dependencies: AppDependencies.defaults(
+      database: database,
       contactsRepository: contactsRepository ?? _FakeContactsRepository(),
       callHistoryRepository:
           callHistoryRepository ?? _FakeCallHistoryRepository(),

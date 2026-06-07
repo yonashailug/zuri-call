@@ -11,8 +11,8 @@ abstract class CallHistoryRepository {
 
 class LocalCallHistoryRepository implements CallHistoryRepository {
   LocalCallHistoryRepository({
-    ZuriDatabase? database,
-  }) : _database = database ?? ZuriDatabase.production();
+    required ZuriDatabase database,
+  }) : _database = database;
 
   static const _maxRecentCalls = 50;
 

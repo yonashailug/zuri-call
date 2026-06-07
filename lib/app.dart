@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,11 +16,13 @@ class ZuriApp extends StatefulWidget {
   const ZuriApp({
     this.dependencies,
     this.authRepository,
+    this.disposeDependencies = true,
     super.key,
   });
 
   final AppDependencies? dependencies;
   final AuthRepository? authRepository;
+  final bool disposeDependencies;
 
   @override
   State<ZuriApp> createState() => _ZuriAppState();
@@ -49,6 +53,9 @@ class _ZuriAppState extends State<ZuriApp> {
   void dispose() {
     router.dispose();
     authController.dispose();
+    if (widget.disposeDependencies) {
+      unawaited(dependencies.dispose());
+    }
     super.dispose();
   }
 
