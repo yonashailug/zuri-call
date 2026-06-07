@@ -77,6 +77,8 @@ class ZuriCircleButton extends StatelessWidget {
         onPressed: onPressed,
         icon: Icon(icon, size: iconSize),
         color: foregroundColor ?? colors.primary,
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints.tightFor(width: size, height: size),
         style: IconButton.styleFrom(
           // Spec: icon button bg = rgba(28,56,32,0.07)
           backgroundColor: backgroundColor ?? ZuriColors.iconButtonBg,
@@ -100,8 +102,8 @@ class ZuriBackButton extends StatelessWidget {
     return ZuriCircleButton(
       icon: ZuriIcons.back,
       onPressed: onPressed,
-      size: 36,
-      iconSize: 22,
+      size: 52,
+      iconSize: 28,
       foregroundColor: ZuriColors.ink,
       backgroundColor: ZuriColors.endedCallPill,
     );
@@ -225,6 +227,12 @@ class ZuriAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final initialsStyle = size >= 84
+        ? ZuriTextStyles.avatarDisplay.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          )
+        : ZuriTextStyles.avatarInitials.copyWith(color: Colors.white);
     final circle = Container(
       height: size,
       width: size,
@@ -235,7 +243,7 @@ class ZuriAvatar extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: ZuriTextStyles.avatarInitials.copyWith(color: Colors.white),
+        style: initialsStyle,
       ),
     );
 

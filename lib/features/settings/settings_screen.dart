@@ -19,7 +19,12 @@ class SettingsScreen extends StatelessWidget {
     return ZuriScaffold(
       title: 'Settings',
       child: ListView(
-        padding: ZuriSpacing.screenCompact,
+        padding: const EdgeInsets.fromLTRB(
+          ZuriSpacing.s5,
+          12,
+          ZuriSpacing.s5,
+          ZuriDimensions.navOverlayBottomPadding,
+        ),
         children: [
           _ProfileHeader(sessionSummary: sessionSummary),
           const SizedBox(height: 22),
@@ -27,9 +32,16 @@ class SettingsScreen extends StatelessWidget {
           ZuriMenuRow(icon: ZuriIcons.wallet, label: 'Wallet', onTap: () {}),
           ZuriMenuRow(icon: ZuriIcons.world, label: 'Rates', onTap: () {}),
           ZuriMenuRow(icon: ZuriIcons.support, label: 'Support', onTap: () {}),
-          ZuriMenuRow(icon: ZuriIcons.privacy, label: 'Privacy policy', onTap: () {}),
-          ZuriMenuRow(icon: ZuriIcons.document, label: 'Terms of service', onTap: () {}),
-          ZuriMenuRow(icon: ZuriIcons.emergency, label: 'Emergency calling notice', onTap: () {}),
+          ZuriMenuRow(
+              icon: ZuriIcons.privacy, label: 'Privacy policy', onTap: () {}),
+          ZuriMenuRow(
+              icon: ZuriIcons.document,
+              label: 'Terms of service',
+              onTap: () {}),
+          ZuriMenuRow(
+              icon: ZuriIcons.emergency,
+              label: 'Emergency calling notice',
+              onTap: () {}),
           const SizedBox(height: 12),
           ZuriMenuRow(
             icon: ZuriIcons.logout,

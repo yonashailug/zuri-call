@@ -88,46 +88,37 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
     return ZuriScaffold(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 32, 20, 28),
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          32,
+          20,
+          ZuriDimensions.navOverlayBottomPadding,
+        ),
         children: [
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.mode == ContactsMode.recents
-                          ? 'Good morning'
-                          : 'Your network',
-                      style: ZuriTextStyles.pageSubtitle.copyWith(
-                        color: ZuriColors.muted,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.mode == ContactsMode.recents
-                          ? sessionSummary.greetingName
-                          : 'Contacts',
-                      style: widget.mode == ContactsMode.recents
-                          ? ZuriTextStyles.greetingTitle
-                          : ZuriTextStyles.pageTitle.copyWith(height: 1),
-                    ),
-                  ],
+              Text(
+                widget.mode == ContactsMode.recents
+                    ? 'Good morning'
+                    : 'Your network',
+                style: ZuriTextStyles.pageSubtitle.copyWith(
+                  color: ZuriColors.muted,
                 ),
               ),
-              _ProfileAvatar(
-                label: sessionSummary.initials,
+              const SizedBox(height: 4),
+              Text(
+                widget.mode == ContactsMode.recents
+                    ? sessionSummary.greetingName
+                    : 'Contacts',
+                style: widget.mode == ContactsMode.recents
+                    ? ZuriTextStyles.greetingTitle
+                    : ZuriTextStyles.pageTitle.copyWith(height: 1),
               ),
             ],
           ),
-          const SizedBox(height: 28),
-          _SearchField(
-            controller: searchController,
-            hintText: 'Search contacts or numbers',
-          ),
-          const SizedBox(height: 22),
           if (widget.mode == ContactsMode.recents) ...[
+            const SizedBox(height: 28),
             _RecentsContent(
               recentCalls: _filteredRecentCalls,
               onContactCall: widget.onContactCall,
@@ -137,6 +128,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
               onRecentCallDelete: widget.onRecentCallDelete,
             ),
           ] else ...[
+            const SizedBox(height: 28),
+            _SearchField(
+              controller: searchController,
+              hintText: 'Search contacts or numbers',
+            ),
+            const SizedBox(height: 22),
             const _ContactsFilterTabs(),
             const SizedBox(height: 24),
             _ContactsContent(
@@ -1097,41 +1094,6 @@ class _ContactRow extends StatelessWidget {
             trailing,
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: 48,
-      child: Stack(
-        children: [
-          ZuriAvatar(
-            label: label,
-            color: ZuriColors.profileAvatar,
-            size: 42,
-          ),
-          Positioned(
-            right: 4,
-            bottom: 4,
-            child: Container(
-              width: 13,
-              height: 13,
-              decoration: BoxDecoration(
-                color: ZuriColors.accent,
-                shape: BoxShape.circle,
-                border: Border.all(color: ZuriColors.surface, width: 3),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

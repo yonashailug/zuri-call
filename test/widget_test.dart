@@ -242,6 +242,9 @@ void main() {
     expect(find.byIcon(ZuriIcons.back), findsOneWidget);
     expect(find.text('Recents'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('Delete from recents'));
+    await tester.drag(find.byType(ListView).last, const Offset(0, -180));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Delete from recents'));
     await tester.pumpAndSettle();
 

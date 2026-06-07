@@ -132,56 +132,19 @@ class _AppShellState extends State<AppShell> {
           );
 
     return Scaffold(
-      body: body,
-      floatingActionButton: selectedIndex == 2
-          ? null
-          : FloatingActionButton(
-              onPressed: () => _selectTab(2),
-              backgroundColor: ZuriColors.primary,
-              foregroundColor: ZuriColors.surface,
-              shape: const CircleBorder(),
-              child: const Icon(ZuriIcons.phonePlus, size: 20),
+      body: Stack(
+        children: [
+          Positioned.fill(child: body),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _ZuriBottomNav(
+              selectedIndex: selectedIndex,
+              onSelected: _selectTab,
             ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: ZuriColors.navBorderTop),
           ),
-        ),
-        child: NavigationBar(
-          height: 56,
-          selectedIndex: selectedIndex,
-          onDestinationSelected: _selectTab,
-          backgroundColor: ZuriColors.surface,
-          indicatorColor: Colors.transparent,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(ZuriIcons.recents),
-              selectedIcon: Icon(ZuriIcons.recents),
-              label: 'Recents',
-            ),
-            NavigationDestination(
-              icon: Icon(ZuriIcons.contacts),
-              selectedIcon: Icon(ZuriIcons.contacts),
-              label: 'Contacts',
-            ),
-            NavigationDestination(
-              icon: SizedBox.shrink(),
-              label: 'Call',
-            ),
-            NavigationDestination(
-              icon: Icon(ZuriIcons.wallet),
-              selectedIcon: Icon(ZuriIcons.wallet),
-              label: 'Wallet',
-            ),
-            NavigationDestination(
-              icon: Icon(ZuriIcons.settings),
-              selectedIcon: Icon(ZuriIcons.settings),
-              label: 'Settings',
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -344,5 +307,247 @@ class _AppShellState extends State<AppShell> {
   bool _sameDialableNumber(String left, String right) {
     return left.replaceAll(RegExp(r'\D'), '') ==
         right.replaceAll(RegExp(r'\D'), '');
+  }
+}
+
+class _ZuriBottomNav extends StatelessWidget {
+  const _ZuriBottomNav({
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  static const _items = [
+    _ZuriBottomNavItem(ZuriIcons.recents, 'Recents'),
+    _ZuriBottomNavItem(ZuriIcons.contactsBook, 'Contacts'),
+    _ZuriBottomNavItem(ZuriIcons.phonePlus, 'Call'),
+    _ZuriBottomNavItem(ZuriIcons.wallet, 'Wallet'),
+    _ZuriBottomNavItem(ZuriIcons.settings, 'Settings'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final surfaceHeight = ZuriDimensions.navHeight + bottomInset;
+    final totalHeight = surfaceHeight + 24;
+
+    return SizedBox(
+      height: totalHeight,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: surfaceHeight,
+              padding: EdgeInsets.only(bottom: bottomInset),
+              decoration: BoxDecoration(
+                color: ZuriColors.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: ZuriColors.primary.withValues(alpha: 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  for (var index = 0; index < _items.length; index += 1)
+                    Expanded(
+                      child: index == 2
+                          ? _ZuriCallNavSlot(
+                              isSelected: selectedIndex == index,
+                              onTap: () => onSelected(index),
+                            )
+                          : _ZuriTabNavSlot(
+                              item: _items[index],
+                              isSelected: selectedIndex == index,
+                              onTap: () => onSelected(index),
+                            ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            child: _ZuriCallFab(
+              isSelected: selectedIndex == 2,
+              onTap: () => onSelected(2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ZuriBottomNavItem {
+  const _ZuriBottomNavItem(this.icon, this.label);
+
+  final IconData icon;
+  final String label;
+}
+
+class _ZuriTabNavSlot extends StatelessWidget {
+  const _ZuriTabNavSlot({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final _ZuriBottomNavItem item;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        isSelected ? ZuriColors.forest800 : ZuriColors.navIconInactive;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const RoundedRectangleBorder(),
+        child: SizedBox.expand(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(item.icon, size: 22, color: color),
+                  const SizedBox(height: ZuriSpacing.s1),
+                  Text(
+                    item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                    style: ZuriTextStyles.navItemLabel.copyWith(
+                      color: color,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ZuriCallNavSlot extends StatelessWidget {
+  const _ZuriCallNavSlot({
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const RoundedRectangleBorder(),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 7),
+            child: Text(
+              'Call',
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+              style: ZuriTextStyles.navItemLabel.copyWith(
+                color: ZuriColors.forest800,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ZuriCallFab extends StatelessWidget {
+  const _ZuriCallFab({
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = isSelected ? 1.04 : 1.0;
+    final shadows = isSelected
+        ? [
+            BoxShadow(
+              color: ZuriColors.primary.withValues(alpha: 0.45),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: ZuriColors.primary.withValues(alpha: 0.2),
+              blurRadius: 40,
+              offset: const Offset(0, 10),
+            ),
+          ]
+        : [
+            BoxShadow(
+              color: ZuriColors.primary.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: ZuriColors.primary.withValues(alpha: 0.15),
+              blurRadius: 32,
+              offset: const Offset(0, 8),
+            ),
+          ];
+
+    return AnimatedScale(
+      scale: scale,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: ZuriColors.primary,
+              shape: BoxShape.circle,
+              boxShadow: shadows,
+            ),
+            child: const Icon(
+              ZuriIcons.phonePlus,
+              size: 22,
+              color: ZuriColors.surface,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

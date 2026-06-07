@@ -32,7 +32,12 @@ class CallDetailsScreen extends StatelessWidget {
 
     return ZuriScaffold(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 32, 20, 28),
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          32,
+          20,
+          ZuriDimensions.navOverlayBottomPadding,
+        ),
         children: [
           Align(
             alignment: Alignment.centerLeft,
@@ -307,19 +312,6 @@ class _ActionsCard extends StatelessWidget {
         _ActionRow(
           icon: ZuriIcons.copy,
           label: 'Copy number',
-          onTap: () {
-            Clipboard.setData(ClipboardData(text: call.phone));
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Number copied'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-        ),
-        _ActionRow(
-          icon: ZuriIcons.document,
-          label: 'Share number',
           onTap: () {
             Clipboard.setData(ClipboardData(text: call.phone));
             ScaffoldMessenger.of(context).showSnackBar(

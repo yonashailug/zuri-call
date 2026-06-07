@@ -72,7 +72,12 @@ class _WalletOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     return ZuriScaffold(
       child: ListView(
-        padding: ZuriSpacing.screen,
+        padding: const EdgeInsets.fromLTRB(
+          ZuriSpacing.s5,
+          32,
+          ZuriSpacing.s5,
+          ZuriDimensions.navOverlayBottomPadding,
+        ),
         children: [
           const _WalletHeader(),
           const SizedBox(height: 28),
@@ -159,11 +164,6 @@ class _WalletHeader extends StatelessWidget {
           ),
         ),
         const _HeaderIconButton(icon: ZuriIcons.recents),
-        const SizedBox(width: 12),
-        const ZuriAvatar(
-          label: 'Y',
-          size: 36,
-        ),
       ],
     );
   }
@@ -188,7 +188,12 @@ class _TopUpWalletScreenState extends State<_TopUpWalletScreen> {
   Widget build(BuildContext context) {
     return ZuriScaffold(
       child: ListView(
-        padding: ZuriSpacing.screen,
+        padding: const EdgeInsets.fromLTRB(
+          ZuriSpacing.s5,
+          32,
+          ZuriSpacing.s5,
+          ZuriDimensions.navOverlayBottomPadding,
+        ),
         children: [
           _TopUpHeader(onBack: widget.onBack),
           const SizedBox(height: 34),
@@ -275,7 +280,12 @@ class _TransactionHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ZuriScaffold(
       child: ListView(
-        padding: ZuriSpacing.screen,
+        padding: const EdgeInsets.fromLTRB(
+          ZuriSpacing.s5,
+          32,
+          ZuriSpacing.s5,
+          ZuriDimensions.navOverlayBottomPadding,
+        ),
         children: [
           _HistoryHeader(onBack: onBack),
           const SizedBox(height: 24),
@@ -663,7 +673,12 @@ class _RateLookupScreenState extends State<_RateLookupScreen> {
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(28, 34, 28, 16),
+              padding: const EdgeInsets.fromLTRB(
+                28,
+                34,
+                28,
+                ZuriDimensions.navOverlayBottomPadding,
+              ),
               children: [
                 _RateLookupHeader(onBack: widget.onBack),
                 const SizedBox(height: 26),
@@ -706,7 +721,12 @@ class _RateLookupScreenState extends State<_RateLookupScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 12, 28, 24),
+            padding: const EdgeInsets.fromLTRB(
+              28,
+              12,
+              28,
+              ZuriDimensions.navOverlayBottomPadding,
+            ),
             child: SizedBox(
               height: 66,
               width: double.infinity,

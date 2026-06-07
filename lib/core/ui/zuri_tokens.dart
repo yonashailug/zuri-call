@@ -66,6 +66,7 @@ class ZuriDimensions {
   static const secondaryButtonHeight = 56.0;
   static const callButtonHeight = 48.0;
   static const navHeight = 56.0;
+  static const navOverlayBottomPadding = 112.0;
   static const quickDialNameMaxLength = 10;
 }
 
