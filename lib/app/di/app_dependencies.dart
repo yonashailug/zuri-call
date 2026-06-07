@@ -33,7 +33,8 @@ class AppDependencies {
       authRepository: authRepository ?? FakeAuthRepository(),
       userProfileRepository:
           userProfileRepository ?? FirestoreUserProfileRepository(),
-      contactsRepository: contactsRepository ?? DeviceContactsRepository(),
+      contactsRepository: contactsRepository ??
+          DeviceContactsRepository(database: resolvedDatabase),
       callHistoryRepository: callHistoryRepository ??
           LocalCallHistoryRepository(database: resolvedDatabase),
       callService: callService ?? const MockCallService(),

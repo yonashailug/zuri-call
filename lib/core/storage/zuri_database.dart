@@ -24,7 +24,18 @@ class CallRecords extends Table {
   IntColumn get durationSeconds => integer().withDefault(const Constant(0))();
 }
 
-@DriftDatabase(tables: [CallRecords])
+@DataClassName('CachedContactRow')
+class CachedContacts extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get name => text()();
+
+  TextColumn get phone => text()();
+
+  DateTimeColumn get cachedAt => dateTime()();
+}
+
+@DriftDatabase(tables: [CallRecords, CachedContacts])
 class ZuriDatabase extends _$ZuriDatabase {
   ZuriDatabase(super.executor);
 
@@ -39,5 +50,17 @@ class ZuriDatabase extends _$ZuriDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (migrator) => migrator.createAll(),
+      onUpgrade: (migrator, from, to) async {
+        if (from < 2) {
+          await migrator.createTable(cachedContacts);
+        }
+      },
+    );
+  }
 }

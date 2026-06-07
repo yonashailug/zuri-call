@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/di/app_dependencies.dart';
 import '../../core/data/phone_country_lookup.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
@@ -41,8 +42,7 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-  late final ContactsRepository contactsRepository =
-      widget.contactsRepository ?? DeviceContactsRepository();
+  ContactsRepository? contactsRepository;
   final searchController = TextEditingController();
 
   ContactsLoadStatus? status;
@@ -55,6 +55,17 @@ class _ContactsScreenState extends State<ContactsScreen> {
   void initState() {
     super.initState();
     searchController.addListener(_handleSearchChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (contactsRepository != null) return;
+
+    contactsRepository = widget.contactsRepository ??
+        DeviceContactsRepository(
+          database: AppDependenciesScope.of(context).database,
+        );
     if (widget.mode == ContactsMode.contacts) {
       _loadContacts();
     }
@@ -156,6 +167,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Future<void> _loadContacts() async {
+    final contactsRepository = this.contactsRepository;
+    if (contactsRepository == null) return;
+
     setState(() {
       isLoading = true;
       errorMessage = null;

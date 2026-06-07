@@ -1,6 +1,8 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as device_contacts;
 
+import '../../core/storage/zuri_database.dart';
 import 'contact_preview.dart';
 
 enum ContactsLoadStatus { loaded, denied, unavailable }
@@ -28,7 +30,11 @@ abstract class ContactsRepository {
   Future<ContactsLoadResult> loadContacts();
 }
 
-class DeviceContactsRepository implements ContactsRepository {
+abstract class ContactsDataSource {
+  Future<ContactsLoadResult> loadContacts();
+}
+
+class DeviceContactsDataSource implements ContactsDataSource {
   @override
   Future<ContactsLoadResult> loadContacts() async {
     try {
@@ -70,5 +76,77 @@ class DeviceContactsRepository implements ContactsRepository {
         phone: number,
       );
     }
+  }
+}
+
+class DeviceContactsRepository implements ContactsRepository {
+  DeviceContactsRepository({
+    required ZuriDatabase database,
+    ContactsDataSource? deviceDataSource,
+  })  : _database = database,
+        _deviceDataSource = deviceDataSource ?? DeviceContactsDataSource();
+
+  final ZuriDatabase _database;
+  final ContactsDataSource _deviceDataSource;
+
+  @override
+  Future<ContactsLoadResult> loadContacts() async {
+    final result = await _deviceDataSource.loadContacts();
+
+    if (result.status == ContactsLoadStatus.loaded) {
+      await _replaceCachedContacts(result.contacts);
+      return result;
+    }
+
+    if (result.status == ContactsLoadStatus.unavailable) {
+      final cachedContacts = await _loadCachedContacts();
+      if (cachedContacts.isNotEmpty) {
+        return ContactsLoadResult.loaded(cachedContacts);
+      }
+    }
+
+    return result;
+  }
+
+  Future<List<ContactPreview>> _loadCachedContacts() async {
+    final rows = await (_database.select(_database.cachedContacts)
+          ..orderBy([
+            (table) => OrderingTerm(
+                  expression: table.name,
+                  mode: OrderingMode.asc,
+                ),
+          ]))
+        .get();
+
+    return rows
+        .map(
+          (row) => ContactPreview.fromNameAndPhone(
+            name: row.name,
+            phone: row.phone,
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> _replaceCachedContacts(List<ContactPreview> contacts) async {
+    final sortedContacts = [...contacts]
+      ..sort((a, b) => a.name.compareTo(b.name));
+    final now = DateTime.now().toUtc();
+
+    await _database.transaction(() async {
+      await _database.delete(_database.cachedContacts).go();
+      await _database.batch((batch) {
+        batch.insertAll(
+          _database.cachedContacts,
+          sortedContacts.map(
+            (contact) => CachedContactsCompanion.insert(
+              name: contact.name,
+              phone: contact.phone,
+              cachedAt: now,
+            ),
+          ),
+        );
+      });
+    });
   }
 }
