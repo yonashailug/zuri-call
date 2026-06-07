@@ -13,6 +13,7 @@ import 'call_details_screen.dart';
 import 'call_record.dart';
 import 'contact_preview.dart';
 import 'contacts_screen.dart';
+import 'device_contacts_repository.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -24,6 +25,8 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int selectedIndex = 1;
   RecentCallsController? recentCallsController;
+  List<ContactPreview> suggestionContacts = const [];
+  bool isLoadingSuggestionContacts = false;
   String? dialNumber;
   String? dialContactName;
   OutgoingCallRequest? activeCall;
@@ -41,6 +44,7 @@ class _AppShellState extends State<AppShell> {
     );
     recentCallsController = controller;
     controller.restore();
+    _loadSuggestionContacts(dependencies);
   }
 
   @override
@@ -103,8 +107,9 @@ class _AppShellState extends State<AppShell> {
       DialpadScreen(
         initialNumber: dialNumber,
         contactName: dialContactName,
-        suggestionContacts:
-            recentCallsController.calls.map((call) => call.contact).toList(),
+        suggestionContacts: _dialpadSuggestionContacts(
+          recentCallsController.calls,
+        ),
         onStartCall: _startDialpadCall,
       ),
       WalletScreen(onCallDestination: _startRateDestinationCall),
@@ -279,11 +284,55 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _selectTab(int index) {
+    if (index == 1 || index == 2) {
+      _loadSuggestionContacts(AppDependenciesScope.of(context));
+    }
+
     setState(() {
       selectedCall = null;
       selectedCallIsRecent = false;
       selectedIndex = index;
     });
+  }
+
+  Future<void> _loadSuggestionContacts(AppDependencies dependencies) async {
+    if (isLoadingSuggestionContacts || suggestionContacts.isNotEmpty) return;
+
+    isLoadingSuggestionContacts = true;
+    final result = await dependencies.contactsRepository.loadContacts();
+    if (!mounted) return;
+
+    setState(() {
+      isLoadingSuggestionContacts = false;
+      suggestionContacts = result.status == ContactsLoadStatus.loaded
+          ? result.contacts
+          : const [];
+    });
+  }
+
+  List<ContactPreview> _dialpadSuggestionContacts(List<CallRecord> calls) {
+    final contacts = <ContactPreview>[];
+    final seenPhones = <String>{};
+
+    void addContact(ContactPreview contact) {
+      final phoneKey = _normalizedPhone(contact.phone);
+      if (phoneKey.isEmpty || !seenPhones.add(phoneKey)) return;
+      contacts.add(contact);
+    }
+
+    for (final call in calls) {
+      addContact(call.contact);
+    }
+
+    for (final contact in suggestionContacts) {
+      addContact(contact);
+    }
+
+    return contacts;
+  }
+
+  String _normalizedPhone(String phone) {
+    return phone.replaceAll(RegExp(r'\D'), '');
   }
 
   bool _sameDialableNumber(String left, String right) {

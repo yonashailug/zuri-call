@@ -525,10 +525,11 @@ class _DialSuggestions extends StatelessWidget {
       );
     }
 
-    final matches = _matchingContacts.take(2).toList();
+    final matches = _matchingContacts.take(1).toList();
     if (matches.isNotEmpty) {
       return _SuggestionCard(
         contacts: matches,
+        inputDigits: inputDigits,
         onContactSelected: onContactSelected,
       );
     }
@@ -541,23 +542,50 @@ class _DialSuggestions extends StatelessWidget {
   List<ContactPreview> get _matchingContacts {
     if (inputDigits.length < 2) return const [];
 
-    final scored = <({ContactPreview contact, int score})>[];
-    for (final contact in contacts) {
-      final phoneDigits = contact.phone.replaceAll(RegExp(r'\D'), '');
-      final index = phoneDigits.indexOf(inputDigits);
-      if (index == -1) continue;
+    final scored = <({ContactPreview contact, int score, int index})>[];
+    for (var index = 0; index < contacts.length; index++) {
+      final contact = contacts[index];
+      final matchScore = _matchScore(contact.phone);
+      if (matchScore == null) continue;
 
-      final score = index == 0 ? 0 : index;
-      scored.add((contact: contact, score: score));
+      scored.add((contact: contact, score: matchScore, index: index));
     }
 
     scored.sort((left, right) {
       final scoreComparison = left.score.compareTo(right.score);
       if (scoreComparison != 0) return scoreComparison;
+      final indexComparison = left.index.compareTo(right.index);
+      if (indexComparison != 0) return indexComparison;
       return left.contact.name.compareTo(right.contact.name);
     });
 
     return scored.map((entry) => entry.contact).toList();
+  }
+
+  int? _matchScore(String phone) {
+    final phoneDigits = phone.replaceAll(RegExp(r'\D'), '');
+    if (phoneDigits.isEmpty) return null;
+    if (phoneDigits.startsWith(inputDigits)) return 0;
+
+    final canMatchInsideNumber = inputDigits.length >= 3;
+    if (canMatchInsideNumber) {
+      final fullIndex = phoneDigits.indexOf(inputDigits);
+      if (fullIndex > 0) return 20 + fullIndex;
+    }
+
+    for (final country in _dialCountries) {
+      final prefixDigits = country.prefix.replaceAll(RegExp(r'\D'), '');
+      if (!phoneDigits.startsWith(prefixDigits)) continue;
+
+      final nationalDigits = phoneDigits.substring(prefixDigits.length);
+      if (nationalDigits.startsWith(inputDigits)) return 1;
+      if (canMatchInsideNumber) {
+        final nationalIndex = nationalDigits.indexOf(inputDigits);
+        if (nationalIndex > 0) return 10 + nationalIndex;
+      }
+    }
+
+    return null;
   }
 }
 
@@ -606,10 +634,12 @@ class _RateContext extends StatelessWidget {
 class _SuggestionCard extends StatelessWidget {
   const _SuggestionCard({
     required this.contacts,
+    required this.inputDigits,
     required this.onContactSelected,
   });
 
   final List<ContactPreview> contacts;
+  final String inputDigits;
   final ValueChanged<ContactPreview> onContactSelected;
 
   @override
@@ -630,6 +660,7 @@ class _SuggestionCard extends StatelessWidget {
             for (var index = 0; index < contacts.length; index++) ...[
               _SuggestionRow(
                 contact: contacts[index],
+                inputDigits: inputDigits,
                 onTap: () => onContactSelected(contacts[index]),
               ),
               if (index < contacts.length - 1)
@@ -651,10 +682,12 @@ class _SuggestionCard extends StatelessWidget {
 class _SuggestionRow extends StatelessWidget {
   const _SuggestionRow({
     required this.contact,
+    required this.inputDigits,
     required this.onTap,
   });
 
   final ContactPreview contact;
+  final String inputDigits;
   final VoidCallback onTap;
 
   @override
@@ -663,41 +696,121 @@ class _SuggestionRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Row(
           children: [
-            Icon(
-              ZuriIcons.account,
-              size: 20,
-              color: ZuriColors.ink.withValues(alpha: 0.72),
+            ZuriAvatar(
+              label: contact.initials,
+              color: contact.color,
+              size: 38,
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                contact.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: ZuriTextStyles.dialpadContext.copyWith(
-                  color: ZuriColors.muted,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    contact.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ZuriTextStyles.dialpadContext.copyWith(
+                      color: ZuriColors.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  _HighlightedPhoneText(
+                    phone: contact.phone,
+                    inputDigits: inputDigits,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            Flexible(
-              child: Text(
-                contact.phone,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
-                style: ZuriTextStyles.dialpadRate.copyWith(
-                  color: ZuriColors.ink,
-                ),
-              ),
+            const SizedBox(width: 10),
+            ZuriCircleButton(
+              icon: ZuriIcons.phone,
+              onPressed: onTap,
+              foregroundColor: ZuriColors.forest800,
+              backgroundColor: ZuriColors.iconButtonBg,
+              size: 38,
+              iconSize: 15,
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _HighlightedPhoneText extends StatelessWidget {
+  const _HighlightedPhoneText({
+    required this.phone,
+    required this.inputDigits,
+  });
+
+  final String phone;
+  final String inputDigits;
+
+  @override
+  Widget build(BuildContext context) {
+    final ranges = _digitRanges(phone, inputDigits);
+    final baseStyle = ZuriTextStyles.dialpadRate.copyWith(
+      color: ZuriColors.muted,
+    );
+    final matchStyle = baseStyle.copyWith(
+      color: ZuriColors.ink,
+      fontWeight: FontWeight.w700,
+    );
+
+    if (ranges == null) {
+      return Text(
+        phone,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: baseStyle,
+      );
+    }
+
+    final (:start, :end) = ranges;
+    return Text.rich(
+      TextSpan(
+        children: [
+          if (start > 0) TextSpan(text: phone.substring(0, start)),
+          TextSpan(text: phone.substring(start, end), style: matchStyle),
+          if (end < phone.length) TextSpan(text: phone.substring(end)),
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: baseStyle,
+    );
+  }
+
+  ({int start, int end})? _digitRanges(String phone, String digits) {
+    if (digits.isEmpty) return null;
+
+    var digitIndex = 0;
+    int? start;
+    for (var charIndex = 0; charIndex < phone.length; charIndex++) {
+      final char = phone[charIndex];
+      if (!_isDigit(char)) continue;
+
+      if (char == digits[digitIndex]) {
+        start ??= charIndex;
+        digitIndex++;
+        if (digitIndex == digits.length) {
+          return (start: start, end: charIndex + 1);
+        }
+      } else if (start != null) {
+        start = char == digits[0] ? charIndex : null;
+        digitIndex = start == null ? 0 : 1;
+      }
+    }
+
+    return null;
+  }
+
+  bool _isDigit(String value) {
+    return value.codeUnitAt(0) >= 48 && value.codeUnitAt(0) <= 57;
   }
 }
 

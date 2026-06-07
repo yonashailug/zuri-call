@@ -532,12 +532,12 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('4'));
-    await tester.tap(find.text('5'));
+    await tester.tap(find.text('9'));
+    await tester.tap(find.text('8'));
     await tester.pumpAndSettle();
 
     expect(find.text('Mikal Afewerki'), findsOneWidget);
-    expect(find.text('Jordan Rivera'), findsOneWidget);
+    expect(find.text('Jordan Rivera'), findsNothing);
     expect(find.text('Maya Kim'), findsNothing);
 
     await tester.tap(
@@ -554,6 +554,57 @@ void main() {
     expect(find.text('+1 (980) 457-9962'), findsOneWidget);
     expect(find.text('United States'), findsOneWidget);
     expect(find.text('\$0.02 / min'), findsOneWidget);
+  });
+
+  testWidgets('dialpad suggests loaded contacts from app shell', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    await tester.tap(find.text('Call'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('2'));
+    await tester.tap(find.text('0'));
+    await tester.tap(find.text('6'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
+  });
+
+  testWidgets('dialpad suggests contacts from middle number segments', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DialpadScreen(
+          suggestionContacts: [
+            ContactPreview.fromNameAndPhone(
+              name: 'Addis Contact',
+              phone: '+251 91 402 6184',
+            ),
+          ],
+          onStartCall: (_) {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('4'));
+    await tester.tap(find.text('0'));
+    await tester.tap(find.text('2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Addis Contact'), findsOneWidget);
+    expect(find.text('+251 91 402 6184'), findsOneWidget);
   });
 
   testWidgets('dialpad clears contact label after editing prefilled number', (
