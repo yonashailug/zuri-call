@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:http/http.dart' as http;
 
+import '../../profile/data/firestore_user_profile_repository.dart';
+import '../../profile/data/user_profile_repository.dart';
+import '../../profile/domain/user_profile.dart';
 import 'phone_country_data.dart';
 import '../domain/phone_number.dart';
 import 'auth_repository.dart';
@@ -12,15 +12,16 @@ import 'auth_repository.dart';
 class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
     firebase_auth.FirebaseAuth? firebaseAuth,
-    http.Client? httpClient,
+    UserProfileRepository? userProfileRepository,
     this.appVerificationDisabledForTesting = false,
     this.testPhoneNumber,
     this.testSmsCode,
   })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
-        _httpClient = httpClient ?? http.Client();
+        _userProfileRepository =
+            userProfileRepository ?? FirestoreUserProfileRepository();
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
-  final http.Client _httpClient;
+  final UserProfileRepository _userProfileRepository;
   final bool appVerificationDisabledForTesting;
   final String? testPhoneNumber;
   final String? testSmsCode;
@@ -39,8 +40,8 @@ class FirebaseAuthRepository implements AuthRepository {
       return null;
     }
 
-    final profile = await _fetchUserProfile(user);
-    final displayName = profile?['displayName'] ?? user.displayName;
+    final profile = await _loadUserProfile(user);
+    final displayName = profile?.displayName ?? user.displayName;
 
     return AuthSession(
       userId: user.uid,
@@ -155,17 +156,24 @@ class FirebaseAuthRepository implements AuthRepository {
     final user = _firebaseAuth.currentUser;
     if (user != null) {
       await user.updateDisplayName(trimmedName);
-      final existingProfile = await _fetchUserProfile(user);
-      await _saveUserProfile(
-        user: user,
-        profile: {
-          'displayName': trimmedName,
-          'phoneNumber': session.phoneNumber.e164,
-          'phoneCountryCode': session.phoneNumber.country.prefix,
-          'phoneNationalNumber': session.phoneNumber.nationalNumber,
-        },
-        includeCreatedAt: existingProfile == null,
-      );
+      try {
+        final authToken = await _authTokenFor(user);
+        final existingProfile = await _userProfileRepository.loadProfile(
+          userId: user.uid,
+          authToken: authToken,
+        );
+        await _userProfileRepository.saveProfile(
+          profile: UserProfile(
+            userId: user.uid,
+            displayName: trimmedName,
+            phoneNumber: session.phoneNumber,
+          ),
+          authToken: authToken,
+          includeCreatedAt: existingProfile == null,
+        );
+      } on UserProfileException catch (error) {
+        throw AuthException(error.message);
+      }
     }
 
     return session.copyWith(displayName: trimmedName);
@@ -196,8 +204,29 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   Future<String?> _displayNameForUser(firebase_auth.User user) async {
-    final profile = await _fetchUserProfile(user);
-    return profile?['displayName'] ?? user.displayName;
+    final profile = await _loadUserProfile(user);
+    return profile?.displayName ?? user.displayName;
+  }
+
+  Future<UserProfile?> _loadUserProfile(firebase_auth.User user) async {
+    try {
+      return await _userProfileRepository.loadProfile(
+        userId: user.uid,
+        authToken: await _authTokenFor(user),
+      );
+    } on UserProfileException catch (error) {
+      throw AuthException(error.message);
+    }
+  }
+
+  Future<String> _authTokenFor(firebase_auth.User user) async {
+    final token = await user.getIdToken();
+    if (token == null || token.isEmpty) {
+      throw const AuthException(
+          'Authentication expired. Please sign in again.');
+    }
+
+    return token;
   }
 
   PhoneNumber? _phoneNumberFromE164(String? e164) {
@@ -215,87 +244,5 @@ class FirebaseAuthRepository implements AuthRepository {
     }
 
     return null;
-  }
-
-  Future<Map<String, String>?> _fetchUserProfile(
-    firebase_auth.User user,
-  ) async {
-    final response = await _httpClient.get(
-      await _userDocumentUri(user.uid),
-      headers: await _authHeaders(user),
-    );
-
-    if (response.statusCode == 404) return null;
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw const AuthException('Could not load your profile. Try again.');
-    }
-
-    final payload = jsonDecode(response.body) as Map<String, dynamic>;
-    final fields = payload['fields'] as Map<String, dynamic>? ?? {};
-
-    return fields.map((key, value) {
-      final field = value as Map<String, dynamic>;
-      return MapEntry(key, field['stringValue'] as String? ?? '');
-    });
-  }
-
-  Future<void> _saveUserProfile({
-    required firebase_auth.User user,
-    required Map<String, String> profile,
-    required bool includeCreatedAt,
-  }) async {
-    final now = DateTime.now().toUtc().toIso8601String();
-    final fields = {
-      ...profile,
-      'updatedAt': now,
-      if (includeCreatedAt) 'createdAt': now,
-    };
-
-    final response = await _httpClient.patch(
-      await _userDocumentUri(user.uid, updateMask: fields.keys),
-      headers: await _authHeaders(user),
-      body: jsonEncode({
-        'fields': _firestoreFields(fields),
-      }),
-    );
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw const AuthException('Could not save your profile. Try again.');
-    }
-  }
-
-  Future<Uri> _userDocumentUri(
-    String uid, {
-    Iterable<String> updateMask = const [],
-  }) async {
-    final projectId = Firebase.app().options.projectId;
-    final queryParameters = <String, dynamic>{
-      if (updateMask.isNotEmpty) 'updateMask.fieldPaths': updateMask.toList(),
-    };
-
-    return Uri.https(
-      'firestore.googleapis.com',
-      '/v1/projects/$projectId/databases/(default)/documents/users/$uid',
-      queryParameters,
-    );
-  }
-
-  Future<Map<String, String>> _authHeaders(firebase_auth.User user) async {
-    final token = await user.getIdToken();
-    return {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    };
-  }
-
-  Map<String, Map<String, String>> _firestoreFields(
-    Map<String, String> fields,
-  ) {
-    return {
-      for (final entry in fields.entries)
-        entry.key: entry.key.endsWith('At')
-            ? {'timestampValue': entry.value}
-            : {'stringValue': entry.value},
-    };
   }
 }

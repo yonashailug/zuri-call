@@ -5,10 +5,13 @@ import '../../features/auth/data/fake_auth_repository.dart';
 import '../../features/calling/call_service.dart';
 import '../../features/home/call_history_repository.dart';
 import '../../features/home/device_contacts_repository.dart';
+import '../../features/profile/data/firestore_user_profile_repository.dart';
+import '../../features/profile/data/user_profile_repository.dart';
 
 class AppDependencies {
   const AppDependencies({
     required this.authRepository,
+    required this.userProfileRepository,
     required this.contactsRepository,
     required this.callHistoryRepository,
     required this.callService,
@@ -16,12 +19,15 @@ class AppDependencies {
 
   factory AppDependencies.defaults({
     AuthRepository? authRepository,
+    UserProfileRepository? userProfileRepository,
     ContactsRepository? contactsRepository,
     CallHistoryRepository? callHistoryRepository,
     CallService? callService,
   }) {
     return AppDependencies(
       authRepository: authRepository ?? FakeAuthRepository(),
+      userProfileRepository:
+          userProfileRepository ?? FirestoreUserProfileRepository(),
       contactsRepository: contactsRepository ?? DeviceContactsRepository(),
       callHistoryRepository:
           callHistoryRepository ?? LocalCallHistoryRepository(),
@@ -30,6 +36,7 @@ class AppDependencies {
   }
 
   final AuthRepository authRepository;
+  final UserProfileRepository userProfileRepository;
   final ContactsRepository contactsRepository;
   final CallHistoryRepository callHistoryRepository;
   final CallService callService;

@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'app/di/app_dependencies.dart';
 import 'app.dart';
 import 'features/auth/data/firebase_auth_repository.dart';
+import 'features/profile/data/firestore_user_profile_repository.dart';
 import 'firebase_options.dart';
 
 const useFirebaseAuth = bool.fromEnvironment('ZURI_USE_FIREBASE_AUTH');
@@ -31,11 +32,15 @@ Future<void> main() async {
     );
   }
 
+  final userProfileRepository = FirestoreUserProfileRepository();
+
   runApp(
     ZuriApp(
       dependencies: AppDependencies.defaults(
+        userProfileRepository: userProfileRepository,
         authRepository: useFirebaseAuth
             ? FirebaseAuthRepository(
+                userProfileRepository: userProfileRepository,
                 appVerificationDisabledForTesting:
                     disableFirebaseAppVerification,
                 testPhoneNumber: firebaseTestPhoneNumber.isEmpty
