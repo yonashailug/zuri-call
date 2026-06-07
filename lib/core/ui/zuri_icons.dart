@@ -83,6 +83,8 @@ class ZuriIcons {
       IconData(0xea51, fontFamily: _fontFamily, fontPackage: _fontPackage);
   static const IconData warning =
       IconData(0xea06, fontFamily: _fontFamily, fontPackage: _fontPackage);
+  static const IconData star =
+      IconData(0xeb2e, fontFamily: _fontFamily, fontPackage: _fontPackage);
 
   static const IconData add =
       IconData(0xeb0b, fontFamily: _fontFamily, fontPackage: _fontPackage);

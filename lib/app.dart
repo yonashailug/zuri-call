@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'app/di/app_dependencies.dart';
 import 'app/routing/app_router.dart';
+import 'app/routing/app_routes.dart';
 import 'core/theme/zuri_theme.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/application/auth_scope.dart';
@@ -42,7 +43,10 @@ class _ZuriAppState extends State<ZuriApp> {
       repository: dependencies.authRepository,
     );
     router = createAppRouter(
-      rootBuilder: (_) => _AuthRoot(authController: authController),
+      rootBuilder: (_, state) => _AuthRoot(
+        authController: authController,
+        initialTabIndex: _tabIndexForLocation(state.uri.path),
+      ),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       authController.restoreSession();
@@ -79,9 +83,11 @@ class _ZuriAppState extends State<ZuriApp> {
 class _AuthRoot extends StatelessWidget {
   const _AuthRoot({
     required this.authController,
+    required this.initialTabIndex,
   });
 
   final AuthController authController;
+  final int initialTabIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -93,12 +99,23 @@ class _AuthRoot extends StatelessWidget {
         }
         final session = authController.state.session;
         if (session != null) {
-          return const AppShell();
+          return AppShell(initialTabIndex: initialTabIndex);
         }
         return const WelcomeScreen();
       },
     );
   }
+}
+
+int _tabIndexForLocation(String location) {
+  return switch (location) {
+    AppRoutes.tabsRecents => 0,
+    AppRoutes.tabsContacts => 1,
+    AppRoutes.tabsDialpad => 2,
+    AppRoutes.tabsWallet => 3,
+    AppRoutes.tabsSettings => 4,
+    _ => 1,
+  };
 }
 
 class _RestoreSessionScreen extends StatelessWidget {

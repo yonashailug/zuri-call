@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/di/app_dependencies.dart';
+import '../../app/routing/app_routes.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import '../calling/call_service.dart';
@@ -16,14 +18,19 @@ import 'contacts_screen.dart';
 import 'device_contacts_repository.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  const AppShell({
+    this.initialTabIndex = 1,
+    super.key,
+  });
+
+  final int initialTabIndex;
 
   @override
   State<AppShell> createState() => _AppShellState();
 }
 
 class _AppShellState extends State<AppShell> {
-  int selectedIndex = 1;
+  late int selectedIndex;
   RecentCallsController? recentCallsController;
   List<ContactPreview> suggestionContacts = const [];
   bool isLoadingSuggestionContacts = false;
@@ -32,6 +39,24 @@ class _AppShellState extends State<AppShell> {
   OutgoingCallRequest? activeCall;
   CallRecord? selectedCall;
   bool selectedCallIsRecent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialTabIndex;
+  }
+
+  @override
+  void didUpdateWidget(covariant AppShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialTabIndex == selectedIndex) return;
+
+    setState(() {
+      selectedCall = null;
+      selectedCallIsRecent = false;
+      selectedIndex = widget.initialTabIndex;
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -198,6 +223,7 @@ class _AppShellState extends State<AppShell> {
       selectedIndex = 0;
     });
 
+    context.go(AppRoutes.tabsRecents);
     recentCallsController?.record(call);
   }
 
@@ -211,6 +237,7 @@ class _AppShellState extends State<AppShell> {
       selectedIndex = 2;
     });
 
+    context.go(AppRoutes.tabsDialpad);
     recentCallsController?.record(call);
   }
 
@@ -220,6 +247,8 @@ class _AppShellState extends State<AppShell> {
       selectedCallIsRecent = true;
       selectedIndex = 0;
     });
+
+    context.go(AppRoutes.tabsRecents);
   }
 
   void _openContactDetails(ContactPreview contact) {
@@ -245,12 +274,18 @@ class _AppShellState extends State<AppShell> {
       selectedIndex = 0;
     });
 
+    context.go(AppRoutes.tabsRecents);
     recentCallsController?.delete(call);
   }
 
   void _selectTab(int index) {
     if (index == 1 || index == 2) {
       _loadSuggestionContacts(AppDependenciesScope.of(context));
+    }
+
+    final route = _tabRouteForIndex(index);
+    if (GoRouterState.of(context).uri.path != route) {
+      context.go(route);
     }
 
     setState(() {
@@ -308,6 +343,17 @@ class _AppShellState extends State<AppShell> {
     return left.replaceAll(RegExp(r'\D'), '') ==
         right.replaceAll(RegExp(r'\D'), '');
   }
+}
+
+String _tabRouteForIndex(int index) {
+  return switch (index) {
+    0 => AppRoutes.tabsRecents,
+    1 => AppRoutes.tabsContacts,
+    2 => AppRoutes.tabsDialpad,
+    3 => AppRoutes.tabsWallet,
+    4 => AppRoutes.tabsSettings,
+    _ => AppRoutes.tabsContacts,
+  };
 }
 
 class _ZuriBottomNav extends StatelessWidget {

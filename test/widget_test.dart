@@ -185,6 +185,68 @@ void main() {
     expect(find.text('+1 (206) 555-0142'), findsOneWidget);
   });
 
+  testWidgets('renders direct tab routes after sign in', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    final router = GoRouter.of(tester.element(find.text('Your network')));
+
+    router.go(AppRoutes.tabsRecents);
+    await tester.pumpAndSettle();
+    expect(find.text('No calls yet'), findsOneWidget);
+
+    router.go(AppRoutes.tabsContacts);
+    await tester.pumpAndSettle();
+    expect(find.text('Your network'), findsOneWidget);
+
+    router.go(AppRoutes.tabsDialpad);
+    await tester.pumpAndSettle();
+    expect(find.text('Call now'), findsOneWidget);
+
+    router.go(AppRoutes.tabsWallet);
+    await tester.pumpAndSettle();
+    expect(find.text('Wallet'), findsWidgets);
+    expect(find.text('Your balance'), findsOneWidget);
+
+    router.go(AppRoutes.tabsSettings);
+    await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsWidgets);
+    expect(find.text('Account'), findsOneWidget);
+  });
+
+  testWidgets('bottom nav updates tab route', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    final router = GoRouter.of(tester.element(find.text('Your network')));
+
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      AppRoutes.tabsRecents,
+    );
+
+    await tester.tap(find.text('Call'));
+    await tester.pumpAndSettle();
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      AppRoutes.tabsDialpad,
+    );
+  });
+
   testWidgets('records failed calls from call service', (tester) async {
     tester.view.physicalSize = const Size(430, 1100);
     tester.view.devicePixelRatio = 1.0;

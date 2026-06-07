@@ -7,8 +7,13 @@ import '../../features/auth/profile_name_screen.dart';
 import '../../features/auth/welcome_screen.dart';
 import 'app_routes.dart';
 
+typedef AppRouteBuilder = Widget Function(
+  BuildContext context,
+  GoRouterState state,
+);
+
 GoRouter createAppRouter({
-  required WidgetBuilder rootBuilder,
+  required AppRouteBuilder rootBuilder,
 }) {
   return GoRouter(
     initialLocation: AppRoutes.root,
@@ -16,7 +21,7 @@ GoRouter createAppRouter({
       GoRoute(
         path: AppRoutes.root,
         name: AppRouteNames.root,
-        builder: (context, state) => rootBuilder(context),
+        builder: rootBuilder,
       ),
       GoRoute(
         path: AppRoutes.authWelcome,
@@ -41,27 +46,27 @@ GoRouter createAppRouter({
       GoRoute(
         path: AppRoutes.tabsRecents,
         name: AppRouteNames.tabsRecents,
-        builder: (context, state) => rootBuilder(context),
+        builder: rootBuilder,
       ),
       GoRoute(
         path: AppRoutes.tabsContacts,
         name: AppRouteNames.tabsContacts,
-        builder: (context, state) => rootBuilder(context),
+        builder: rootBuilder,
       ),
       GoRoute(
         path: AppRoutes.tabsDialpad,
         name: AppRouteNames.tabsDialpad,
-        builder: (context, state) => rootBuilder(context),
+        builder: rootBuilder,
       ),
       GoRoute(
         path: AppRoutes.tabsWallet,
         name: AppRouteNames.tabsWallet,
-        builder: (context, state) => rootBuilder(context),
+        builder: rootBuilder,
       ),
       GoRoute(
         path: AppRoutes.tabsSettings,
         name: AppRouteNames.tabsSettings,
-        builder: (context, state) => rootBuilder(context),
+        builder: rootBuilder,
       ),
     ],
     redirect: (context, state) {
@@ -71,7 +76,7 @@ GoRouter createAppRouter({
 
       return null;
     },
-    errorBuilder: (context, state) => rootBuilder(context),
+    errorBuilder: rootBuilder,
   );
 }
 
