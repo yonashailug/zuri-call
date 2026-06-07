@@ -50,7 +50,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
           if (authState.errorMessage != null) ...[
             Text(
               authState.errorMessage!,
-              style: ZuriTextStyles.bodyLarge.copyWith(
+              style: ZuriTextStyles.bodyText.copyWith(
                 color: Theme.of(context).colorScheme.error,
               ),
             ),

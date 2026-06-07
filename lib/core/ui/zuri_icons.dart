@@ -18,6 +18,10 @@ class ZuriIcons {
       IconData(0xec06, fontFamily: _fontFamily, fontPackage: _fontPackage);
   static const IconData back =
       IconData(0xea19, fontFamily: _fontFamily, fontPackage: _fontPackage);
+  static const IconData arrowDownLeft =
+      IconData(0xea13, fontFamily: _fontFamily, fontPackage: _fontPackage);
+  static const IconData arrowUpRight =
+      IconData(0xea24, fontFamily: _fontFamily, fontPackage: _fontPackage);
 
   static const IconData phone =
       IconData(0xeb09, fontFamily: _fontFamily, fontPackage: _fontPackage);

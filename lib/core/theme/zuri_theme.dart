@@ -103,32 +103,8 @@ class ZuriTheme {
       scaffoldBackgroundColor: ZuriColors.surface,
     );
 
-    final sansTextTheme = base.textTheme.apply(
-      fontFamily: ZuriTypography.uiFont,
-    );
-    final textTheme = sansTextTheme.copyWith(
-      displayLarge: sansTextTheme.displayLarge?.copyWith(
-        fontFamily: ZuriTypography.displayFont,
-      ),
-      displayMedium: sansTextTheme.displayMedium?.copyWith(
-        fontFamily: ZuriTypography.displayFont,
-      ),
-      displaySmall: sansTextTheme.displaySmall?.copyWith(
-        fontFamily: ZuriTypography.displayFont,
-      ),
-      headlineLarge: sansTextTheme.headlineLarge?.copyWith(
-        fontFamily: ZuriTypography.displayFont,
-      ),
-      headlineMedium: sansTextTheme.headlineMedium?.copyWith(
-        fontFamily: ZuriTypography.displayFont,
-      ),
-      headlineSmall: sansTextTheme.headlineSmall?.copyWith(
-        fontFamily: ZuriTypography.displayFont,
-      ),
-    );
-
     return base.copyWith(
-      textTheme: textTheme.apply(
+      textTheme: base.textTheme.apply(
         bodyColor: ZuriColors.ink,
         displayColor: ZuriColors.ink,
       ),
@@ -137,7 +113,7 @@ class ZuriTheme {
         foregroundColor: ZuriColors.ink,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: ZuriTextStyles.screenTitle.copyWith(
+        titleTextStyle: ZuriTextStyles.pageTitle.copyWith(
           color: ZuriColors.ink,
         ),
       ),
@@ -156,9 +132,8 @@ class ZuriTheme {
           borderRadius: BorderRadius.circular(ZuriRadius.field),
           borderSide: const BorderSide(color: ZuriColors.primary),
         ),
-        hintStyle: ZuriTextStyles.control.copyWith(
+        hintStyle: ZuriTextStyles.inputText.copyWith(
           color: ZuriColors.muted,
-          fontWeight: FontWeight.w500,
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -169,13 +144,7 @@ class ZuriTheme {
         backgroundColor: ZuriColors.surface,
         indicatorColor: ZuriColors.callSurface,
         labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(
-            fontFamily: ZuriTypography.uiFont,
-            color: ZuriColors.ink,
-            fontSize: 9,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0,
-          ),
+          ZuriTextStyles.navItemLabel.copyWith(color: ZuriColors.ink),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(

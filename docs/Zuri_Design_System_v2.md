@@ -1,7 +1,7 @@
 # Zuri Design System v2.0
 
 > **Flutter · iOS & Android · Confidential — Internal Use Only**
-> Version 2.0 — Revised June 2026
+> Version 2.0 — Revised June 2026 (typography system updated)
 > Supersedes v1.0 · All changes marked with ⚡
 
 ---
@@ -10,18 +10,20 @@
 
 | # | Token / Component | v1.0 (wrong) | v2.0 (correct) | Reason |
 |---|---|---|---|---|
-| 1 | `contactName` typeface | DM Serif Display | **DM Sans** | Serif at 14sp too light for list density |
-| 2 | `contactName` weight | Regular 400 | **Medium 500** | Matches native iOS Phone app visual weight |
-| 3 | `contactName` size | 14sp | **15sp** | Compensates for sans-serif at list row density |
-| 4 | `greetingName` typeface | DM Serif Display | **DM Serif Display** | Correct — kept, but now explicitly enforced |
-| 5 | Icon button background | rgba(28,56,32,0.07) in CSS | **Color(0x121C3820)** | Pre-converted to Flutter hex — no ambiguity |
-| 6 | Search bar radius | "12–14px" (range) | **14.0** (exact) | Ranges cause developer drift |
-| 7 | Search bar height | "42dp" | **44.0** (exact) | Matches 44dp minimum touch target |
-| 8 | Avatar colour map | Reference table only | **Dart function shipped** | Table alone is not implementable |
-| 9 | Nav icon inactive colour | rgba(44,74,46,0.28) CSS | **Color(0x472C4A2E)** | Pre-converted Flutter hex |
-| 10 | Row divider colour | rgba(28,56,32,0.06) CSS | **Color(0x0F1C3820)** | Pre-converted Flutter hex |
-| 11 | `pillTruncation` | Not specified | **maxLength: 10 chars, firstName only** | Prevents "Seme (." broken truncation |
-| 12 | `MissedCallBanner` | Not in spec | **Full component spec added** | Required by UX principle 02 |
+| 1 | Typeface system | Custom bundled fonts | **Platform system font** | Matches native iOS/Android typography |
+| 2 | Typography mapping | Visual token names | **Role-first tokens** | Prevents titles, metrics, rows, and chips from sharing accidental styles |
+| 3 | Contact row title | `contactName` | **`contactRowTitle` / `recentRowTitle`** | Same visual value, stricter role semantics |
+| 4 | Wallet title | `display` | **`pageTitle`** | Page titles must not use numeric metric tokens |
+| 5 | Typography class | `ZuriTypography` | **`ZuriTextStyles`** | Renamed and expanded into role tokens |
+| 6 | Token coverage | 9 tokens | **Strict semantic tokens** | Full coverage eliminates all `.copyWith(fontSize/fontWeight)` hacks |
+| 7 | Icon button background | rgba(28,56,32,0.07) in CSS | **Color(0x121C3820)** | Pre-converted to Flutter hex — no ambiguity |
+| 8 | Search bar radius | "12–14px" (range) | **14.0** (exact) | Ranges cause developer drift |
+| 9 | Search bar height | "42dp" | **44.0** (exact) | Matches 44dp minimum touch target |
+| 10 | Avatar colour map | Reference table only | **Dart function shipped** | Table alone is not implementable |
+| 11 | Nav icon inactive colour | rgba(44,74,46,0.28) CSS | **Color(0x472C4A2E)** | Pre-converted Flutter hex |
+| 12 | Row divider colour | rgba(28,56,32,0.06) CSS | **Color(0x0F1C3820)** | Pre-converted Flutter hex |
+| 13 | `pillTruncation` | Not specified | **maxLength: 10 chars, firstName only** | Prevents "Seme (." broken truncation |
+| 14 | `MissedCallBanner` | Not in spec | **Full component spec added** | Required by UX principle 02 |
 
 ---
 
@@ -102,37 +104,105 @@ The function `ZuriAvatarColors.forInitial(String initial)` must be used — neve
 
 ## 02 Typography
 
-> **Rule:** Every text widget MUST use a named `ZuriTypography` constant via `style: ZuriTypography.xxx`.
-> Never pass inline `TextStyle()` in widget code.
+> **Rule:** Every text widget MUST use a named `ZuriTextStyles` constant via `style: ZuriTextStyles.xxx`.
+> Never pass inline `TextStyle()` in widget code. Never use `.copyWith(fontSize: ...)` or `.copyWith(fontWeight: ...)` — if no token fits, add one.
 
-### Typefaces
+### ⚡ Typeface — platform system font
 
-| Typeface | Role | Weights used | pubspec.yaml key |
+| Typeface | Role | Weights used | Flutter configuration |
 |---|---|---|---|
-| **DM Serif Display** | Display only | Regular 400 | `DM Serif Display` |
-| **DM Sans** | All UI text | Light 300 · Regular 400 · Medium 500 | `DM Sans` |
+| **Platform system font** | All UI text — every token | Light 300 · Medium 500 · SemiBold 600 · Bold 700 · ExtraBold 800 | No `fontFamily`; Flutter resolves to SF Pro on iOS and Roboto on Android |
 
-### ⚡ Type scale — v2.0 corrected
+Custom bundled fonts have been removed from the active type system. The app uses native platform typography for an iPhone Phone-style feel.
 
-| Token | Typeface | Size | Weight | Flutter constant | Used for |
+### ⚡ Type roles — strict semantic mapping
+
+Tokens must be selected by UI role, not by visual size. Visual aliases from earlier versions remain in code only as deprecated compatibility aliases.
+
+#### Page / state roles
+
+| Token | Size | Weight | Height | Flutter constant | Used for |
 |---|---|---|---|---|---|
-| Screen title | DM Serif Display | `28sp` | w400 | `ZuriTypography.screenTitle` | "Wallet", "Contacts", "Dial" — page headings |
-| Greeting name | DM Serif Display | `28sp` | w400 | `ZuriTypography.greetingName` | "Yonas" — personalised display moment |
-| Balance / figure | DM Serif Display | `32sp` | w400 | `ZuriTypography.balanceLarge` | "$4.88", "04:23" — prominent data figures |
-| ⚡ **Contact / call name** | **DM Sans** | **15sp** | **w500** | `ZuriTypography.contactName` | All list row primary labels — names and numbers |
-| Button / CTA label | DM Sans | `14sp` | w500 | `ZuriTypography.btnPrimary` | "Call now", "Top up", "Pay" |
-| Body / secondary | DM Sans | `12sp` | w400 | `ZuriTypography.bodyRegular` | Subtitles, phone numbers, descriptions |
-| Metadata / caption | DM Sans | `11sp` | w300 | `ZuriTypography.caption` | Timestamps, durations, rates |
-| Section label | DM Sans | `10sp` | w500 | `ZuriTypography.sectionLabel` | "TODAY", "FAVOURITES" — all caps, 0.1em tracking |
-| Call timer | DM Sans | `20sp` | w300 | `ZuriTypography.callTimer` | "04:23" — tabular figures, active call screen |
+| `pageTitle` | 30sp | w700 | 1.08 | `ZuriTextStyles.pageTitle` | Screen and subpage titles |
+| `pageSubtitle` | 15sp | w600 | 1.25 | `ZuriTextStyles.pageSubtitle` | Header subtitles and descriptors |
+| `greetingTitle` | 32sp | w700 | 1.0 | `ZuriTextStyles.greetingTitle` | Recents greeting name |
+| `stateTitle` | 28sp | w700 | 1.1 | `ZuriTextStyles.stateTitle` | Empty states and in-call state titles |
+| `compactPageTitle` | 24sp | w700 | 1.08 | `ZuriTextStyles.compactPageTitle` | Compact titles, call details, dialpad placeholders |
+
+#### Metric / numeric roles
+
+| Token | Size | Weight | Height | Flutter constant | Used for |
+|---|---|---|---|---|---|
+| `metricHero` | 52sp | w300 | 0.95 | `ZuriTextStyles.metricHero` | Wallet balance hero |
+| `metricValue` | 34sp | w300 | 1.0 | `ZuriTextStyles.metricValue` | Balance figures, preset amounts, large numerics |
+| `metricLabel` | 20sp | w700 | 1.0 | `ZuriTextStyles.metricLabel` | Wallet card sub-figures |
+| `dialpadEntry` | 26sp | w600 | 1.0 | `ZuriTextStyles.dialpadEntry` | Dialpad number entry |
+| `dialpadContext` | 16sp | w500 | 1.2 | `ZuriTextStyles.dialpadContext` | Dialpad country/contact context |
+| `dialpadRate` | 16sp | w600 | 1.2 | `ZuriTextStyles.dialpadRate` | Dialpad rate text |
+| `dialpadKey` | 24sp | w600 | 1.0 | `ZuriTextStyles.dialpadKey` | Dialpad key numerals |
+| `callTimerText` | 22sp | w300 | — | `ZuriTextStyles.callTimerText` | Tabular call duration |
+| `avatarDisplay` | 36sp | w300 | 1.0 | `ZuriTextStyles.avatarDisplay` | Large in-call avatar initials |
+
+#### Top-up wallet roles
+
+| Token | Size | Weight | Height | Flutter constant | Used for |
+|---|---|---|---|---|---|
+| `topUpTitle` | 26sp | w700 | 1.08 | `ZuriTextStyles.topUpTitle` | Top-up flow page title |
+| `topUpBalanceLabel` | 14sp | w500 | 1.2 | `ZuriTextStyles.topUpBalanceLabel` | Current balance caption |
+| `topUpBalanceValue` | 28sp | w700 | 1.0 | `ZuriTextStyles.topUpBalanceValue` | Current balance value |
+| `topUpOptionAmount` | 26sp | w700 | 1.0 | `ZuriTextStyles.topUpOptionAmount` | Preset amount figures |
+| `topUpOptionMinutes` | 13sp | w600 | 1.2 | `ZuriTextStyles.topUpOptionMinutes` | Preset minute estimates |
+| `topUpBadge` | 13sp | w700 | 1.15 | `ZuriTextStyles.topUpBadge` | Most popular badge |
+| `topUpFieldText` | 16sp | w700 | — | `ZuriTextStyles.topUpFieldText` | Custom amount and disabled add-payment labels |
+| `topUpPaymentTitle` | 16sp | w700 | — | `ZuriTextStyles.topUpPaymentTitle` | Payment method title |
+| `topUpPaymentSubtitle` | 14sp | w500 | 1.2 | `ZuriTextStyles.topUpPaymentSubtitle` | Payment method subtitle |
+| `topUpSummaryLabel` | 14sp | w500 | — | `ZuriTextStyles.topUpSummaryLabel` | Top-up preview row labels |
+| `topUpSummaryValue` | 15sp | w700 | — | `ZuriTextStyles.topUpSummaryValue` | Top-up preview row values |
+
+#### Row / list roles
+
+| Token | Size | Weight | Flutter constant | Used for |
+|---|---|---|---|---|
+| `contactRowTitle` | 16sp | w700 | `ZuriTextStyles.contactRowTitle` | Contact list primary labels |
+| `contactRowSubtitle` | 14sp | w500 | `ZuriTextStyles.contactRowSubtitle` | Contact list secondary labels |
+| `recentRowTitle` | 16sp | w700 | `ZuriTextStyles.recentRowTitle` | Recents row names |
+| `recentRowSubtitle` | 14sp | w500 | `ZuriTextStyles.recentRowSubtitle` | Recents call metadata and timestamps |
+| `walletTransactionAmount` | 16sp | w600 | `ZuriTextStyles.walletTransactionAmount` | Wallet activity/history debit and credit amounts |
+| `settingsRowTitle` | 16sp | w700 | `ZuriTextStyles.settingsRowTitle` | Settings row labels |
+| `cardTitle` | 16sp | w700 | `ZuriTextStyles.cardTitle` | Small cards and panels |
+| `cardSubtitle` | 14sp | w500 | `ZuriTextStyles.cardSubtitle` | Small card secondary text |
+| `rowTitle` | 18sp | w800 | `ZuriTextStyles.rowTitle` | Transaction/destination row titles, wallet history names |
+
+#### Body / label roles
+
+| Token | Size | Weight | Height | Flutter constant | Used for |
+|---|---|---|---|---|---|
+| `bodyText` | 16sp | w600 | 1.4 | `ZuriTextStyles.bodyText` | Primary copy |
+| `supportingText` | 16sp | w600 | 1.4 | `ZuriTextStyles.supportingText` | Supporting/empty-state copy |
+| `emphasisText` | 16sp | w800 | 1.45 | `ZuriTextStyles.emphasisText` | High-emphasis inline text |
+| `metadata` | 14sp | w500 | 1.2 | `ZuriTextStyles.metadatadata` | Timestamps, durations, rate notes |
+| `metadataStrong` | 14sp | w800 | 1.2 | `ZuriTextStyles.metadatadataStrong` | Strong metadata and metric captions |
+| `chipLabel` | 15sp | w700 | — | `ZuriTextStyles.chipLabel` | Filter chips and quick-dial pills |
+| `sectionCount` | 15sp | w700 | — | `ZuriTextStyles.sectionCount` | Section right-side counts |
+
+#### Controls / navigation
+
+| Token | Size | Weight | Letter-spacing | Flutter constant | Used for |
+|---|---|---|---|---|---|
+| `inputText` | 16sp | w700 | 0 | `ZuriTextStyles.inputText` | Text fields and input controls |
+| `primaryButtonLabel` | 16sp | w700 | 0 | `ZuriTextStyles.primaryButtonLabel` | Primary CTAs |
+| `strongButtonLabel` | 16sp | w800 | 0 | `ZuriTextStyles.strongButtonLabel` | High-emphasis CTAs |
+| `secondaryButtonLabel` | 15sp | w700 | 0 | `ZuriTextStyles.secondaryButtonLabel` | Secondary CTAs |
+| `sectionHeader` | 11sp | w800 | 1.0 | `ZuriTextStyles.sectionHeader` | Section headers, eyebrow labels, date groups |
+| `navItemLabel` | 11sp | w700 | 0 | `ZuriTextStyles.navItemLabel` | Navigation bar tab labels |
 
 ### Typography rules
 
-- **DM Serif Display** is for display-scale data (28sp+): screen titles, greeting name, balance, call timer
-- **DM Sans** is for everything at list-row scale and below: contact names, subtitles, buttons, labels
-- ⚡ **Revised rule (v2):** Contact names in list rows use DM Sans Medium 500 — DM Serif Display is too light at 14–15sp against the cream background
-- Never mix typefaces within a single component
-- Never hardcode `fontFamily` strings in widget code — always use `ZuriTypography` constants
+- **Platform system font only.** Do not set `fontFamily` in app typography tokens or widget code.
+- **No `.copyWith(fontSize:)` or `.copyWith(fontWeight:)` in widget code.** If a size/weight combination isn't covered, add a token to `ZuriTextStyles`.
+- **Color-only `.copyWith()` is permitted.** Example: `ZuriTextStyles.recentRowTitle.copyWith(color: ZuriColors.danger)`.
+- **Height overrides are permitted** when a layout requires tighter or looser leading than the token default.
+- Never hardcode `fontFamily` strings in widget code.
 
 ---
 
@@ -198,12 +268,13 @@ The function `ZuriAvatarColors.forInitial(String initial)` must be used — neve
 
 | Variant | Height | Radius | Background | Text colour | Text style |
 |---|---|---|---|---|---|
-| Primary | `50.0` | `25.0` | `ZuriColors.forest800` | `ZuriColors.cream` | `ZuriTypography.btnPrimary` |
-| Secondary | `44.0` | `22.0` | `Colors.transparent` | `ZuriColors.forest800` with 0.7 | `ZuriTypography.btnPrimary` |
+| Primary | `62.0` | `ZuriRadius.pill` (22.0) | `ZuriColors.primary` | `ZuriColors.surface` | `ZuriTextStyles.primaryButtonLabel` |
+| Secondary | `56.0` | `ZuriRadius.pill` (22.0) | `Colors.transparent` | `ZuriColors.muted` | `ZuriTextStyles.primaryButtonLabel` |
+| Call / dial | `48.0` | `ZuriRadius.pill` | `ZuriColors.primary` | `ZuriColors.surface` | `ZuriTextStyles.primaryButtonLabel` |
 | End call | `58.0` circle | `29.0` | `ZuriColors.danger` | `Colors.white` | N/A |
-| FAB | `48.0` circle | `24.0` | `ZuriColors.forest800` | `ZuriColors.cream` | N/A |
-| ⚡ Icon button | `36.0` circle | `18.0` | `ZuriColors.iconButtonBg` | `ZuriColors.forest800` | N/A |
-| In-call control | `58.0` | `20.0` | `Colors.white` with 0.08 | `ZuriColors.cream` with 0.7 | N/A |
+| FAB | `48.0` circle | `24.0` | `ZuriColors.primary` | `ZuriColors.surface` | N/A |
+| Icon button | `36.0` circle | `ZuriRadius.iconButton` (18.0) | `ZuriColors.iconButtonBg` | `ZuriColors.ink` | N/A |
+| In-call control | `58.0` | `20.0` | `ZuriColors.inCallControl` | `ZuriColors.inCallControlIcon` | N/A |
 
 ### Avatars
 
@@ -226,22 +297,22 @@ The function `ZuriAvatarColors.forInitial(String initial)` must be used — neve
 | Border (default) | `1.0` width, `ZuriColors.searchBorder` | — |
 | Border (focused) | `1.5` width, `ZuriColors.forest800` | — |
 | Leading icon | `ti-search`, `15.0`, `ZuriColors.searchPlaceholder` | — |
-| Placeholder style | `ZuriTypography.bodyRegular` colour `ZuriColors.searchPlaceholder` | — |
-| Active text style | `ZuriTypography.bodyRegular` colour `ZuriColors.forest800` | — |
+| Placeholder style | `ZuriTextStyles.bodyText` colour `ZuriColors.searchPlaceholder` | — |
+| Active text style | `ZuriTextStyles.bodyText` colour `ZuriColors.forest800` | — |
 | Filter button size | `28.0 × 28.0`, radius `8.0`, bg `ZuriColors.neutralBg` | — |
 
 ### Status badges & pills
 
 | Badge | Background | Border | Text style | Used for |
 |---|---|---|---|---|
-| Active call | `ZuriColors.successBg` | `1.0` `ZuriColors.success` 0.3 | `ZuriTypography.caption` `ZuriColors.success` | Live call + blink dot |
-| On hold | `ZuriColors.warningBg` | `1.0` `ZuriColors.warning` 0.35 | `ZuriTypography.caption` `ZuriColors.warning` | Paused state |
-| Muted | `ZuriColors.dangerBg` | `1.0` `ZuriColors.danger` 0.35 | `ZuriTypography.caption` `ZuriColors.danger` | Mic off |
-| Call ended | `ZuriColors.neutralBg` | `1.0` `ZuriColors.forest800` 0.14 | `ZuriTypography.caption` `ZuriColors.subtitleText` | Summary screen |
-| Filter — active | `ZuriColors.forest800` | `1.0` `ZuriColors.forest800` | `ZuriTypography.caption` `ZuriColors.cream` | Selected tab |
-| Filter — inactive | `Colors.transparent` | `1.0` `ZuriColors.searchBorder` | `ZuriTypography.caption` `ZuriColors.subtitleText` | Unselected tab |
-| Zuri member | `ZuriColors.neutralBg` | None | `ZuriTypography.caption` w500 `ZuriColors.forest800` | Free-call indicator |
-| Most popular | `ZuriColors.warning` | None | `ZuriTypography.caption` w600 `#FAEEDA` | Top-up suggestion |
+| Active call | `ZuriColors.successBg` | `1.0` `ZuriColors.success` 0.3 | `ZuriTextStyles.metadata` `ZuriColors.success` | Live call + blink dot |
+| On hold | `ZuriColors.warningBg` | `1.0` `ZuriColors.warning` 0.35 | `ZuriTextStyles.metadata` `ZuriColors.warning` | Paused state |
+| Muted | `ZuriColors.dangerBg` | `1.0` `ZuriColors.danger` 0.35 | `ZuriTextStyles.metadata` `ZuriColors.danger` | Mic off |
+| Call ended | `ZuriColors.neutralBg` | `1.0` `ZuriColors.forest800` 0.14 | `ZuriTextStyles.metadata` `ZuriColors.subtitleText` | Summary screen |
+| Filter — active | `ZuriColors.forest800` | `1.0` `ZuriColors.forest800` | `ZuriTextStyles.metadata` `ZuriColors.cream` | Selected tab |
+| Filter — inactive | `Colors.transparent` | `1.0` `ZuriColors.searchBorder` | `ZuriTextStyles.metadata` `ZuriColors.subtitleText` | Unselected tab |
+| Zuri member | `ZuriColors.neutralBg` | None | `ZuriTextStyles.pageSubtitle` `ZuriColors.forest800` | Free-call indicator |
+| Most popular | `ZuriColors.warning` | None | `ZuriTextStyles.metadata` `#FAEEDA` | Top-up suggestion |
 
 ### Bottom navigation bar
 
@@ -253,7 +324,7 @@ FAB size:        48.0 circle, ZuriColors.forest800, offset: Offset(0, -18)
 Tab icon size:   20.0
 Tab icon inactive: ZuriColors.navIconInactive
 Tab icon active: ZuriColors.forest800
-Tab label style: ZuriTypography.sectionLabel (9sp, w500, same colour as icon)
+Tab label style: ZuriTextStyles.navItemLabel (9sp, w500, same colour as icon)
 ```
 
 ### ⚡ Quick-dial pill — truncation rule
@@ -277,9 +348,9 @@ Border:          1.0 width, ZuriColors.danger with 0.15 opacity
 Border radius:   ZuriRadius.card (12.0)
 Padding:         12.0 horizontal, 10.0 vertical
 Leading icon:    ti-phone-missed, 16.0, ZuriColors.danger
-Title:           "X missed call(s)" — ZuriTypography.contactName, ZuriColors.danger
-Subtitle:        Contact name + time — ZuriTypography.caption, ZuriColors.danger 0.6
-CTA button:      "Call back" — ZuriTypography.caption w600, ZuriColors.danger
+Title:           "X missed call(s)" — ZuriTextStyles.recentRowTitle, ZuriColors.danger
+Subtitle:        Contact name + time — ZuriTextStyles.metadata, ZuriColors.danger 0.6
+CTA button:      "Call back" — ZuriTextStyles.primaryButtonLabel, ZuriColors.danger
                  bg: ZuriColors.danger with 0.1, radius: 8.0, padding: 4.0×10.0
 ```
 
@@ -334,7 +405,7 @@ All spacing values are in logical pixels (dp/sp).
 ### CallHistoryRow
 
 ```
-Total height:        64.0
+Total height:        72.0
 Horizontal padding:  20.0 (ZuriSpacing.s5)
 Vertical padding:    10.0 top, 10.0 bottom
 
@@ -346,25 +417,25 @@ Avatar:
 
 Text column (flex: 1):
   Name:
-    style:           ZuriTypography.contactName  (DM Sans, 15sp, w500)
+    style:           ZuriTextStyles.recentRowTitle (system font, 16sp, w700)
     colour:          ZuriColors.forest800
     overflow:        TextOverflow.ellipsis
     maxLines:        1
   Subtitle row (top margin 2.0):
-    icon:            ti-phone-outgoing / ti-phone-incoming / ti-phone-missed
-    icon size:       14.0
+    icon:            arrow-up-right (outgoing) / arrow-down-left (incoming, missed)
+    icon size:       16.0
     icon colour:     ZuriColors.subtitleText (outgoing)
                      ZuriColors.success (incoming)
                      ZuriColors.danger (missed)
-    gap after icon:  4.0
+    gap after icon:  6.0
     text:            "Outgoing · 6s" or "Incoming · 2m 30s" or "Missed"
-    style:           ZuriTypography.caption
+    style:           ZuriTextStyles.recentRowSubtitle
     colour:          ZuriColors.subtitleText (outgoing/incoming)
                      ZuriColors.danger (missed — entire row tinted red)
 
 Right column:
   Timestamp (top):
-    style:           ZuriTypography.caption
+    style:           ZuriTextStyles.recentRowSubtitle
     colour:          ZuriColors.subtitleText
     alignment:       right
   Call-back button (bottom, top margin 4.0):
@@ -390,15 +461,15 @@ Missed call row — additional overrides:
 ### ContactRow
 
 ```
-Total height:        64.0
+Total height:        content height, 14.0 vertical padding
 Horizontal padding:  20.0
 Vertical padding:    10.0 top, 10.0 bottom
 
 Avatar:              same as CallHistoryRow
 Text column:
-  Name:              ZuriTypography.contactName (DM Sans, 15sp, w500)
+  Name:              ZuriTextStyles.contactRowTitle (system font, 16sp, w700)
   Subtitle:          phone number or "● Online" + Zuri pill
-                     ZuriTypography.caption, ZuriColors.subtitleText
+                     ZuriTextStyles.contactRowSubtitle, ZuriColors.subtitleText
 
 Right column:
   Call button:       same as CallHistoryRow call-back button
@@ -417,16 +488,16 @@ Vertical padding:    8.0 top, 8.0 bottom
 
 Leading icon circle:
   size:              36.0 × 36.0, circle
-  Call debit:        bg ZuriColors.neutralBg, icon ti-phone-outgoing forest800
+  Call debit:        bg ZuriColors.neutralBg, icon arrow-up-right forest800
   Top-up credit:     bg ZuriColors.successBg, icon ti-credit-card success
 
 Text column:
-  Primary:           ZuriTypography.contactName
-  Subtitle:          ZuriTypography.caption, ZuriColors.subtitleText
+  Primary:           ZuriTextStyles.cardTitle
+  Subtitle:          ZuriTextStyles.walletTransactionSubtitle, ZuriColors.subtitleText
 
 Amount (right):
-  Debit:             ZuriTypography.bodyRegular w500, ZuriColors.danger
-  Credit:            ZuriTypography.bodyRegular w500, ZuriColors.success
+  Debit:             ZuriTextStyles.walletTransactionAmount, ZuriColors.danger
+  Credit:            ZuriTextStyles.walletTransactionAmount, ZuriColors.success
 ```
 
 ---
@@ -475,8 +546,8 @@ Animations respect `prefers-reduced-motion` via `MediaQuery.of(context).disableA
 ```dart
 // ============================================================
 // zuri_tokens.dart
-// Zuri Design System v2.0
-// Generated June 2026 — DO NOT edit inline values in widget code
+// Zuri Design System v2.0 (typography updated June 2026)
+// DO NOT edit inline values in widget code.
 // All colours, typography, spacing and dimensions must come
 // from these constants. No exceptions.
 // ============================================================
@@ -486,20 +557,25 @@ import 'package:flutter/material.dart';
 // ── COLOURS ──────────────────────────────────────────────────
 
 class ZuriColors {
-  ZuriColors._();
+  const ZuriColors._();
 
   // Brand ramp
-  static const cream    = Color(0xFFF2EAE3); // page background
-  static const sand     = Color(0xFFD8CFC8); // dividers, borders
-  static const stone    = Color(0xFFB5A99E); // disabled, placeholder
-  static const bark     = Color(0xFF3A2E28); // secondary labels
+  static const surface  = Color(0xFFF2EAE3); // cream — page background
+  static const border   = Color(0xFFD8CFC8); // sand — dividers, borders
+  static const disabled = Color(0xFFB5A99E); // stone — disabled, placeholder
+  static const ink      = Color(0xFF1C3820); // primary — CTAs, text, nav active
+  static const muted    = Color(0xFF9EA49A); // muted — subtitles, metadata
+  static const card     = Color(0xFFFFFFFF); // card surface
 
-  static const forest50  = Color(0xFFE8F4E9); // tint bg, Zuri pill
-  static const forest200 = Color(0xFFA8CFA9); // light border
-  static const forest400 = Color(0xFF4A8C50); // hover
+  static const forest50  = Color(0xFFE8F4E9); // tint bg, call surface
+  static const forest200 = Color(0xFFA8CFA9); // light border, avatar ring
+  static const forest400 = Color(0xFF4A8C50); // accent, hover
   static const forest600 = Color(0xFF2D5E30); // active / pressed
-  static const forest800 = Color(0xFF1C3820); // PRIMARY — CTAs, nav active
+  static const forest800 = Color(0xFF1C3820); // primary (alias for ink)
   static const forest900 = Color(0xFF0E1E10); // call screen deep bg
+
+  static const accent    = forest400;
+  static const primary   = ink;
 
   // Semantic
   static const success   = Color(0xFF1C7A3E);
@@ -507,23 +583,46 @@ class ZuriColors {
   static const warning   = Color(0xFFB7651D);
   static const warningBg = Color(0x1AB7651D); // 10% opacity
   static const danger    = Color(0xFFC0392B);
-  static const dangerBg  = Color(0x1AC0392B); // 10% opacity
+  static const dangerBg  = Color(0xFFFFEDEA);
 
-  // ⚡ Opacity-derived — pre-converted (never use inline rgba)
-  static const iconButtonBg    = Color(0x121C3820); // rgba(28,56,32, 0.07)
-  static const rowDivider      = Color(0x0F1C3820); // rgba(28,56,32, 0.06)
-  static const navIconInactive = Color(0x472C4A2E); // rgba(44,74,46, 0.28)
-  static const searchBorder    = Color(0x1E1C3820); // rgba(28,56,32, 0.12)
-  static const searchPlaceholder = Color(0x471C3820); // rgba(28,56,32, 0.28)
-  static const subtitleText    = Color(0x731C3820); // rgba(28,56,32, 0.45)
-  static const navBorderTop    = Color(0x141C3820); // rgba(28,56,32, 0.08)
-  static const neutralBg       = Color(0x0F1C3820); // rgba(28,56,32, 0.06)
+  // Opacity-derived — pre-converted (never use inline rgba)
+  static const iconButtonBg      = Color(0x121C3820); // rgba(28,56,32, 0.07)
+  static const rowDivider        = Color(0xFFE2DAD3);
+  static const navIconInactive   = Color(0x472C4A2E); // rgba(44,74,46, 0.28)
+  static const searchBorder      = Color(0x1E1C3820); // rgba(28,56,32, 0.12)
+  static const searchPlaceholder = Color(0xFFB9BFB7);
+  static const subtitleText      = Color(0xFF9EA49A); // alias for muted
+  static const navBorderTop      = Color(0x141C3820); // rgba(28,56,32, 0.08)
+  static const neutralBg         = Color(0x0F1C3820); // rgba(28,56,32, 0.06)
+  static const callSurface       = Color(0xFFE8F4E9); // forest50 alias
+
+  // In-call screen colours
+  static const inCallControl       = Color(0x14FFFFFF);
+  static const inCallControlActive = Color(0x24FFFFFF);
+  static const inCallControlIcon   = Color(0xB3F2EAE3);
+  static const inCallAvatarFill    = Color(0xFF39533A);
+
+  // Wallet colours
+  static const walletCardMuted    = Color(0xFF91A08F);
+  static const walletCardDivider  = Color(0xFF496748);
+  static const walletActiveText   = Color(0xFF9ED18D);
+  static const walletTipText      = Color(0xFF965616);
+  static const walletTipBackground= Color(0xFFFFEBDD);
+  static const walletTipBorder    = Color(0xFFEBC6A7);
+  static const walletDebit        = Color(0xFFC0392D);
+  static const walletPopular      = Color(0xFFB56B2C);
+
+  // Legacy aliases
+  static const cream = surface;
+  static const sand  = border;
+  static const stone = disabled;
+  static const bark  = Color(0xFF3A2E28);
 }
 
 // ── AVATAR COLOURS ───────────────────────────────────────────
 
 class ZuriAvatarColors {
-  ZuriAvatarColors._();
+  const ZuriAvatarColors._();
 
   static const indigo      = Color(0xFF7B68D9); // A H O V
   static const coral       = Color(0xFFE74C3C); // B I P W
@@ -535,116 +634,92 @@ class ZuriAvatarColors {
   static const slate       = Color(0xFF546E7A); // numbers / symbols
 
   /// Returns the deterministic avatar colour for a given display name initial.
-  /// Call as: ZuriAvatarColors.forInitial(contact.displayName)
-  static Color forInitial(String displayName) {
-    if (displayName.isEmpty) return slate;
-    final ch = displayName.trim().toUpperCase()[0];
-    switch (ch) {
-      case 'A': case 'H': case 'O': case 'V': return indigo;
-      case 'B': case 'I': case 'P': case 'W': return coral;
-      case 'C': case 'J': case 'Q': case 'X': return teal;
-      case 'D': case 'K': case 'R': case 'Y': return amber;
-      case 'E': case 'L': case 'S': case 'Z': return purple;
-      case 'F': case 'M': case 'T':           return forestGreen;
-      case 'G': case 'N': case 'U':           return red;
-      default:                                return slate;
-    }
+  /// Usage: ZuriAvatarColors.forInitial(contact.initials)
+  static Color forInitial(String initial) {
+    final first = initial.trim().characters.take(1).toString().toUpperCase();
+    return switch (first) {
+      'A' || 'H' || 'O' || 'V' => indigo,
+      'B' || 'I' || 'P' || 'W' => coral,
+      'C' || 'J' || 'Q' || 'X' => teal,
+      'D' || 'K' || 'R' || 'Y' => amber,
+      'E' || 'L' || 'S' || 'Z' => purple,
+      'F' || 'M' || 'T'        => forestGreen,
+      'G' || 'N' || 'U'        => red,
+      _                        => slate,
+    };
   }
 }
 
 // ── TYPOGRAPHY ───────────────────────────────────────────────
+// Platform system font only. Select tokens by UI role.
 
-class ZuriTypography {
-  ZuriTypography._();
+class ZuriTextStyles {
+  const ZuriTextStyles._();
 
-  static const _serif = 'DM Serif Display';
-  static const _sans  = 'DM Sans';
-
-  // Display scale — DM Serif Display
-  static const screenTitle = TextStyle(
-    fontFamily: _serif, fontSize: 28, fontWeight: FontWeight.w400,
-    color: ZuriColors.forest800, letterSpacing: -0.3,
-  );
-  static const greetingName = TextStyle(
-    fontFamily: _serif, fontSize: 28, fontWeight: FontWeight.w400,
-    color: ZuriColors.forest800, letterSpacing: -0.3,
-  );
-  static const balanceLarge = TextStyle(
-    fontFamily: _serif, fontSize: 32, fontWeight: FontWeight.w400,
-    color: ZuriColors.forest800, letterSpacing: -0.5,
-  );
-  static const callTimer = TextStyle(
-    fontFamily: _sans, fontSize: 20, fontWeight: FontWeight.w300,
-    color: ZuriColors.cream,
-    fontFeatures: [FontFeature.tabularFigures()],
-  );
-
-  // ⚡ List row scale — DM Sans (revised from v1)
-  static const contactName = TextStyle(
-    fontFamily: _sans, fontSize: 15, fontWeight: FontWeight.w500,
-    color: ZuriColors.forest800,
-  );
-
-  // UI scale — DM Sans
-  static const btnPrimary = TextStyle(
-    fontFamily: _sans, fontSize: 14, fontWeight: FontWeight.w500,
-    color: ZuriColors.cream, letterSpacing: 0.1,
-  );
-  static const bodyRegular = TextStyle(
-    fontFamily: _sans, fontSize: 12, fontWeight: FontWeight.w400,
-    color: ZuriColors.forest800,
-  );
-  static const caption = TextStyle(
-    fontFamily: _sans, fontSize: 11, fontWeight: FontWeight.w300,
-    color: ZuriColors.subtitleText,
-  );
-  static const sectionLabel = TextStyle(
-    fontFamily: _sans, fontSize: 10, fontWeight: FontWeight.w500,
-    color: ZuriColors.subtitleText, letterSpacing: 1.0,
-  );
+  static const pageTitle = TextStyle(fontSize: 30, fontWeight: FontWeight.w700);
+  static const metricHero = TextStyle(fontSize: 52, fontWeight: FontWeight.w300);
+  static const contactRowTitle = TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
+  static const recentRowSubtitle = TextStyle(fontSize: 14, fontWeight: FontWeight.w500);
+  static const primaryButtonLabel = TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
 }
+
+// See lib/core/ui/zuri_tokens.dart for the complete source of truth.
 
 // ── SPACING ──────────────────────────────────────────────────
 
 class ZuriSpacing {
-  ZuriSpacing._();
-  static const s1 =  4.0;
-  static const s2 =  8.0;
-  static const s3 = 12.0;
-  static const s4 = 16.0;
-  static const s5 = 20.0; // screen horizontal padding
-  static const s6 = 24.0;
-  static const s8 = 32.0;
+  const ZuriSpacing._();
+
+  static const s1 =  4.0; // icon-to-label gap
+  static const s2 =  8.0; // row internal gaps
+  static const s3 = 12.0; // card internal / component gap
+  static const s4 = 16.0; // card padding / section inset
+  static const s5 = 20.0; // screen horizontal padding — ALL screens
+  static const s6 = 24.0; // major section separation
+  static const s8 = 32.0; // page-level vertical breathing
+
+  static const screen        = EdgeInsets.fromLTRB(s5, 32, s5, 32);
+  static const screenCompact = EdgeInsets.fromLTRB(s5, 12, s5, 32);
 }
 
 // ── DIMENSIONS ───────────────────────────────────────────────
 
 class ZuriDimensions {
-  ZuriDimensions._();
-  static const rowHeight           = 64.0;
-  static const searchBarHeight     = 44.0; // ⚡ was "42dp" in v1
-  static const navHeight           = 56.0; // + MediaQuery bottom padding
-  static const sectionHeaderHeight = 28.0;
-  static const minTapTarget        = 44.0;
-  static const fabOffset           = -18.0;
-  static const fabSize             = 48.0;
-  static const iconButtonSize      = 36.0;
-  static const callBackBtnSize     = 32.0;
-  static const avatarRowSize       = 44.0;
-  static const avatarHeaderSize    = 36.0;
+  const ZuriDimensions._();
+
+  static const callBackBtnSize       = 32.0;
+  static const searchBarHeight       = 44.0;
+  static const avatarRowSize         = 44.0;
+  static const iconButtonSize        = 36.0;
+  static const quickDialHeight       = 56.0;
+  static const recentRowHeight       = 64.0;
+  static const dialpadActionSize     = 44.0;
+  static const primaryButtonHeight   = 62.0;
+  static const secondaryButtonHeight = 56.0;
+  static const callButtonHeight      = 48.0;
+  static const navHeight             = 56.0;
+  static const quickDialNameMaxLength = 10;
 }
 
 // ── BORDER RADII ─────────────────────────────────────────────
 
 class ZuriRadius {
-  ZuriRadius._();
-  static const pill        = 25.0;
-  static const card        = 12.0;
-  static const input       = 14.0; // ⚡ was "12–14" range in v1
-  static const key         = 18.0;
-  static const badge       = 20.0;
-  static const callAvatar  = 28.0;
-  static const iconButton  =  8.0;
+  const ZuriRadius._();
+
+  static const pill       = 22.0; // pill buttons
+  static const card       = 12.0; // standard surface / card
+  static const input      = 14.0; // search bar, text inputs
+  static const key        = 18.0; // dialpad keys
+  static const badge      = 20.0; // status badges / pills
+  static const callAv     = 28.0; // call screen avatar (rounded rect)
+  static const iconButton = 18.0; // 36dp circular icon buttons
+  static const compact    =  7.0; // small wallet/inset controls
+  static const small      =  8.0; // tiny rounded surfaces
+  static const action     = 13.0; // compact CTA buttons
+  static const surface    = 16.0; // medium cards / selectable rows
+  static const tile       = 18.0; // content tiles
+  static const round      = 999.0;// fully rounded pills
+  static const modal      = 30.0; // bottom sheet modal
 }
 ```
 
@@ -655,15 +730,16 @@ class ZuriRadius {
 Before opening a PR, every developer must verify:
 
 - [ ] All colours reference `ZuriColors.*` — zero inline `Color(0xFF...)` in widget files
-- [ ] All text widgets use `style: ZuriTypography.*` — zero inline `TextStyle()`
-- [ ] Avatar colour uses `ZuriAvatarColors.forInitial(contact.displayName)` — never hardcoded
+- [ ] All text widgets use `style: ZuriTextStyles.*` — zero inline `TextStyle()`
+- [ ] No `.copyWith(fontSize: ...)` or `.copyWith(fontWeight: ...)` in widget code — use a named token
+- [ ] Avatar colour uses `ZuriAvatarColors.forInitial(contact.initials)` — never hardcoded
 - [ ] Icon button background is `ZuriColors.iconButtonBg` — NOT teal, NOT `Colors.green`
-- [ ] Icon button icon colour is `ZuriColors.forest800` — NOT teal
+- [ ] Icon button icon colour is `ZuriColors.ink` — NOT teal
 - [ ] Search bar height is `ZuriDimensions.searchBarHeight` (44.0), radius is `ZuriRadius.input` (14.0)
 - [ ] `MissedCallBanner` renders above the list when `missedCalls.isNotEmpty`
-- [ ] Quick-dial pills show `firstName` only, max 10 characters
+- [ ] Quick-dial pills show `firstName` only, max `ZuriDimensions.quickDialNameMaxLength` (10) characters
 - [ ] All fonts declared in `pubspec.yaml` under `flutter > fonts`
-- [ ] `flutter clean && flutter pub get` run after any font or token change
+- [ ] `flutter analyze --no-pub` returns zero issues after any token or theme change
 
 ---
 

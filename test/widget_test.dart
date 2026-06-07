@@ -117,14 +117,16 @@ void main() {
     expect(find.text('COST'), findsOneWidget);
     expect(find.text('Rate'), findsOneWidget);
     expect(find.text('Wallet balance'), findsOneWidget);
-    expect(find.text('Report call quality'), findsOneWidget);
+    expect(find.text('Call back'), findsOneWidget);
+    expect(find.text('Save contact'), findsNothing);
+    expect(find.text('Report call quality'), findsNothing);
 
-    await tester.tap(find.text('Report call quality'));
+    await tester.tap(find.byIcon(ZuriIcons.close));
     await tester.pumpAndSettle();
 
     expect(find.text('Maya Kim'), findsOneWidget);
     expect(find.text('Just now'), findsOneWidget);
-    expect(find.text('Outgoing • 1s'), findsOneWidget);
+    expect(find.text('1s'), findsNothing);
 
     await tester.tap(find.text('Maya Kim').first);
     await tester.pumpAndSettle();
@@ -140,7 +142,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Recents'), findsOneWidget);
     expect(find.text('Just now'), findsOneWidget);
-    expect(find.text('Outgoing • 1s'), findsOneWidget);
+    expect(find.text('1s'), findsNothing);
 
     await tester.tap(find.text('Maya Kim').first);
     await tester.pumpAndSettle();
@@ -176,7 +178,7 @@ void main() {
 
     expect(find.text('Maya Kim'), findsOneWidget);
     expect(find.text('Just now'), findsOneWidget);
-    expect(find.text('Outgoing • Failed'), findsOneWidget);
+    expect(find.text('Failed'), findsNothing);
   });
 
   testWidgets('deletes recent call from details', (tester) async {
@@ -215,6 +217,39 @@ void main() {
     expect(callHistoryRepository.savedCalls, isEmpty);
   });
 
+  testWidgets('swiping left removes a recent call', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final callHistoryRepository = _FakeCallHistoryRepository(
+      initialCalls: [
+        CallRecord.fromDialpad(
+          number: '+1 (503) 555-0278',
+          name: 'Jordan Rivera',
+          startedAt: DateTime.now(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_testApp(callHistoryRepository));
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+    await tester.tap(find.text('Recents'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jordan Rivera'), findsOneWidget);
+
+    await tester.drag(find.text('Jordan Rivera'), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jordan Rivera'), findsNothing);
+    expect(find.text('No calls yet'), findsOneWidget);
+    expect(callHistoryRepository.savedCalls, isEmpty);
+  });
+
   testWidgets('restores persisted recent calls after sign in', (tester) async {
     tester.view.physicalSize = const Size(430, 1100);
     tester.view.devicePixelRatio = 1.0;
@@ -241,7 +276,8 @@ void main() {
 
     expect(find.text('Jordan Rivera'), findsOneWidget);
     expect(find.text('Just now'), findsOneWidget);
-    expect(find.text('Outgoing'), findsOneWidget);
+    expect(find.text('Outgoing'), findsNothing);
+    expect(find.byIcon(ZuriIcons.arrowUpRight), findsOneWidget);
   });
 
   testWidgets('recents shows first-name quick dial and missed call banner', (
@@ -281,6 +317,8 @@ void main() {
     expect(find.text('Jordan R.'), findsNothing);
     expect(find.text('1 missed call'), findsOneWidget);
     expect(find.text('Call back'), findsOneWidget);
+    expect(find.byIcon(ZuriIcons.arrowDownLeft), findsOneWidget);
+    expect(find.byIcon(ZuriIcons.phoneMissed), findsNothing);
   });
 
   testWidgets('recents call button starts the in-call screen', (tester) async {
@@ -361,6 +399,37 @@ void main() {
     );
   });
 
+  testWidgets('contact row opens details like recent rows', (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+
+    await _signIn(tester, displayName: 'Alex Johnson');
+
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('+1 (206) 555-0142'), findsNothing);
+
+    await tester.tap(find.text('Maya Kim'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Maya Kim'), findsOneWidget);
+    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
+    expect(find.text('Call back'), findsOneWidget);
+    expect(find.text('Status'), findsOneWidget);
+    expect(find.text('Copy number'), findsOneWidget);
+    expect(find.text('Delete from recents'), findsNothing);
+
+    await tester.tap(find.byIcon(ZuriIcons.back));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Your network'), findsOneWidget);
+    expect(find.text('Maya Kim'), findsOneWidget);
+  });
+
   testWidgets('shows network-building empty contacts state', (tester) async {
     tester.view.physicalSize = const Size(430, 1100);
     tester.view.devicePixelRatio = 1.0;
@@ -388,7 +457,10 @@ void main() {
     await tester.tap(find.text('Add manually'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Dial'), findsOneWidget);
+    expect(find.text('Dial'), findsNothing);
+    expect(find.text('US +1'), findsNothing);
+    expect(find.text('United States'), findsOneWidget);
+    expect(find.text('\$0.02 / min'), findsOneWidget);
   });
 
   testWidgets('dialpad formats manual US numbers with selected prefix', (
@@ -452,7 +524,7 @@ void main() {
     expect(find.text('+1 (206) 555-014'), findsOneWidget);
   });
 
-  testWidgets('dialpad syncs international prefix with country pill', (
+  testWidgets('dialpad syncs international prefix with rate context', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -472,7 +544,9 @@ void main() {
     await tester.tap(find.text('3'));
     await tester.pumpAndSettle();
 
-    expect(find.text('ET +251'), findsOneWidget);
+    expect(find.text('ET +251'), findsNothing);
+    expect(find.text('Ethiopia'), findsOneWidget);
+    expect(find.text('\$0.22 / min'), findsOneWidget);
     expect(find.text('+251 91 3'), findsOneWidget);
   });
 
@@ -706,7 +780,7 @@ void main() {
     expect(find.text('DURATION'), findsOneWidget);
     expect(find.text('COST'), findsOneWidget);
 
-    await tester.tap(find.text('Call\nback'));
+    await tester.tap(find.text('Call back'));
     await tester.pump();
 
     expect(callbackRecord, isNotNull);
@@ -735,7 +809,9 @@ void main() {
     expect(find.text('Call ended'), findsOneWidget);
     expect(find.text('DURATION'), findsOneWidget);
     expect(find.text('COST'), findsOneWidget);
-    expect(find.text('Report call quality'), findsOneWidget);
+    expect(find.text('Call back'), findsOneWidget);
+    expect(find.text('Save contact'), findsNothing);
+    expect(find.text('Report call quality'), findsNothing);
     expect(find.text('Maya Kim'), findsOneWidget);
   });
 
@@ -764,7 +840,7 @@ void main() {
 
     expect(find.text('Maya Kim'), findsOneWidget);
     expect(find.text('Just now'), findsOneWidget);
-    expect(find.text('Outgoing'), findsOneWidget);
+    expect(find.text('Outgoing'), findsNothing);
   });
 
   testWidgets('service ended status opens call summary', (
@@ -793,7 +869,9 @@ void main() {
     expect(find.text('Call ended'), findsOneWidget);
     expect(find.text('DURATION'), findsOneWidget);
     expect(find.text('COST'), findsOneWidget);
-    expect(find.text('Report call quality'), findsOneWidget);
+    expect(find.text('Call back'), findsOneWidget);
+    expect(find.text('Save contact'), findsNothing);
+    expect(find.text('Report call quality'), findsNothing);
   });
 }
 

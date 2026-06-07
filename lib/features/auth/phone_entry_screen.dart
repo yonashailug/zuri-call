@@ -71,7 +71,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
           const SizedBox(height: 34),
           Text(
             'You agree to receive automated text messages from us. Message frequency varies. Message and data rates may apply. Text STOP to cancel.',
-            style: ZuriTextStyles.bodyLarge.copyWith(
+            style: ZuriTextStyles.bodyText.copyWith(
               color: ZuriColors.muted,
             ),
           ),
@@ -133,7 +133,7 @@ class _ErrorText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       message,
-      style: ZuriTextStyles.bodyLarge.copyWith(color: ZuriColors.danger),
+      style: ZuriTextStyles.bodyText.copyWith(color: ZuriColors.danger),
     );
   }
 }
@@ -165,7 +165,7 @@ class _CountrySelector extends StatelessWidget {
             Expanded(
               child: Text(
                 '${country.name} (${country.prefix})',
-                style: ZuriTextStyles.controlStrong.copyWith(
+                style: ZuriTextStyles.strongButtonLabel.copyWith(
                   color: ZuriColors.ink,
                 ),
               ),
@@ -218,11 +218,11 @@ class _CountrySheet extends StatelessWidget {
                   title: Text(
                     '${country.name} (${country.prefix})',
                     textAlign: TextAlign.center,
-                    style: ZuriTextStyles.control.copyWith(
+                    style: ZuriTextStyles.inputText.copyWith(
                       color: selected ? ZuriColors.ink : Colors.black,
                       fontWeight: selected
                           ? FontWeight.w800
-                          : ZuriTextStyles.control.fontWeight,
+                          : ZuriTextStyles.inputText.fontWeight,
                     ),
                   ),
                   onTap: () => Navigator.of(context).pop(country),

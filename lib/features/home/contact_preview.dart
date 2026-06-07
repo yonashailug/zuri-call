@@ -42,8 +42,11 @@ class ContactPreview {
   }
 
   static String _initials(String value) {
-    final parts = value
+    final cleanedValue = value.replaceAll(RegExp(r'\([^)]*\)'), ' ');
+    final parts = cleanedValue
+        .trim()
         .split(RegExp(r'\s+'))
+        .map((part) => part.replaceAll(RegExp(r'^[^A-Za-z0-9]+'), ''))
         .where((part) => part.isNotEmpty)
         .take(2)
         .toList();

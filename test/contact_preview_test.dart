@@ -17,6 +17,15 @@ void main() {
     expect(contact.color, ZuriAvatarColors.forInitial('M'));
   });
 
+  test('ignores parenthesized labels when deriving initials', () {
+    final contact = ContactPreview.fromNameAndPhone(
+      name: 'Seme (Dil Kursu)',
+      phone: '+1 (503) 555-0278',
+    );
+
+    expect(contact.initials, 'S');
+  });
+
   test('matches search by name and phone digits', () {
     final contact = ContactPreview.fromNameAndPhone(
       name: 'Jordan Rivera',

@@ -73,10 +73,9 @@ class _DialpadScreenState extends State<DialpadScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compactHeight = constraints.maxHeight < 720;
-            const keySize = 88.0;
-            const keyGap = 20.0;
-            const rowGap = 20.0;
-            final topGap = compactHeight ? 10.0 : 14.0;
+            final keySize = compactHeight ? 78.0 : 88.0;
+            final keyGap = compactHeight ? 16.0 : 20.0;
+            final rowGap = compactHeight ? 12.0 : 20.0;
             final actionGap = compactHeight ? 14.0 : 20.0;
 
             return Padding(
@@ -88,8 +87,6 @@ class _DialpadScreenState extends State<DialpadScreen> {
               ),
               child: Column(
                 children: [
-                  _DialHeader(country: dialState.country),
-                  SizedBox(height: topGap),
                   _NumberDisplay(number: dialState.displayNumber),
                   const SizedBox(height: 10),
                   _RateRow(
@@ -123,40 +120,6 @@ class _DialpadScreenState extends State<DialpadScreen> {
           },
         ),
       ),
-    );
-  }
-}
-
-class _DialHeader extends StatelessWidget {
-  const _DialHeader({required this.country});
-
-  final _DialCountry country;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          'Dial',
-          style: ZuriTextStyles.pageTitle.copyWith(
-            color: ZuriColors.ink,
-          ),
-        ),
-        const Spacer(),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: const ShapeDecoration(
-            color: ZuriColors.primary,
-            shape: StadiumBorder(),
-          ),
-          child: Text(
-            '${country.shortCode} ${country.prefix}',
-            style: ZuriTextStyles.sectionHeader.copyWith(
-              color: ZuriColors.surface,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

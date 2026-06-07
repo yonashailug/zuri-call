@@ -12,14 +12,14 @@ class CallDetailsScreen extends StatelessWidget {
     required this.call,
     required this.onBack,
     required this.onCallBack,
-    required this.onDelete,
+    this.onDelete,
     super.key,
   });
 
   final CallRecord call;
   final VoidCallback onBack;
   final ValueChanged<ContactPreview> onCallBack;
-  final ValueChanged<CallRecord> onDelete;
+  final ValueChanged<CallRecord>? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -94,13 +94,14 @@ class CallDetailsScreen extends StatelessWidget {
               );
             },
           ),
-          ZuriMenuRow(
-            icon: ZuriIcons.trash,
-            label: 'Delete from recents',
-            destructive: true,
-            contentPadding: EdgeInsets.zero,
-            onTap: () => onDelete(call),
-          ),
+          if (onDelete != null)
+            ZuriMenuRow(
+              icon: ZuriIcons.trash,
+              label: 'Delete from recents',
+              destructive: true,
+              contentPadding: EdgeInsets.zero,
+              onTap: () => onDelete!(call),
+            ),
         ],
       ),
     );

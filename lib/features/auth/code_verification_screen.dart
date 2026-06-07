@@ -87,7 +87,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                   },
             style: TextButton.styleFrom(
               foregroundColor: ZuriColors.accent,
-              textStyle: ZuriTextStyles.sectionTitle,
+              textStyle: ZuriTextStyles.sectionHeader,
             ),
             child: const Text("I didn't get a text message"),
           ),
@@ -95,7 +95,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
           if (authState.errorMessage != null) ...[
             Text(
               authState.errorMessage!,
-              style: ZuriTextStyles.bodyLarge.copyWith(
+              style: ZuriTextStyles.bodyText.copyWith(
                 color: ZuriColors.danger,
               ),
             ),
@@ -150,7 +150,7 @@ class _CodeBoxes extends StatelessWidget {
           ),
           child: Text(
             hasValue ? value[index] : '',
-            style: ZuriTextStyles.control.copyWith(
+            style: ZuriTextStyles.inputText.copyWith(
               color: ZuriColors.ink,
             ),
           ),

@@ -25,12 +25,12 @@ class WelcomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     const Text(
                       'Zuri',
-                      style: ZuriTextStyles.display,
+                      style: ZuriTextStyles.metricValue,
                     ),
                     const SizedBox(height: 14),
                     Text(
                       'Crystal-clear calls, wherever you are',
-                      style: ZuriTextStyles.control.copyWith(
+                      style: ZuriTextStyles.inputText.copyWith(
                         color: ZuriColors.muted,
                         height: 1.2,
                       ),
@@ -53,7 +53,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       style: TextButton.styleFrom(
                         foregroundColor: ZuriColors.muted,
-                        textStyle: ZuriTextStyles.label,
+                        textStyle: ZuriTextStyles.chipLabel,
                       ),
                       child: const Text('I already have an account'),
                     ),
