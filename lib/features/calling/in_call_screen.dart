@@ -7,6 +7,7 @@ import '../../core/data/phone_country_lookup.dart';
 import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import '../home/call_record.dart';
+import 'application/call_session_controller.dart';
 import 'call_service.dart';
 
 class InCallScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class InCallScreen extends StatefulWidget {
     required this.callService,
     required this.onCallEnded,
     this.onCallBackAfterEnded,
-    this.onSaveContactAfterEnded,
     super.key,
   });
 
@@ -23,7 +23,6 @@ class InCallScreen extends StatefulWidget {
   final CallService callService;
   final ValueChanged<CallRecord> onCallEnded;
   final ValueChanged<CallRecord>? onCallBackAfterEnded;
-  final ValueChanged<CallRecord>? onSaveContactAfterEnded;
 
   @override
   State<InCallScreen> createState() => _InCallScreenState();
@@ -31,49 +30,47 @@ class InCallScreen extends StatefulWidget {
 
 class _InCallScreenState extends State<InCallScreen>
     with SingleTickerProviderStateMixin {
-  StreamSubscription<ActiveCallStatus>? callSubscription;
-  Timer? callTimer;
   Timer? returnTimer;
   late final AnimationController motionController;
-  ActiveCallStatus status = ActiveCallStatus.connecting;
-  DateTime? connectedAt;
-  int elapsedSeconds = 0;
-  bool isMuted = false;
-  bool isSpeakerOn = false;
-  bool isHoldOn = false;
-  bool isKeypadOpen = false;
-  int holdElapsedSeconds = 0;
-  bool isCompleting = false;
-  CallRecord? endedCall;
+  late final CallSessionController callSessionController;
 
   @override
   void initState() {
     super.initState();
+    callSessionController = CallSessionController(
+      request: widget.request,
+      callService: widget.callService,
+    )..start();
     motionController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     )..repeat();
-    callSubscription = widget.callService
-        .startOutgoingCall(widget.request)
-        .listen(_handleStatusChanged);
   }
 
   @override
   void dispose() {
-    callSubscription?.cancel();
-    callTimer?.cancel();
     returnTimer?.cancel();
     motionController.dispose();
+    callSessionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: callSessionController,
+      builder: (context, _) => _buildCallScreen(context),
+    );
+  }
+
+  Widget _buildCallScreen(BuildContext context) {
     final displayName = widget.request.name?.trim();
     final title = displayName == null || displayName.isEmpty
         ? widget.request.phone
         : displayName;
-    final endedCall = this.endedCall;
+    final state = callSessionController.state;
+    _scheduleFailedCallReturn(state.failedCall);
+    final endedCall = state.endedCall;
     if (endedCall != null) {
       return _EndedCallSummaryScreen(
         call: endedCall,
@@ -81,20 +78,15 @@ class _InCallScreenState extends State<InCallScreen>
         onCallBack: () => _finishEndedCall(
           widget.onCallBackAfterEnded ?? widget.onCallEnded,
         ),
-        onSaveContact: () => _finishEndedCall(
-          widget.onSaveContactAfterEnded ?? widget.onCallEnded,
-        ),
-        onReportQuality: () => _finishEndedCall(widget.onCallEnded),
       );
     }
 
     final mode = _CallUiMode.fromState(
-      status: status,
-      isMuted: isMuted,
-      isOnHold: isHoldOn,
-      isCompleting: isCompleting,
+      status: state.status,
+      isMuted: state.isMuted,
+      isOnHold: state.isHoldOn,
+      isCompleting: state.isCompleting,
     );
-    final isConnected = _isConnectedStatus(status) && !isCompleting;
 
     return Scaffold(
       backgroundColor: _InCallColors.background,
@@ -105,7 +97,7 @@ class _InCallScreenState extends State<InCallScreen>
             children: [
               const SizedBox(height: 22),
               _StatusPill(
-                status: status,
+                status: state.status,
                 mode: mode,
                 motion: motionController,
               ),
@@ -133,7 +125,7 @@ class _InCallScreenState extends State<InCallScreen>
               ),
               const SizedBox(height: 14),
               Text(
-                _supportingStatusText,
+                state.supportingStatusText,
                 textAlign: TextAlign.center,
                 style: ZuriTextStyles.pageSubtitle.copyWith(
                   color: mode == _CallUiMode.poorNetwork
@@ -145,11 +137,11 @@ class _InCallScreenState extends State<InCallScreen>
               if (mode == _CallUiMode.poorNetwork)
                 const _SignalQuality()
               else if (mode == _CallUiMode.onHold)
-                _HoldStatusLine(seconds: holdElapsedSeconds)
+                _HoldStatusLine(seconds: state.holdElapsedSeconds)
               else
                 _Waveform(
                   motion: motionController,
-                  isLive: isConnected && !isMuted,
+                  isLive: state.isConnected && !state.isMuted,
                 ),
               const Spacer(),
               if (mode == _CallUiMode.onHold) ...[
@@ -163,25 +155,24 @@ class _InCallScreenState extends State<InCallScreen>
                   mode: mode,
                   text: 'Audio may cut out.\nMove to better signal.',
                   actionLabel: 'Use 4G',
-                  onAction: _useCellularFallback,
+                  onAction: callSessionController.useCellularFallback,
                 ),
                 const SizedBox(height: 24),
               ],
               _CallControls(
-                isMuted: isMuted,
-                isSpeakerOn: isSpeakerOn,
-                isHoldOn: isHoldOn,
-                isKeypadOpen: isKeypadOpen,
+                isMuted: state.isMuted,
+                isSpeakerOn: state.isSpeakerOn,
+                isHoldOn: state.isHoldOn,
+                isKeypadOpen: state.isKeypadOpen,
                 mode: mode,
-                onMute: () => setState(() => isMuted = !isMuted),
-                onSpeaker: () => setState(() => isSpeakerOn = !isSpeakerOn),
-                onHold: _toggleHold,
-                onKeypad: () => setState(() => isKeypadOpen = !isKeypadOpen),
+                onMute: callSessionController.toggleMute,
+                onSpeaker: callSessionController.toggleSpeaker,
+                onHold: callSessionController.toggleHold,
+                onKeypad: callSessionController.toggleKeypad,
               ),
               const SizedBox(height: 24),
               _BottomCallActions(
-                onEndCall: _endCall,
-                onMore: _togglePoorNetworkPreview,
+                onEndCall: callSessionController.endCall,
               ),
             ],
           ),
@@ -190,139 +181,19 @@ class _InCallScreenState extends State<InCallScreen>
     );
   }
 
-  void _handleStatusChanged(ActiveCallStatus nextStatus) {
-    if (!mounted) return;
-    if (isCompleting) return;
+  void _scheduleFailedCallReturn(CallRecord? failedCall) {
+    if (failedCall == null || returnTimer != null) return;
 
-    if (nextStatus == ActiveCallStatus.failed) {
-      _completeCall(CallStatus.failed, terminalStatus: nextStatus);
-      return;
-    }
-
-    if (nextStatus == ActiveCallStatus.ended) {
-      final callStatus =
-          connectedAt == null ? CallStatus.cancelled : CallStatus.completed;
-      _completeCall(callStatus, terminalStatus: nextStatus);
-      return;
-    }
-
-    setState(() {
-      status = nextStatus;
-      if (_isConnectedStatus(nextStatus) && connectedAt == null) {
-        connectedAt = DateTime.now();
-        elapsedSeconds = 0;
-        _startCallTimer();
-      }
+    returnTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted) return;
+      widget.onCallEnded(failedCall);
     });
-  }
-
-  void _endCall() {
-    final callStatus =
-        connectedAt == null ? CallStatus.cancelled : CallStatus.completed;
-    _completeCall(callStatus, terminalStatus: ActiveCallStatus.ended);
-  }
-
-  void _completeCall(
-    CallStatus callStatus, {
-    required ActiveCallStatus terminalStatus,
-  }) {
-    if (isCompleting) return;
-
-    final durationSeconds = elapsedSeconds;
-    callSubscription?.cancel();
-    callTimer?.cancel();
-
-    final call = CallRecord.fromDialpad(
-      number: widget.request.phone,
-      name: widget.request.name,
-      startedAt: widget.request.startedAt,
-      status: callStatus,
-      durationSeconds: durationSeconds,
-    );
-
-    setState(() {
-      isCompleting = true;
-      status = terminalStatus;
-      elapsedSeconds = durationSeconds;
-      isHoldOn = false;
-      endedCall = callStatus == CallStatus.failed ? null : call;
-    });
-
-    if (callStatus == CallStatus.failed) {
-      returnTimer = Timer(const Duration(milliseconds: 900), () {
-        if (!mounted) return;
-        widget.onCallEnded(call);
-      });
-    }
   }
 
   void _finishEndedCall(ValueChanged<CallRecord> action) {
-    final call = endedCall;
+    final call = callSessionController.state.endedCall;
     if (call == null) return;
     action(call);
-  }
-
-  void _startCallTimer() {
-    callTimer?.cancel();
-    callTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted || connectedAt == null || isCompleting) return;
-
-      setState(() {
-        elapsedSeconds += 1;
-        if (isHoldOn) {
-          holdElapsedSeconds += 1;
-        }
-      });
-    });
-  }
-
-  void _toggleHold() {
-    setState(() {
-      isHoldOn = !isHoldOn;
-      if (isHoldOn) {
-        isMuted = false;
-        isSpeakerOn = false;
-        isKeypadOpen = false;
-        holdElapsedSeconds = 0;
-      }
-    });
-  }
-
-  void _useCellularFallback() {
-    setState(() {
-      status = ActiveCallStatus.connected;
-    });
-  }
-
-  void _togglePoorNetworkPreview() {
-    if (connectedAt != null && !isCompleting) {
-      setState(() {
-        status = status == ActiveCallStatus.poorNetwork
-            ? ActiveCallStatus.connected
-            : ActiveCallStatus.poorNetwork;
-        isHoldOn = false;
-      });
-    }
-  }
-
-  String get _supportingStatusText {
-    if (isHoldOn) return _formatDuration(elapsedSeconds);
-
-    return switch (status) {
-      ActiveCallStatus.connected => _formatDuration(elapsedSeconds),
-      ActiveCallStatus.poorNetwork => _formatDuration(elapsedSeconds),
-      ActiveCallStatus.ended => 'Call ended',
-      ActiveCallStatus.failed => 'Unable to connect',
-      ActiveCallStatus.ringing => 'Waiting for answer',
-      ActiveCallStatus.connecting => 'Setting up secure audio',
-    };
-  }
-
-  String _formatDuration(int totalSeconds) {
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    final paddedSeconds = seconds.toString().padLeft(2, '0');
-    return '$minutes:$paddedSeconds';
   }
 
   String _initials(String value) {
@@ -334,11 +205,6 @@ class _InCallScreenState extends State<InCallScreen>
     if (parts.isEmpty) return '?';
 
     return parts.map((part) => part[0].toUpperCase()).join();
-  }
-
-  bool _isConnectedStatus(ActiveCallStatus status) {
-    return status == ActiveCallStatus.connected ||
-        status == ActiveCallStatus.poorNetwork;
   }
 }
 
@@ -412,15 +278,11 @@ class _EndedCallSummaryScreen extends StatelessWidget {
     required this.call,
     required this.onClose,
     required this.onCallBack,
-    required this.onSaveContact,
-    required this.onReportQuality,
   });
 
   final CallRecord call;
   final VoidCallback onClose;
   final VoidCallback onCallBack;
-  final VoidCallback onSaveContact;
-  final VoidCallback onReportQuality;
 
   @override
   Widget build(BuildContext context) {
@@ -474,59 +336,26 @@ class _EndedCallSummaryScreen extends StatelessWidget {
               ),
               const SizedBox(height: 28),
               _CostSummaryCard(call: call, cost: cost),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 60,
-                      child: FilledButton.icon(
-                        onPressed: onCallBack,
-                        icon: const Icon(ZuriIcons.phone),
-                        label: const Text('Call\nback'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: ZuriColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: const StadiumBorder(),
-                          textStyle: ZuriTextStyles.strongButtonLabel.copyWith(
-                            height: 1.05,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 60,
-                      child: OutlinedButton.icon(
-                        onPressed: onSaveContact,
-                        icon: const Icon(ZuriIcons.userPlus),
-                        label: const Text('Save\ncontact'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: ZuriColors.muted,
-                          side: const BorderSide(
-                            color: _EndedCallColors.border,
-                            width: 1.4,
-                          ),
-                          shape: const StadiumBorder(),
-                          textStyle: ZuriTextStyles.strongButtonLabel.copyWith(
-                            height: 1.05,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 22),
-              TextButton.icon(
-                onPressed: onReportQuality,
-                icon: const Icon(ZuriIcons.warning),
-                label: const Text('Report call quality'),
-                style: TextButton.styleFrom(
-                  foregroundColor: _EndedCallColors.muted,
-                  textStyle: ZuriTextStyles.strongButtonLabel,
+              Center(
+                child: SizedBox(
+                  width: 210,
+                  height: 60,
+                  child: FilledButton.icon(
+                    onPressed: onCallBack,
+                    icon: const Icon(ZuriIcons.phone),
+                    label: const Text(
+                      'Call back',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: ZuriColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      textStyle: ZuriTextStyles.primaryButtonLabel,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -653,8 +482,6 @@ class _CostSummaryCard extends StatelessWidget {
     );
   }
 }
-
-
 
 class _QualitySummaryRow extends StatelessWidget {
   const _QualitySummaryRow();
@@ -1139,38 +966,25 @@ class _CallControlButton extends StatelessWidget {
 class _BottomCallActions extends StatelessWidget {
   const _BottomCallActions({
     required this.onEndCall,
-    required this.onMore,
   });
 
   final VoidCallback onEndCall;
-  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _RoundCallAction(
-          icon: ZuriIcons.video,
-          onPressed: () {},
-        ),
-        SizedBox.square(
-          dimension: 58,
-          child: IconButton(
-            onPressed: onEndCall,
-            icon: const Icon(ZuriIcons.phoneOff, size: 22),
-            color: Colors.white,
-            style: IconButton.styleFrom(
-              backgroundColor: _InCallColors.endCall,
-              shape: const CircleBorder(),
-            ),
+    return Center(
+      child: SizedBox.square(
+        dimension: 58,
+        child: IconButton(
+          onPressed: onEndCall,
+          icon: const Icon(ZuriIcons.phoneOff, size: 22),
+          color: Colors.white,
+          style: IconButton.styleFrom(
+            backgroundColor: _InCallColors.endCall,
+            shape: const CircleBorder(),
           ),
         ),
-        _RoundCallAction(
-          icon: ZuriIcons.more,
-          onPressed: onMore,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -1244,32 +1058,6 @@ enum _CallUiMode {
       _CallUiMode.ended => ZuriIcons.phoneOff,
       _ => null,
     };
-  }
-}
-
-class _RoundCallAction extends StatelessWidget {
-  const _RoundCallAction({
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: 58,
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 25),
-        color: _InCallColors.controlIcon,
-        style: IconButton.styleFrom(
-          backgroundColor: _InCallColors.control,
-          shape: const CircleBorder(),
-        ),
-      ),
-    );
   }
 }
 

@@ -7,6 +7,7 @@ import '../calling/in_call_screen.dart';
 import '../dialpad/dialpad_screen.dart';
 import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
+import 'application/recent_calls_controller.dart';
 import 'call_details_screen.dart';
 import 'call_history_repository.dart';
 import 'call_record.dart';
@@ -34,20 +35,35 @@ class _AppShellState extends State<AppShell> {
   int selectedIndex = 1;
   late final CallHistoryRepository callHistoryRepository =
       widget.callHistoryRepository ?? LocalCallHistoryRepository();
+  late final RecentCallsController recentCallsController =
+      RecentCallsController(repository: callHistoryRepository);
   String? dialNumber;
   String? dialContactName;
   OutgoingCallRequest? activeCall;
   CallRecord? selectedCall;
-  final recentCalls = <CallRecord>[];
+  bool selectedCallIsRecent = false;
 
   @override
   void initState() {
     super.initState();
-    _restoreRecentCalls();
+    recentCallsController.restore();
+  }
+
+  @override
+  void dispose() {
+    recentCallsController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: recentCallsController,
+      builder: (context, _) => _buildShell(context),
+    );
+  }
+
+  Widget _buildShell(BuildContext context) {
     final activeCall = this.activeCall;
     if (activeCall != null) {
       return InCallScreen(
@@ -55,16 +71,17 @@ class _AppShellState extends State<AppShell> {
         callService: widget.callService,
         onCallEnded: _recordCompletedCall,
         onCallBackAfterEnded: _recordCompletedCallAndCallBack,
-        onSaveContactAfterEnded: _recordCompletedCallAndOpenContacts,
       );
     }
     final screens = [
       ContactsScreen(
         mode: ContactsMode.recents,
         contactsRepository: widget.contactsRepository,
-        recentCalls: recentCalls,
+        recentCalls: recentCallsController.calls,
         onContactCall: _selectContactForCall,
+        onContactOpen: _openContactDetails,
         onRecentCallOpen: _openCallDetails,
+        onRecentCallDelete: _deleteRecentCall,
         onOpenDialpad: () => _selectTab(2),
         onOpenContacts: () => _selectTab(1),
       ),
@@ -72,6 +89,7 @@ class _AppShellState extends State<AppShell> {
         mode: ContactsMode.contacts,
         contactsRepository: widget.contactsRepository,
         onContactCall: _selectContactForCall,
+        onContactOpen: _openContactDetails,
         onRecentCallOpen: _openCallDetails,
         onOpenDialpad: () => _selectTab(2),
       ),
@@ -94,18 +112,20 @@ class _AppShellState extends State<AppShell> {
             call: selectedCall,
             onBack: _closeCallDetails,
             onCallBack: _selectContactForCall,
-            onDelete: _deleteRecentCall,
+            onDelete: selectedCallIsRecent ? _deleteRecentCall : null,
           );
 
     return Scaffold(
       body: body,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _selectTab(2),
-        backgroundColor: ZuriColors.primary,
-        foregroundColor: ZuriColors.surface,
-        shape: const CircleBorder(),
-        child: const Icon(ZuriIcons.phonePlus, size: 20),
-      ),
+      floatingActionButton: selectedIndex == 2
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _selectTab(2),
+              backgroundColor: ZuriColors.primary,
+              foregroundColor: ZuriColors.surface,
+              shape: const CircleBorder(),
+              child: const Icon(ZuriIcons.phonePlus, size: 20),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: DecoratedBox(
         decoration: const BoxDecoration(
@@ -153,6 +173,7 @@ class _AppShellState extends State<AppShell> {
   void _selectContactForCall(ContactPreview contact) {
     setState(() {
       selectedCall = null;
+      selectedCallIsRecent = false;
       dialNumber = null;
       dialContactName = null;
       activeCall = OutgoingCallRequest(
@@ -168,6 +189,7 @@ class _AppShellState extends State<AppShell> {
         dialNumber != null && _sameDialableNumber(dialNumber!, number);
     setState(() {
       selectedCall = null;
+      selectedCallIsRecent = false;
       activeCall = OutgoingCallRequest(
         phone: number,
         name: matchingPrefilledContact ? dialContactName : null,
@@ -179,6 +201,7 @@ class _AppShellState extends State<AppShell> {
   void _startRateDestinationCall(RateDestination destination) {
     setState(() {
       selectedCall = null;
+      selectedCallIsRecent = false;
       dialNumber = null;
       dialContactName = null;
       activeCall = OutgoingCallRequest(
@@ -192,81 +215,66 @@ class _AppShellState extends State<AppShell> {
   void _recordCompletedCall(CallRecord call) {
     setState(() {
       activeCall = null;
+      selectedCallIsRecent = false;
       selectedIndex = 0;
-      recentCalls.insert(0, call);
     });
 
-    _saveRecentCalls();
+    recentCallsController.record(call);
   }
 
   void _recordCompletedCallAndCallBack(CallRecord call) {
     setState(() {
       activeCall = null;
       selectedCall = null;
+      selectedCallIsRecent = false;
       dialNumber = call.phone;
       dialContactName = call.name;
       selectedIndex = 2;
-      recentCalls.insert(0, call);
     });
 
-    _saveRecentCalls();
-  }
-
-  void _recordCompletedCallAndOpenContacts(CallRecord call) {
-    setState(() {
-      activeCall = null;
-      selectedCall = null;
-      selectedIndex = 1;
-      recentCalls.insert(0, call);
-    });
-
-    _saveRecentCalls();
+    recentCallsController.record(call);
   }
 
   void _openCallDetails(CallRecord call) {
     setState(() {
       selectedCall = call;
+      selectedCallIsRecent = true;
       selectedIndex = 0;
+    });
+  }
+
+  void _openContactDetails(ContactPreview contact) {
+    setState(() {
+      selectedCall = CallRecord.fromContact(contact, DateTime.now());
+      selectedCallIsRecent = false;
     });
   }
 
   void _closeCallDetails() {
     setState(() {
+      final returnIndex = selectedCallIsRecent ? 0 : selectedIndex;
       selectedCall = null;
-      selectedIndex = 0;
+      selectedCallIsRecent = false;
+      selectedIndex = returnIndex;
     });
   }
 
   void _deleteRecentCall(CallRecord call) {
     setState(() {
       selectedCall = null;
-      recentCalls.remove(call);
+      selectedCallIsRecent = false;
       selectedIndex = 0;
     });
 
-    _saveRecentCalls();
+    recentCallsController.delete(call);
   }
 
   void _selectTab(int index) {
     setState(() {
       selectedCall = null;
+      selectedCallIsRecent = false;
       selectedIndex = index;
     });
-  }
-
-  Future<void> _restoreRecentCalls() async {
-    final restoredCalls = await callHistoryRepository.loadRecentCalls();
-    if (!mounted) return;
-
-    setState(() {
-      recentCalls
-        ..clear()
-        ..addAll(restoredCalls);
-    });
-  }
-
-  Future<void> _saveRecentCalls() {
-    return callHistoryRepository.saveRecentCalls(recentCalls);
   }
 
   bool _sameDialableNumber(String left, String right) {

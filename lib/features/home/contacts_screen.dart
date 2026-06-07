@@ -16,6 +16,7 @@ class ContactsScreen extends StatefulWidget {
   const ContactsScreen({
     required this.mode,
     required this.onContactCall,
+    required this.onContactOpen,
     required this.onRecentCallOpen,
     this.contactsRepository,
     this.recentCalls = const [],
@@ -27,6 +28,7 @@ class ContactsScreen extends StatefulWidget {
 
   final ContactsMode mode;
   final ValueChanged<ContactPreview> onContactCall;
+  final ValueChanged<ContactPreview> onContactOpen;
   final ValueChanged<CallRecord> onRecentCallOpen;
   final ContactsRepository? contactsRepository;
   final List<CallRecord> recentCalls;
@@ -134,6 +136,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               errorMessage: errorMessage,
               onRetry: _loadContacts,
               onContactCall: widget.onContactCall,
+              onContactOpen: widget.onContactOpen,
               onAddManually: widget.onOpenDialpad,
             ),
           ],
@@ -228,7 +231,8 @@ class _RecentsContent extends StatelessWidget {
           label: 'TODAY',
           trailing: Text(
             '${recentCalls.length} ${recentCalls.length == 1 ? 'call' : 'calls'}',
-            style: ZuriTextStyles.sectionCount.copyWith(color: ZuriColors.muted),
+            style:
+                ZuriTextStyles.sectionCount.copyWith(color: ZuriColors.muted),
           ),
         ),
         const SizedBox(height: 8),
@@ -340,7 +344,6 @@ class _ContactsFilterTabs extends StatelessWidget {
     );
   }
 }
-
 
 class _EmptyRecentsState extends StatelessWidget {
   const _EmptyRecentsState({
@@ -641,7 +644,6 @@ class MissedCallBanner extends StatelessWidget {
   }
 }
 
-
 class _RecentCallRow extends StatelessWidget {
   const _RecentCallRow({
     required this.call,
@@ -669,9 +671,10 @@ class _RecentCallRow extends StatelessWidget {
         child: Row(
           children: [
             ZuriAvatar(
-              label: (call.contact.isPhoneOnly && call.countryAvatarLabel != null)
-                  ? call.countryAvatarLabel!
-                  : call.contact.initials,
+              label:
+                  (call.contact.isPhoneOnly && call.countryAvatarLabel != null)
+                      ? call.countryAvatarLabel!
+                      : call.contact.initials,
               color: call.contact.color,
               size: 52,
               badge: call.countryFlag == null
@@ -742,35 +745,19 @@ class _RecentCallRow extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     SizedBox(
-                      width: 96,
-                      height: ZuriDimensions.recentRowHeight - 10,
-                      child: Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Text(
-                              call.relativeTime,
-                              style: ZuriTextStyles.recentRowSubtitle.copyWith(
-                                color: metaColor,
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: ZuriCircleButton(
-                              icon: ZuriIcons.phone,
-                              onPressed: onCallBack,
-                              foregroundColor: missed
-                                  ? ZuriColors.danger
-                                  : ZuriColors.forest800,
-                              backgroundColor: missed
-                                  ? ZuriColors.danger.withValues(alpha: 0.10)
-                                  : ZuriColors.iconButtonBg,
-                              size: ZuriDimensions.callBackBtnSize,
-                              iconSize: 15,
-                            ),
-                          ),
-                        ],
+                      width: ZuriDimensions.callBackBtnSize,
+                      child: Center(
+                        child: ZuriCircleButton(
+                          icon: ZuriIcons.phone,
+                          onPressed: onCallBack,
+                          foregroundColor:
+                              missed ? ZuriColors.danger : ZuriColors.forest800,
+                          backgroundColor: missed
+                              ? ZuriColors.danger.withValues(alpha: 0.10)
+                              : ZuriColors.iconButtonBg,
+                          size: ZuriDimensions.callBackBtnSize,
+                          iconSize: 15,
+                        ),
                       ),
                     ),
                   ],
@@ -818,6 +805,7 @@ class _ContactsContent extends StatelessWidget {
     required this.isLoading,
     required this.onRetry,
     required this.onContactCall,
+    required this.onContactOpen,
     this.onAddManually,
     this.errorMessage,
   });
@@ -829,6 +817,7 @@ class _ContactsContent extends StatelessWidget {
   final String? errorMessage;
   final VoidCallback onRetry;
   final ValueChanged<ContactPreview> onContactCall;
+  final ValueChanged<ContactPreview> onContactOpen;
   final VoidCallback? onAddManually;
 
   @override
@@ -880,6 +869,7 @@ class _ContactsContent extends StatelessWidget {
         for (final contact in contacts)
           _ContactRow(
             contact: contact,
+            onTap: () => onContactOpen(contact),
             trailing: ZuriCircleButton(
               icon: ZuriIcons.phone,
               onPressed: () => onContactCall(contact),
@@ -1057,48 +1047,42 @@ class _GhostAvatar extends StatelessWidget {
 }
 
 class _ContactRow extends StatelessWidget {
-  _ContactRow({
+  const _ContactRow({
     required this.contact,
+    required this.onTap,
     required this.trailing,
-    String? subtitle,
-  }) : subtitle = subtitle ?? contact.phone;
+  });
 
   final ContactPreview contact;
+  final VoidCallback onTap;
   final Widget trailing;
-  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          ZuriAvatar(
-            label: contact.initials,
-            color: contact.color,
-            size: 44,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  contact.name,
-                  style: ZuriTextStyles.contactRowTitle,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: ZuriTextStyles.contactRowSubtitle.copyWith(
-                    color: ZuriColors.muted,
-                  ),
-                ),
-              ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(ZuriRadius.action),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          children: [
+            ZuriAvatar(
+              label: contact.initials,
+              color: contact.color,
+              size: 44,
             ),
-          ),
-          trailing,
-        ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                contact.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: ZuriTextStyles.contactRowTitle,
+              ),
+            ),
+            trailing,
+          ],
+        ),
       ),
     );
   }
@@ -1139,7 +1123,6 @@ class _ProfileAvatar extends StatelessWidget {
   }
 }
 
-
 extension on ContactPreview {
   bool get isPhoneOnly => name == phone;
 
@@ -1169,13 +1152,7 @@ extension on CallRecord {
   }
 
   String get recentsSubtitle {
-    if (isMissed) return 'Missed • ${relativeTime.shortTimeAgo}';
-    final parts = [
-      direction.label,
-      if (status != CallStatus.completed) status.label,
-      if (durationSeconds > 0) durationLabel,
-    ];
-    return parts.join(' • ');
+    return relativeTime;
   }
 
   String? get countryFlag {
@@ -1190,10 +1167,3 @@ extension on CallRecord {
 String? _countryFlagFor(String phone) => PhoneCountryLookup.flagFor(phone);
 
 String? _countryLabelFor(String phone) => PhoneCountryLookup.codeFor(phone);
-
-extension on String {
-  String get shortTimeAgo {
-    return replaceAll(' ago', '');
-  }
-}
-
