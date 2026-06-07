@@ -894,19 +894,19 @@ class _CallActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 2),
+      padding: const EdgeInsets.only(top: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: 200,
-            height: ZuriDimensions.callButtonHeight,
+            width: 232,
+            height: 56,
             child: _DialCallButton(
               enabled: canCall,
               onPressed: onStartCall,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           ZuriCircleButton(
             onPressed: onBackspace,
             icon: ZuriIcons.backspace,
@@ -916,7 +916,8 @@ class _CallActions extends StatelessWidget {
             backgroundColor: ZuriColors.callSurface.withValues(
               alpha: canCall ? 1 : 0.55,
             ),
-            size: ZuriDimensions.dialpadActionSize,
+            size: 56,
+            iconSize: 24,
           ),
         ],
       ),
@@ -938,10 +939,10 @@ class _DialCallButton extends StatelessWidget {
     final foregroundColor =
         enabled ? ZuriColors.surface : ZuriColors.ink.withValues(alpha: 0.38);
     return SizedBox(
-      height: ZuriDimensions.callButtonHeight,
+      height: 56,
       child: TextButton.icon(
         onPressed: enabled ? onPressed : null,
-        icon: const Icon(ZuriIcons.phone, size: 18),
+        icon: const Icon(ZuriIcons.phone, size: 22),
         label: const Text('Call now'),
         style: TextButton.styleFrom(
           backgroundColor: enabled
@@ -953,7 +954,11 @@ class _DialCallButton extends StatelessWidget {
           foregroundColor: foregroundColor,
           disabledForegroundColor: foregroundColor,
           shape: const StadiumBorder(),
-          textStyle: ZuriTextStyles.primaryButtonLabel,
+          textStyle: ZuriTextStyles.primaryButtonLabel.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 28),
         ),
       ),
     );
