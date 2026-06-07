@@ -4,18 +4,21 @@ import '../../core/theme/zuri_theme.dart';
 import '../../core/ui/zuri_ui.dart';
 import '../auth/data/phone_country_data.dart';
 import '../auth/domain/phone_mask_input_formatter.dart';
+import '../home/contact_preview.dart';
 
 class DialpadScreen extends StatefulWidget {
   const DialpadScreen({
     required this.onStartCall,
     this.initialNumber,
     this.contactName,
+    this.suggestionContacts = const [],
     super.key,
   });
 
   final ValueChanged<String> onStartCall;
   final String? initialNumber;
   final String? contactName;
+  final List<ContactPreview> suggestionContacts;
 
   @override
   State<DialpadScreen> createState() => _DialpadScreenState();
@@ -65,6 +68,12 @@ class _DialpadScreenState extends State<DialpadScreen> {
     widget.onStartCall(dialableNumber);
   }
 
+  void selectSuggestion(ContactPreview contact) {
+    setState(() {
+      dialState = _DialState.fromInitialNumber(contact.phone, contact.name);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -89,9 +98,12 @@ class _DialpadScreenState extends State<DialpadScreen> {
                 children: [
                   _NumberDisplay(number: dialState.displayNumber),
                   const SizedBox(height: 10),
-                  _RateRow(
+                  _DialSuggestions(
                     country: dialState.country,
                     contactName: dialState.contactName,
+                    inputDigits: dialState.searchDigits,
+                    contacts: widget.suggestionContacts,
+                    onContactSelected: selectSuggestion,
                   ),
                   Expanded(
                     child: Column(
@@ -126,9 +138,9 @@ class _DialpadScreenState extends State<DialpadScreen> {
 
 class _DialState {
   const _DialState({
-    required this.country,
     required this.nationalDigits,
     required this.rawInternational,
+    this.country,
     this.contactName,
   });
 
@@ -136,15 +148,15 @@ class _DialState {
     final value = initialNumber?.trim();
     if (value == null || value.isEmpty) {
       return const _DialState(
-        country: _defaultCountry,
         nationalDigits: '',
         rawInternational: null,
       );
     }
 
-    if (value.startsWith('+')) {
-      final country = _countryForNumber(value);
-      final digits = value.replaceAll(RegExp(r'\D'), '');
+    final internationalValue = _normalizeInternationalInput(value);
+    if (internationalValue != null) {
+      final country = _countryForNumber(internationalValue);
+      final digits = internationalValue.replaceAll(RegExp(r'\D'), '');
       final prefixDigits = country.prefix.replaceAll(RegExp(r'\D'), '');
       final nationalDigits = digits.startsWith(prefixDigits)
           ? digits.substring(prefixDigits.length)
@@ -159,24 +171,31 @@ class _DialState {
     }
 
     return _DialState(
-      country: _defaultCountry,
       nationalDigits: value.replaceAll(RegExp(r'\D'), ''),
       rawInternational: null,
       contactName: _cleanContactName(name),
     );
   }
 
-  final _DialCountry country;
+  final _DialCountry? country;
   final String nationalDigits;
   final String? rawInternational;
   final String? contactName;
 
   bool get hasInput => rawInternational != null || nationalDigits.isNotEmpty;
 
+  String get searchDigits {
+    final raw = rawInternational;
+    if (raw != null) return raw.replaceAll(RegExp(r'\D'), '');
+    return nationalDigits;
+  }
+
   String get displayNumber {
     final raw = rawInternational;
     if (raw != null) {
       if (raw == '+') return raw;
+      final country = this.country;
+      if (country == null) return raw;
       final digits = raw.replaceAll(RegExp(r'\D'), '');
       final prefixDigits = country.prefix.replaceAll(RegExp(r'\D'), '');
       if (digits.startsWith(prefixDigits)) {
@@ -190,6 +209,8 @@ class _DialState {
     }
     if (nationalDigits.isEmpty) return '';
 
+    final country = this.country;
+    if (country == null) return nationalDigits;
     final formattedNational = country.format(nationalDigits);
     if (formattedNational.isEmpty) return country.prefix;
     return '${country.prefix} $formattedNational';
@@ -199,6 +220,8 @@ class _DialState {
     final raw = rawInternational;
     if (raw != null) return raw.length > 1 ? raw : '';
     if (nationalDigits.isEmpty) return '';
+    final country = this.country;
+    if (country == null) return nationalDigits;
     return '${country.prefix} $nationalDigits';
   }
 
@@ -207,15 +230,35 @@ class _DialState {
     if (raw != null) {
       final nextRaw = '$raw$digit';
       return _DialState(
-        country: _countryForNumber(nextRaw),
+        country: _countryForNumberOrNull(nextRaw),
         nationalDigits: '',
         rawInternational: nextRaw,
       );
     }
 
+    final nextNationalDigits = '$nationalDigits$digit';
+    final normalizedInternational = _normalizeInternationalDigits(
+      nextNationalDigits,
+    );
+    if (normalizedInternational != null) {
+      final country = _countryForNumberOrNull(normalizedInternational);
+      final prefixDigits = country?.prefix.replaceAll(RegExp(r'\D'), '');
+      final internationalDigits =
+          normalizedInternational.replaceAll(RegExp(r'\D'), '');
+      final nationalDigits =
+          prefixDigits != null && internationalDigits.startsWith(prefixDigits)
+              ? internationalDigits.substring(prefixDigits.length)
+              : '';
+      return _DialState(
+        country: country,
+        nationalDigits: nationalDigits,
+        rawInternational: normalizedInternational,
+      );
+    }
+
     return _DialState(
-      country: country,
-      nationalDigits: '$nationalDigits$digit',
+      country: null,
+      nationalDigits: nextNationalDigits,
       rawInternational: null,
     );
   }
@@ -223,7 +266,6 @@ class _DialState {
   _DialState appendPlus() {
     if (!hasInput) {
       return const _DialState(
-        country: _defaultCountry,
         nationalDigits: '',
         rawInternational: '+',
       );
@@ -246,7 +288,7 @@ class _DialState {
     if (raw != null) {
       final nextRaw = raw.substring(0, raw.length - 1);
       return _DialState(
-        country: _countryForNumber(nextRaw),
+        country: _countryForNumberOrNull(nextRaw),
         nationalDigits: '',
         rawInternational: nextRaw.isEmpty ? null : nextRaw,
       );
@@ -355,13 +397,33 @@ final _dialCountries = <_DialCountry>[
 ];
 
 _DialCountry _countryForNumber(String value) {
+  return _countryForNumberOrNull(value) ?? _defaultCountry;
+}
+
+_DialCountry? _countryForNumberOrNull(String value) {
   final normalized = value.replaceAll(RegExp(r'\s'), '');
   final matches = _dialCountries
       .where((country) => normalized.startsWith(country.prefix))
       .toList()
     ..sort((a, b) => b.prefix.length.compareTo(a.prefix.length));
   if (matches.isNotEmpty) return matches.first;
-  return _defaultCountry;
+  return null;
+}
+
+String? _normalizeInternationalInput(String value) {
+  final trimmed = value.trim();
+  if (trimmed.startsWith('+')) return trimmed;
+  return _normalizeInternationalDigits(trimmed.replaceAll(RegExp(r'\D'), ''));
+}
+
+String? _normalizeInternationalDigits(String digits) {
+  if (digits.startsWith('00') && digits.length > 2) {
+    return '+${digits.substring(2)}';
+  }
+  if (digits.startsWith('011') && digits.length > 3) {
+    return '+${digits.substring(3)}';
+  }
+  return null;
 }
 
 String _shortCodeFor(String countryName) {
@@ -424,29 +486,88 @@ class _NumberDisplay extends StatelessWidget {
   }
 }
 
-class _RateRow extends StatelessWidget {
-  const _RateRow({
+class _DialSuggestions extends StatelessWidget {
+  const _DialSuggestions({
     required this.country,
     required this.contactName,
+    required this.inputDigits,
+    required this.contacts,
+    required this.onContactSelected,
   });
 
-  final _DialCountry country;
+  final _DialCountry? country;
   final String? contactName;
+  final String inputDigits;
+  final List<ContactPreview> contacts;
+  final ValueChanged<ContactPreview> onContactSelected;
 
   @override
   Widget build(BuildContext context) {
+    final country = this.country;
     if (contactName != null) {
-      return Text(
-        contactName!,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-        style: ZuriTextStyles.pageSubtitle.copyWith(
-          color: ZuriColors.muted,
-        ),
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            contactName!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: ZuriTextStyles.pageSubtitle.copyWith(
+              color: ZuriColors.muted,
+            ),
+          ),
+          if (country != null) ...[
+            const SizedBox(height: 3),
+            _RateContext(country: country),
+          ],
+        ],
       );
     }
 
+    final matches = _matchingContacts.take(2).toList();
+    if (matches.isNotEmpty) {
+      return _SuggestionCard(
+        contacts: matches,
+        onContactSelected: onContactSelected,
+      );
+    }
+
+    if (country == null) return const SizedBox(height: 20);
+
+    return _RateContext(country: country);
+  }
+
+  List<ContactPreview> get _matchingContacts {
+    if (inputDigits.length < 2) return const [];
+
+    final scored = <({ContactPreview contact, int score})>[];
+    for (final contact in contacts) {
+      final phoneDigits = contact.phone.replaceAll(RegExp(r'\D'), '');
+      final index = phoneDigits.indexOf(inputDigits);
+      if (index == -1) continue;
+
+      final score = index == 0 ? 0 : index;
+      scored.add((contact: contact, score: score));
+    }
+
+    scored.sort((left, right) {
+      final scoreComparison = left.score.compareTo(right.score);
+      if (scoreComparison != 0) return scoreComparison;
+      return left.contact.name.compareTo(right.contact.name);
+    });
+
+    return scored.map((entry) => entry.contact).toList();
+  }
+}
+
+class _RateContext extends StatelessWidget {
+  const _RateContext({required this.country});
+
+  final _DialCountry country;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
@@ -477,6 +598,104 @@ class _RateRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SuggestionCard extends StatelessWidget {
+  const _SuggestionCard({
+    required this.contacts,
+    required this.onContactSelected,
+  });
+
+  final List<ContactPreview> contacts;
+  final ValueChanged<ContactPreview> onContactSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 330),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: ZuriColors.callSurface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: ZuriColors.border.withValues(alpha: 0.55),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var index = 0; index < contacts.length; index++) ...[
+              _SuggestionRow(
+                contact: contacts[index],
+                onTap: () => onContactSelected(contacts[index]),
+              ),
+              if (index < contacts.length - 1)
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 44,
+                  endIndent: 14,
+                  color: ZuriColors.rowDivider,
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionRow extends StatelessWidget {
+  const _SuggestionRow({
+    required this.contact,
+    required this.onTap,
+  });
+
+  final ContactPreview contact;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        child: Row(
+          children: [
+            Icon(
+              ZuriIcons.account,
+              size: 20,
+              color: ZuriColors.ink.withValues(alpha: 0.72),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                contact.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: ZuriTextStyles.dialpadContext.copyWith(
+                  color: ZuriColors.muted,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                contact.phone,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: ZuriTextStyles.dialpadRate.copyWith(
+                  color: ZuriColors.ink,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -460,11 +460,11 @@ void main() {
 
     expect(find.text('Dial'), findsNothing);
     expect(find.text('US +1'), findsNothing);
-    expect(find.text('United States'), findsOneWidget);
-    expect(find.text('\$0.02 / min'), findsOneWidget);
+    expect(find.text('United States'), findsNothing);
+    expect(find.text('\$0.02 / min'), findsNothing);
   });
 
-  testWidgets('dialpad formats manual US numbers with selected prefix', (
+  testWidgets('dialpad keeps ambiguous local numbers neutral', (
     tester,
   ) async {
     String? startedNumber;
@@ -482,7 +482,10 @@ void main() {
     await tester.tap(find.text('6'));
     await tester.pumpAndSettle();
 
-    expect(find.text('+1 (206)'), findsOneWidget);
+    expect(find.text('206'), findsOneWidget);
+    expect(find.text('+1 (206)'), findsNothing);
+    expect(find.text('United States'), findsNothing);
+    expect(find.text('\$0.02 / min'), findsNothing);
 
     await tester.tap(find.text('5'));
     await tester.tap(find.text('5'));
@@ -493,12 +496,61 @@ void main() {
     await tester.tap(find.text('2'));
     await tester.pumpAndSettle();
 
-    expect(find.text('+1 (206) 555-0142'), findsOneWidget);
+    expect(find.text('2065550142'), findsOneWidget);
 
     await tester.tap(find.text('Call now'));
     await tester.pump();
 
-    expect(startedNumber, '+1 2065550142');
+    expect(startedNumber, '2065550142');
+  });
+
+  testWidgets('dialpad suggests matching contacts while typing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DialpadScreen(
+          suggestionContacts: [
+            ContactPreview.fromNameAndPhone(
+              name: 'Mikal Afewerki',
+              phone: '+1 (980) 457-9962',
+            ),
+            ContactPreview.fromNameAndPhone(
+              name: 'Maya Kim',
+              phone: '+1 (206) 555-0142',
+            ),
+            ContactPreview.fromNameAndPhone(
+              name: 'Jordan Rivera',
+              phone: '+1 (503) 555-4570',
+            ),
+          ],
+          onStartCall: (_) {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('4'));
+    await tester.tap(find.text('5'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mikal Afewerki'), findsOneWidget);
+    expect(find.text('Jordan Rivera'), findsOneWidget);
+    expect(find.text('Maya Kim'), findsNothing);
+
+    await tester.tap(
+      find
+          .ancestor(
+            of: find.text('Mikal Afewerki'),
+            matching: find.byType(InkWell),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mikal Afewerki'), findsOneWidget);
+    expect(find.text('+1 (980) 457-9962'), findsOneWidget);
+    expect(find.text('United States'), findsOneWidget);
+    expect(find.text('\$0.02 / min'), findsOneWidget);
   });
 
   testWidgets('dialpad clears contact label after editing prefilled number', (
