@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/zuri_theme.dart';
+import 'zuri_icons.dart';
 import 'zuri_tokens.dart';
 
 class ZuriPillButton extends StatelessWidget {
@@ -82,6 +83,27 @@ class ZuriCircleButton extends StatelessWidget {
           shape: const CircleBorder(),
         ),
       ),
+    );
+  }
+}
+
+class ZuriBackButton extends StatelessWidget {
+  const ZuriBackButton({
+    required this.onPressed,
+    super.key,
+  });
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ZuriCircleButton(
+      icon: ZuriIcons.back,
+      onPressed: onPressed,
+      size: 36,
+      iconSize: 22,
+      foregroundColor: ZuriColors.ink,
+      backgroundColor: ZuriColors.endedCallPill,
     );
   }
 }

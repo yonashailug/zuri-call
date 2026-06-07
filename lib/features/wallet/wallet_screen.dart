@@ -248,18 +248,7 @@ class _TopUpHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox.square(
-          dimension: 36,
-          child: IconButton(
-            onPressed: onBack,
-            icon: const Icon(ZuriIcons.back),
-            color: ZuriColors.primary,
-            style: IconButton.styleFrom(
-              backgroundColor: ZuriColors.neutralBg,
-              shape: const CircleBorder(),
-            ),
-          ),
-        ),
+        ZuriBackButton(onPressed: onBack),
         const SizedBox(width: 18),
         Expanded(
           child: Text(
@@ -354,18 +343,7 @@ class _HistoryHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox.square(
-          dimension: 36,
-          child: IconButton(
-            onPressed: onBack,
-            icon: const Icon(ZuriIcons.back),
-            color: ZuriColors.primary,
-            style: IconButton.styleFrom(
-              backgroundColor: ZuriColors.neutralBg,
-              shape: const CircleBorder(),
-            ),
-          ),
-        ),
+        ZuriBackButton(onPressed: onBack),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -504,16 +482,16 @@ class _HistoryFilters extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        ZuriFilterChip(height: null, horizontalPadding: 18,label: 'All', selected: true),
+        ZuriFilterChip(
+            height: null, horizontalPadding: 18, label: 'All', selected: true),
         SizedBox(width: 10),
-        ZuriFilterChip(height: null, horizontalPadding: 18,label: 'Calls'),
+        ZuriFilterChip(height: null, horizontalPadding: 18, label: 'Calls'),
         SizedBox(width: 10),
-        ZuriFilterChip(height: null, horizontalPadding: 18,label: 'Top-ups'),
+        ZuriFilterChip(height: null, horizontalPadding: 18, label: 'Top-ups'),
       ],
     );
   }
 }
-
 
 class _HistoryDateGroup extends StatelessWidget {
   const _HistoryDateGroup({
@@ -762,18 +740,7 @@ class _RateLookupHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox.square(
-          dimension: 36,
-          child: IconButton(
-            onPressed: onBack,
-            icon: const Icon(ZuriIcons.back),
-            color: ZuriColors.primary,
-            style: IconButton.styleFrom(
-              backgroundColor: ZuriColors.neutralBg,
-              shape: const CircleBorder(),
-            ),
-          ),
-        ),
+        ZuriBackButton(onPressed: onBack),
         const SizedBox(width: 18),
         Expanded(
           child: Text(
@@ -953,7 +920,6 @@ class _FeaturedRateCard extends StatelessWidget {
     );
   }
 }
-
 
 class _RateCalcDivider extends StatelessWidget {
   const _RateCalcDivider();
@@ -1383,12 +1349,14 @@ class _TopUpPreviewCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          ZuriInfoRow(compact: true,
+          ZuriInfoRow(
+            compact: true,
             label: 'Top-up amount',
             value: '\$${amount.toStringAsFixed(2)}',
           ),
           const Divider(color: _WalletColors.rowDivider, height: 22),
-          ZuriInfoRow(compact: true,
+          ZuriInfoRow(
+            compact: true,
             label: 'New balance',
             value: '\$${newBalance.toStringAsFixed(2)}',
             strong: true,
@@ -1398,7 +1366,6 @@ class _TopUpPreviewCard extends StatelessWidget {
     );
   }
 }
-
 
 class _SecurePayButton extends StatelessWidget {
   const _SecurePayButton({required this.amount});
@@ -1547,7 +1514,6 @@ class _ActiveBadge extends StatelessWidget {
   }
 }
 
-
 class _WalletActions extends StatelessWidget {
   const _WalletActions({
     required this.onTopUp,
@@ -1602,7 +1568,6 @@ class _WalletActions extends StatelessWidget {
     );
   }
 }
-
 
 class _ActivityRow extends StatelessWidget {
   const _ActivityRow({

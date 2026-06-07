@@ -26,8 +26,7 @@ class AuthScaffold extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ZuriCircleButton(
-                    icon: ZuriIcons.back,
+                  ZuriBackButton(
                     onPressed: onBack ?? () => Navigator.maybePop(context),
                   ),
                   ZuriCircleButton(

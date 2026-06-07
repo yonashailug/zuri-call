@@ -137,10 +137,10 @@ void main() {
     expect(find.text('Call details'), findsNothing);
     expect(find.byIcon(ZuriIcons.back), findsOneWidget);
     expect(find.text('Recents'), findsOneWidget);
-    expect(find.text('Status'), findsOneWidget);
-    expect(find.text('Completed'), findsOneWidget);
+    expect(find.text('Call result'), findsOneWidget);
+    expect(find.text('Connected'), findsOneWidget);
     expect(find.text('Duration'), findsOneWidget);
-    expect(find.text('1s'), findsOneWidget);
+    expect(find.text('1 sec'), findsOneWidget);
 
     await tester.tap(find.byIcon(ZuriIcons.back));
     await tester.pumpAndSettle();
@@ -423,7 +423,8 @@ void main() {
     expect(find.text('Maya Kim'), findsOneWidget);
     expect(find.text('+1 (206) 555-0142'), findsOneWidget);
     expect(find.text('Call back'), findsOneWidget);
-    expect(find.text('Status'), findsOneWidget);
+    expect(find.byIcon(ZuriIcons.userPlus), findsNothing);
+    expect(find.text('Call result'), findsOneWidget);
     expect(find.text('Copy number'), findsOneWidget);
     expect(find.text('Delete from recents'), findsNothing);
 

@@ -126,6 +126,8 @@ class _AppShellState extends State<AppShell> {
             call: selectedCall,
             onBack: _closeCallDetails,
             onCallBack: _selectContactForCall,
+            showSaveContact:
+                selectedCallIsRecent && _callLooksUnsaved(selectedCall),
             onDelete: selectedCallIsRecent ? _deleteRecentCall : null,
           );
 
@@ -333,6 +335,10 @@ class _AppShellState extends State<AppShell> {
 
   String _normalizedPhone(String phone) {
     return phone.replaceAll(RegExp(r'\D'), '');
+  }
+
+  bool _callLooksUnsaved(CallRecord call) {
+    return _normalizedPhone(call.name) == _normalizedPhone(call.phone);
   }
 
   bool _sameDialableNumber(String left, String right) {
