@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'app/di/app_dependencies.dart';
+import 'app/routing/app_router.dart';
 import 'core/theme/zuri_theme.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/application/auth_scope.dart';
@@ -25,6 +27,7 @@ class ZuriApp extends StatefulWidget {
 class _ZuriAppState extends State<ZuriApp> {
   late final AppDependencies dependencies;
   late final AuthController authController;
+  late final GoRouter router;
 
   @override
   void initState() {
@@ -34,6 +37,9 @@ class _ZuriAppState extends State<ZuriApp> {
     authController = AuthController(
       repository: dependencies.authRepository,
     );
+    router = createAppRouter(
+      rootBuilder: (_) => _AuthRoot(authController: authController),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       authController.restoreSession();
     });
@@ -41,6 +47,7 @@ class _ZuriAppState extends State<ZuriApp> {
 
   @override
   void dispose() {
+    router.dispose();
     authController.dispose();
     super.dispose();
   }
@@ -51,40 +58,15 @@ class _ZuriAppState extends State<ZuriApp> {
       dependencies: dependencies,
       child: AuthScope(
         controller: authController,
-        child: MaterialApp(
+        child: MaterialApp.router(
           title: 'Zuri',
           debugShowCheckedModeBanner: false,
           theme: ZuriTheme.light(),
-          home: _AuthRoot(authController: authController),
-          onGenerateRoute: (settings) {
-            if (_isFirebaseAuthCallback(settings.name)) {
-              return _rootRoute(settings);
-            }
-
-            return null;
-          },
-          onUnknownRoute: _rootRoute,
+          routerConfig: router,
         ),
       ),
     );
   }
-
-  MaterialPageRoute<void> _rootRoute(RouteSettings settings) {
-    return MaterialPageRoute<void>(
-      settings: settings,
-      builder: (_) => _AuthRoot(authController: authController),
-    );
-  }
-}
-
-bool _isFirebaseAuthCallback(String? routeName) {
-  if (routeName == null) return false;
-
-  final uri = Uri.tryParse(routeName);
-  return uri?.path == '/link' &&
-      (uri?.queryParameters['deep_link_id'] ?? '').contains(
-        '/__/auth/callback',
-      );
 }
 
 class _AuthRoot extends StatelessWidget {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:zuri_call/app/di/app_dependencies.dart';
 import 'package:zuri_call/core/theme/zuri_theme.dart';
@@ -32,7 +33,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    Navigator.of(tester.element(find.text('Zuri'))).pushNamed(
+    GoRouter.of(tester.element(find.text('Zuri'))).go(
       '/link?deep_link_id=https://zuri-call.firebaseapp.com/__/auth/callback',
     );
     await tester.pumpAndSettle();
@@ -47,7 +48,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    Navigator.of(tester.element(find.text('Zuri'))).pushNamed('/unexpected');
+    GoRouter.of(tester.element(find.text('Zuri'))).go('/unexpected');
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
